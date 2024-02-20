@@ -1,20 +1,18 @@
 package ch.epfl.chacun;
 
 public interface Zone {
-    int id();
-
-    default int tileId(int zoneId) {
+    public static int tileId(int zoneId) {
         return zoneId / 10;
     }
 
-    default int localId(int zoneId) {
+    public static int localId(int zoneId) {
         return zoneId % 10;
     }
 
-   // int tileId();
+    // returns the zone identifier
+    abstract public int id();
 
-    //int localId();
-
+    // TODO default (public) ?
     default int tileId() {
         return tileId(id());
     }
@@ -23,6 +21,7 @@ public interface Zone {
         return localId(id());
     }
 
+    // only meadows and lakes can have a special power
     default SpecialPower specialPower() {
         return null;
     }
@@ -33,6 +32,6 @@ public interface Zone {
         HUNTING_TRAP,
         PIT_TRAP,
         WILD_FIRE,
-        RAFT
+        RAFT;
     }
 }

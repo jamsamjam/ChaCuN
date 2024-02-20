@@ -13,7 +13,9 @@ public record Pos(int x, int y) {
             case E -> new Pos(x + 1, y);
             case S -> new Pos(x, y + 1);
             case W -> new Pos(x - 1, y);
-            default -> throw new IllegalArgumentException("Invalid direction: " + direction);
+            // default -> throw new IllegalArgumentException("Invalid direction: " + direction);
         };
     }
 }
+
+// TODO switch method before 3.11.1 ?
