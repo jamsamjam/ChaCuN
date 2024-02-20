@@ -2,7 +2,7 @@ package ch.epfl.chacun;
 
 import java.util.List;
 
-public interface Zone {
+public sealed interface Zone {
     public static int tileId(int zoneId) {
         return zoneId / 10;
     }
@@ -37,11 +37,13 @@ public interface Zone {
         RAFT;
     }
 
+    // TODO enum type ; at the end ?
+    // TODO Q: compact constructor
     record Forest(int id, Kind kind) implements Zone {
         public enum Kind {
             PLAIN,
             WITH_MENHIR,
-            WITH_MUSHROOMS
+            WITH_MUSHROOMS;
         }
     }
 
@@ -50,7 +52,7 @@ public interface Zone {
             animals = List.copyOf(animals);
         }
     }
-    interface Water extends Zone {
+    sealed interface Water extends Zone {
         int fishCount();
     }
     record Lake(int id, int fishCount, SpecialPower specialPower) implements Water {
@@ -61,6 +63,5 @@ public interface Zone {
             return lake != null;
         }
     }
-
 
 }
