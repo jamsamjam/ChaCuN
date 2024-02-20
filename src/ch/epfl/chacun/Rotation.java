@@ -1,4 +1,4 @@
-package ch.epfl.sigcheck;
+package ch.epfl.chacun;
 
 public enum Rotation {
         NONE,

@@ -1,5 +1,4 @@
-package ch.epfl.sigcheck;
-import ch.epfl.Preconditions;
+package ch.epfl.chacun;
 
 public final class Points {
     private Points() {}
