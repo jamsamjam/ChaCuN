@@ -3,16 +3,16 @@ package ch.epfl.chacun;
 import java.util.List;
 
 public sealed interface Zone {
-    public static int tileId(int zoneId) {
+    static int tileId(int zoneId) {
         return zoneId / 10;
     }
 
-    public static int localId(int zoneId) {
+    static int localId(int zoneId) {
         return zoneId % 10;
     }
 
     // returns the zone identifier
-    abstract public int id();
+    int id();
 
     // TODO default (public) ?
     default int tileId() {
@@ -34,7 +34,7 @@ public sealed interface Zone {
         HUNTING_TRAP,
         PIT_TRAP,
         WILD_FIRE,
-        RAFT;
+        RAFT
     }
 
     // TODO enum type ; at the end ?
@@ -43,7 +43,7 @@ public sealed interface Zone {
         public enum Kind {
             PLAIN,
             WITH_MENHIR,
-            WITH_MUSHROOMS;
+            WITH_MUSHROOMS
         }
     }
 
