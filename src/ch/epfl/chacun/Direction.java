@@ -13,10 +13,11 @@ public enum Direction {
     public static final int COUNT = ALL.size();
 
     public Direction rotated(Rotation rotation){
-        return .add(rotation);
+        int rotatedIndex = (this.ordinal() + rotation.quarterTurnsCW()) % COUNT;
+        return ALL.get(rotatedIndex);
     }
 
     public Direction opposite() {
-
+        return rotated(Rotation.HALF_TURN);
     }
 }

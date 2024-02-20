@@ -23,11 +23,11 @@ public record Animal(int id, Kind kind) {
 
         // NullPointerExceptionif kindis null,
         //IllegalArgumentExceptionif zoneIdis strictly negative.
-        public Kind () {
+        /*public Kind () {
             if ()
                 throw new NullPointerException ();
             else if (this.id() )
-        }
+        }*/
     }
 
 
