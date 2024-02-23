@@ -2,7 +2,15 @@ package ch.epfl.chacun;
 
 import java.util.List;
 
+/**
+ *
+ */
 public sealed interface Zone {
+    /**
+     *
+     * @param zoneId
+     * @return
+     */
     static int tileId(int zoneId) {
         return zoneId / 10;
     }

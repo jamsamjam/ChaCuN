@@ -7,16 +7,12 @@ package ch.epfl.chacun;
  * @author Sam Lee (375535)
  */
 public final class Preconditions {
-    /**
-     * Default constructor
-     */
-    private  Preconditions () {}
+
+    private Preconditions () {}
 
     /**
-     * Makes it impossible to create instances of the class
-     *
-     * @param shouldBeTrue
-     * @throws IllegalArgumentException if its argument is false, and does nothing otherwise
+     * @param shouldBeTrue the argument
+     * @throws IllegalArgumentException if the argument is false, and does nothing otherwise
      */
     public static void checkArgument(boolean shouldBeTrue) {
         if (!shouldBeTrue) {

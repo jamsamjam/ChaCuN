@@ -19,5 +19,3 @@ public enum PlayerColor {
      */
     public static final List<PlayerColor> ALL = List.of(AllColors);
 }
-
-
