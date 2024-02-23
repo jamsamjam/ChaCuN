@@ -37,7 +37,6 @@ public sealed interface Zone {
         RAFT
     }
 
-    // TODO enum type ; at the end ?
     // TODO Q: compact constructor
     record Forest(int id, Kind kind) implements Zone {
         public enum Kind {
