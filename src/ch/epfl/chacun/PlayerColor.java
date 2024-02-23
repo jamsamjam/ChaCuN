@@ -3,7 +3,7 @@ package ch.epfl.chacun;
 import java.util.List;
 
 /**
- *
+ * Lists the colors associated with the players
  */
 public enum PlayerColor {
     RED,
@@ -12,7 +12,11 @@ public enum PlayerColor {
     YELLOW,
     PURPLE;
 
-    public static final PlayerColor[] AllColors = values();
+    private static final PlayerColor[] AllColors = values();
+
+    /**
+     * an immutable list containing all the values, in their order of definition
+     */
     public static final List<PlayerColor> ALL = List.of(AllColors);
 }
 
