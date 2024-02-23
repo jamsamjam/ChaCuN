@@ -10,8 +10,8 @@ public final class Points {
     private Points() {}
 
     /**
-     * @param tileCount
-     * @param mushroomGroupCount
+     * @param tileCount the number of tiles making up the forest
+     * @param mushroomGroupCount the number of mushrooms it contains
      * @return the number of points obtained by the majority pickers of a closed forest
      */
     public static int forClosedForest(int tileCount, int mushroomGroupCount) {
@@ -21,8 +21,8 @@ public final class Points {
     }
 
     /**
-     * @param tileCount
-     * @param fishCount
+     * @param tileCount the number of tiles making up the river
+     * @param fishCount the number of fish (in the river itself or in one of the possible lakes at the ends)
      * @return the number of points obtained by the majority fishermen of a closed river
      */
     public static int forClosedRiver(int tileCount, int fishCount) {
@@ -32,9 +32,9 @@ public final class Points {
     }
 
     /**
-     * @param mammothCount
-     * @param aurochsCount
-     * @param deerCount (the deer devoured by smilodons not being included)
+     * @param mammothCount the number of mammoths
+     * @param aurochsCount the number of aurochs
+     * @param deerCount the number of deer (the ones devoured by smilodons not being included)
      * @return the number of points obtained by the majority hunters of a meadow
      */
     public static int forMeadow(int mammothCount, int aurochsCount, int deerCount) {
@@ -45,7 +45,7 @@ public final class Points {
     }
 
     /**
-     * @param fishCount
+     * @param fishCount the number of fish present in this network
      * @return the number of points obtained by the majority fishermen of a hydrographic network
      */
     public static int forRiverSystem(int fishCount) {
@@ -54,7 +54,7 @@ public final class Points {
     }
 
     /**
-     * @param lakeCount
+     * @param lakeCount the number of lakes in the hydrographic network of which it is part
      * @return the number of points obtained by the player placing the canoe in a hydrographic network
      */
     public static int forLogboat(int lakeCount) {
@@ -63,7 +63,7 @@ public final class Points {
     }
 
     /**
-     * @param lakeCount
+     * @param lakeCount the number of lakes containing the raft
      * @return the number of additional points obtained by the majority fishermen of the
      * hydrographic network
      */

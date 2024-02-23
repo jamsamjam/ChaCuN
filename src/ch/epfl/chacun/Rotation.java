@@ -4,6 +4,9 @@ import java.util.List;
 
 /**
  * Lists the four rotations that can be applied to a tile before placing it on the board
+ *
+ * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
  */
 public enum Rotation {
     NONE,
