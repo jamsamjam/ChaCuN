@@ -16,5 +16,3 @@ public record Pos(int x, int y) {
         };
     }
 }
-
-// TODO switch method before 3.11.1 ?

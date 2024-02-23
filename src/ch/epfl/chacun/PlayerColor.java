@@ -2,6 +2,9 @@ package ch.epfl.chacun;
 
 import java.util.List;
 
+/**
+ *
+ */
 public enum PlayerColor {
     RED,
     BLUE,
@@ -11,7 +14,6 @@ public enum PlayerColor {
 
     public static final PlayerColor[] AllColors = values();
     public static final List<PlayerColor> ALL = List.of(AllColors);
-
 }
 
 

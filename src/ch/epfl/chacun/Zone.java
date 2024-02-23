@@ -14,7 +14,6 @@ public sealed interface Zone {
     // returns the zone identifier
     int id();
 
-    // TODO default (public) ?
     default int tileId() {
         return tileId(id());
     }
@@ -37,7 +36,6 @@ public sealed interface Zone {
         RAFT
     }
 
-    // TODO Q: compact constructor
     record Forest(int id, Kind kind) implements Zone {
         public enum Kind {
             PLAIN,
