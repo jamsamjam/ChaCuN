@@ -10,14 +10,7 @@ public record Occupant(Kind kind, int zoneId) {
     }
 
     public static int occupantsCount(Kind kind) {
-        switch (kind) {
-            case PAWN:
-                return 5;
-            case HUT:
-                return 3;
-            default:
-                return 0; //could also throw a newException here instead
-        }
+        return (kind == Kind.PAWN) ? 5 : (kind == Kind.HUT) ? 3 : 0;
     }
 
     public enum Kind {
