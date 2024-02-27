@@ -3,15 +3,15 @@ package ch.epfl.chacun;
 import java.util.List;
 
 /**
- * Represents a zone in the game
- * Zones can have various properties and special powers
+ * Represents a zone in the game.
+ * Zones can have various properties and special powers.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
 public sealed interface Zone {
     /**
-     * Calculates the tile identifier of a zone based on its zone identifier
+     * Calculates the tile identifier of a zone based on its zone identifier.
      *
      * @param zoneId zone identifier
      * @return tile identifier
@@ -21,7 +21,7 @@ public sealed interface Zone {
     }
 
     /**
-     * Calculates the local identifier of a zone based on its zone identifier
+     * Calculates the local identifier of a zone based on its zone identifier.
      *
      * @param zoneId zone identifier
      * @return local identifier
@@ -31,14 +31,14 @@ public sealed interface Zone {
     }
 
     /**
-     * Returns zone identifier
+     * Returns zone identifier.
      *
      * @return zone identifier
      */
     int id();
 
     /**
-     * Returns tile identifier of the zone
+     * Returns tile identifier of the zone.
      *
      * @return tile identifier
      */
@@ -47,7 +47,7 @@ public sealed interface Zone {
     }
 
     /**
-     * Returns the local identifier of this zone
+     * Returns the local identifier of this zone.
      *
      * @return local identifier
      */
@@ -56,8 +56,8 @@ public sealed interface Zone {
     }
 
     /**
-     * Returns the special power associated with this zone
-     * meadows & lakes can have a special power
+     * Returns the special power associated with this zone.
+     * Meadows & lakes can have a special power.
      *
      * @return special power, or null if none
      */
@@ -75,10 +75,15 @@ public sealed interface Zone {
     }
 
     /**
-     * Represents a forest zone
-     * Forests can have different kinds, such as plain or with mushrooms
+     * Represents a forest type zone.
+     *
+     * @param id the zone identifier
+     * @param kind the kind of forest in question
      */
     record Forest(int id, Kind kind) implements Zone {
+        /**
+         * Lists the three types of forests that exist.
+         */
         public enum Kind {
             PLAIN,
             WITH_MENHIR,
@@ -87,15 +92,15 @@ public sealed interface Zone {
     }
 
     /**
-     * Represents a meadow zone
-     * Meadows can contain animals and have special powers
+     * Represents a meadow type zone.
+     *
+     * @param id the zone identifier
+     * @param animals the animals contained in the meadow
+     * @param specialPower the possible special power of the meadow, which can be null
      */
     record Meadow(int id, List<Animal> animals, SpecialPower specialPower) implements Zone {
         /**
-         * Constructs a meadow
-         *
-         * @param animals list of animals in the meadow
-         * @param specialPower special power associated with meadow
+         * Compact constructor of Meadow
          */
         public Meadow {
             animals = List.copyOf(animals);
@@ -103,8 +108,8 @@ public sealed interface Zone {
     }
 
     /**
-     * Represents a water zone
-     * Water zones can be lakes or rivers
+     * Represents a water type zone.
+     * Water zones can be lakes or rivers.
      */
     sealed interface Water extends Zone {
         /**
@@ -116,19 +121,25 @@ public sealed interface Zone {
     }
 
     /**
-     * Represents a lake zone
-     * Lakes are water zones with fish and can have special powers
+     * Represents a lake type zone.
+     *
+     * @param id the zone identifier
+     * @param fishCount the number of fish swimming in the lake
+     * @param specialPower the possible special power of the lake, which can be null
      */
     record Lake(int id, int fishCount, SpecialPower specialPower) implements Water {
     }
 
     /**
-     * Represents a river zone
-     * Rivers are water zones with fish and can connect to lakes
+     * Represents a river type zone.
+     *
+     * @param id the zone identifier
+     * @param fishCount the number of fish swimming in the river
+     * @param lake the lake to which the river is connected, or null if there is none
      */
     record River(int id, int fishCount, Lake lake) implements Water {
         /**
-         * Checks if this river is connected to a lake
+         * Checks if this river is connected to a lake.
          *
          * @return true if connected to a lake, false otherwise
          */

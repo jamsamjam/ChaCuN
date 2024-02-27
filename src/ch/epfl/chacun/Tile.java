@@ -4,9 +4,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ * @param id
+ * @param kind
+ * @param n
+ * @param e
+ * @param s
+ * @param w
+ */
 public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSide w) {
 
     /**
+     * Returns the list of the four sides of the tile, in the order n, e, s, w.
+     *
      * @return the list of the four sides of the tile, in the order n, e, s, w
      */
     public List<TileSide> sides() {
@@ -25,10 +36,20 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     }
 
     /**
+     * Returns the set of all areas of the tile
      * @return the set of all areas of the tile (including lakes)
      */
     public Set<Zone> zones() {
-       // return
+        Set<Zone> sideZones = new HashSet<>();
+        for (TileSide side : sides()) {
+            sideZones.addAll(side.zones());
+            for (Zone zone : sideZones) {
+                if (zone instanceof Zone.River && ((Zone.River) zone).hasLake()) {
+                    // add lakes to the list
+                }
+            }
+        }
+        return sideZones;
     }
 
     /**

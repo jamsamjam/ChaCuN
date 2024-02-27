@@ -1,8 +1,8 @@
 package ch.epfl.chacun;
 
 /**
- * Represents an animal
- * Each animal has an identifier and a kind
+ * Represents an animal.
+ * Each animal has an identifier and a kind.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
@@ -10,7 +10,7 @@ package ch.epfl.chacun;
 public record Animal(int id, Kind kind) {
 
     /**
-     * Returns identifier of the tile on which the animal is located
+     * Returns identifier of the tile on which the animal is located.
      *
      * @return the tile identifier
      */
@@ -19,7 +19,7 @@ public record Animal(int id, Kind kind) {
     }
 
     /**
-     * Defines various types of animals
+     * Defines various types of animals.
      */
     public enum Kind {
         MAMMOTH,

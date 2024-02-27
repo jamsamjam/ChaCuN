@@ -2,15 +2,15 @@ package ch.epfl.chacun;
 import java.util.Objects;
 
 /**
- * Represents an occupant (pawn or hut) of an area
- * Each occupant has a kind and a zone ID
+ * Represents an occupant (pawn or hut) of an area.
+ * Each occupant has a kind and a zone ID.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
 public record Occupant(Kind kind, int zoneId) {
     /**
-     * Constructs an occupant with the given kind and zone ID
+     * Constructs an occupant with the given kind and zone ID.
      *
      * @param kind kind of occupant
      * @param zoneId  zone ID
@@ -26,15 +26,17 @@ public record Occupant(Kind kind, int zoneId) {
     }
 
     /**
-     * @param kind The kind of occupant
-     * @return The number of occupants of the given kind
+     * Returns the number of occupants of the given kind.
+     *
+     * @param kind the kind
+     * @return the number
      */
     public static int occupantsCount(Kind kind) {
         return (kind == Kind.PAWN) ? 5 : (kind == Kind.HUT) ? 3 : 0;
     }
 
     /**
-     * Defines various types of occupants
+     * Defines various types of occupants.
      */
     public enum Kind {
         PAWN,
