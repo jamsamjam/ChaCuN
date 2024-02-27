@@ -2,23 +2,9 @@ package ch.epfl.chacun;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- *
- * @param tile
- * @param placer
- * @param rotation
- * @param pos
- * @param occupant
- *
- * @author
- */
 public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant) {
 
-    /**
-     * Compact constructor of PlaceTile.
-     * Throws TODO
-     */
+    // Compact constructor
     public PlacedTile {
         if (tile == null || rotation == null || pos == null) {
             throw new IllegalArgumentException("Tile, rotation, and pos cannot be null");
@@ -38,23 +24,14 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         return tile.kind();
     }
 
-    public TileSide side(Direction direction) {
-        //TODO return tile.side(direction, rotation);
-    }
-
-    /**
-     * Returns the zone with the given identifier.
-     *
-     * @param id the identifier of the zone
-     * @return the zone with the given identifier, or null if not found
-     */
     public Zone zoneWithId(int id) {
-        for (Zone zone : tile.zones()) {
+        //TODO
+        for (Zone zone : zones()) {
             if (zone.id() == id) {
                 return zone;
             }
         }
-        throw new IllegalArgumentException("The tile does not have an area with the id");
+        return null;
     }
 
     public Zone specialPowerZone() {
@@ -101,7 +78,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         if (placer == null) {
             return potentialOccupants;
         }
-        //need to return the list here, but is the hasset list correct?
+
+        //TODO
     }
 
     public PlacedTile withOccupant(Occupant occupant) {
