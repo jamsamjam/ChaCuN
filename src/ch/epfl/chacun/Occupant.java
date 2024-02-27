@@ -17,6 +17,7 @@ public record Occupant(Kind kind, int zoneId) {
      * @throws NullPointerException If kind is null
      * @throws IllegalArgumentException If zone ID is negative
      */
+    // TODO message ?
     public Occupant {
         Objects.requireNonNull(kind, "Kind must not be null");
         if (zoneId < 0) {
