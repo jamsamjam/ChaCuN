@@ -39,12 +39,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     public TileSide side(Direction direction) {
-        //return tile.side(direction, rotation);
+        //TODO return tile.side(direction, rotation);
     }
-//
-//    public Zone zoneWithId(int id) {
-//        return tile.zoneWithId(id);
-//    }
 
     /**
      * Returns the zone with the given identifier.
@@ -53,12 +49,12 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * @return the zone with the given identifier, or null if not found
      */
     public Zone zoneWithId(int id) {
-        for (Zone zone : zones()) {
+        for (Zone zone : tile.zones()) {
             if (zone.id() == id) {
                 return zone;
             }
         }
-        return null;
+        throw new IllegalArgumentException("The tile does not have an area with the id");
     }
 
     public Zone specialPowerZone() {
