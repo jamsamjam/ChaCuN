@@ -28,7 +28,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of all areas of the tile (including lakes)
      */
     public Set<Zone> zones() {
-        return
+       // return
     }
 
     /**
@@ -39,4 +39,38 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
         NORMAL,
         MENHIR
     }
+
+    /**
+     * Returns the identifier of the tile.
+     *
+     * @return the identifier of the tile
+     */
+    public int id() {
+        return id;
+    }
+
+    /**
+     * Returns the kind of the tile.
+     *
+     * @return the kind of the tile
+     */
+    public Kind kind() {
+        return kind;
+    }
+
+    /**
+     * Returns the zone with the given identifier.
+     *
+     * @param id the identifier of the zone
+     * @return the zone with the given identifier, or null if not found
+     */
+    public Zone zoneWithId(int id) {
+        for (Zone zone : zones()) {
+            if (zone.id() == id) {
+                return zone;
+            }
+        }
+        return null;
+    }
+
 }
