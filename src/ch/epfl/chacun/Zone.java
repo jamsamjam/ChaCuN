@@ -34,7 +34,8 @@ public sealed interface Zone {
      * Returns zone identifier
      *
      * @return zone identifier
-     */    int id();
+     */
+    int id();
 
     /**
      * Returns tile identifier of the zone
@@ -106,7 +107,6 @@ public sealed interface Zone {
      * Water zones can be lakes or rivers
      */
     sealed interface Water extends Zone {
-
         /**
          * Returns the number of fish in this water zone
          *
@@ -136,5 +136,4 @@ public sealed interface Zone {
             return lake != null;
         }
     }
-
 }
