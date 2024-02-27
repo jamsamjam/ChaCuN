@@ -2,9 +2,23 @@ package ch.epfl.chacun;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ *
+ *
+ * @param tile
+ * @param placer
+ * @param rotation
+ * @param pos
+ * @param occupant
+ *
+ * @author
+ */
 public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant) {
 
-    // Compact constructor
+    /**
+     * Compact constructor of PlaceTile.
+     * Throws TODO
+     */
     public PlacedTile {
         if (tile == null || rotation == null || pos == null) {
             throw new IllegalArgumentException("Tile, rotation, and pos cannot be null");
@@ -27,9 +41,24 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     public TileSide side(Direction direction) {
         //return tile.side(direction, rotation);
     }
+//
+//    public Zone zoneWithId(int id) {
+//        return tile.zoneWithId(id);
+//    }
 
+    /**
+     * Returns the zone with the given identifier.
+     *
+     * @param id the identifier of the zone
+     * @return the zone with the given identifier, or null if not found
+     */
     public Zone zoneWithId(int id) {
-        return tile.zoneWithId(id);
+        for (Zone zone : zones()) {
+            if (zone.id() == id) {
+                return zone;
+            }
+        }
+        return null;
     }
 
     public Zone specialPowerZone() {

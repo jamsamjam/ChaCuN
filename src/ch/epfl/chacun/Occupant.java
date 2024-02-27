@@ -10,7 +10,7 @@ import java.util.Objects;
  */
 public record Occupant(Kind kind, int zoneId) {
     /**
-     * Constructs an occupant with the given kind and zone ID.
+     * Constructor of Occupant.
      *
      * @param kind kind of occupant
      * @param zoneId  zone ID

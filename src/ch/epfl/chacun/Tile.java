@@ -5,13 +5,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Represents a tile that has not yet been placed.
  *
- * @param id
- * @param kind
- * @param n
- * @param e
- * @param s
- * @param w
+ * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
+ *
+ * @param id the tile identifier
+ * @param kind the type of tile
+ * @param n the north side of the tile
+ * @param e the east side of the tile
+ * @param s the south side of the tile
+ * @param w the west side of the tile
  */
 public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSide w) {
 
@@ -25,6 +29,8 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     }
 
     /**
+     * Returns the set of border areas of the tile (except lakes).
+     *
      * @return the set of border areas of the tile (except lakes)
      */
     public Set<Zone> sideZones() {
@@ -36,7 +42,8 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     }
 
     /**
-     * Returns the set of all areas of the tile
+     * Returns the set of all areas of the tile (including lakes).
+     *
      * @return the set of all areas of the tile (including lakes)
      */
     public Set<Zone> zones() {
@@ -44,8 +51,9 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
         for (TileSide side : sides()) {
             sideZones.addAll(side.zones());
             for (Zone zone : sideZones) {
-                if (zone instanceof Zone.River && ((Zone.River) zone).hasLake()) {
-                    // add lakes to the list
+                if (zone instanceof Zone.River river && river.hasLake()) {
+                    // TODO
+                    sideZones.add(river.lake());
                 }
             }
         }
@@ -53,45 +61,11 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     }
 
     /**
-     * Lists the kinds of tiles that exist
+     * Lists the kinds of tiles that exist.
      */
     enum Kind {
         START,
         NORMAL,
         MENHIR
     }
-
-    /**
-     * Returns the identifier of the tile.
-     *
-     * @return the identifier of the tile
-     */
-    public int id() {
-        return id;
-    }
-
-    /**
-     * Returns the kind of the tile.
-     *
-     * @return the kind of the tile
-     */
-    public Kind kind() {
-        return kind;
-    }
-
-    /**
-     * Returns the zone with the given identifier.
-     *
-     * @param id the identifier of the zone
-     * @return the zone with the given identifier, or null if not found
-     */
-    public Zone zoneWithId(int id) {
-        for (Zone zone : zones()) {
-            if (zone.id() == id) {
-                return zone;
-            }
-        }
-        return null;
-    }
-
 }
