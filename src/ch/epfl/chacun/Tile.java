@@ -54,6 +54,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
                 if (zone instanceof Zone.River river && river.hasLake()) {
                     // TODO
                     sideZones.add(river.lake());
+                    // he
                 }
             }
         }
