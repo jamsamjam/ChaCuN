@@ -2,16 +2,28 @@ package ch.epfl.chacun;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * Represents the piles of the three types of tile that exist — start, normal, menhir.
+ *
+ * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
+ *
+ * @param startTiles a list containing the starting tile (or nothing at all)
+ * @param normalTiles a list containing the remaining normal tiles
+ * @param menhirTiles a list containing the remaining menhir tiles
+ */
 public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile> menhirTiles) {
 
-    // Compact constructor
+    /**
+     * A compact constructor of TileDecks.
+     */
     public TileDecks {
         startTiles = List.copyOf(startTiles);
         normalTiles = List.copyOf(normalTiles);
         menhirTiles = List.copyOf(menhirTiles);
     }
 
-    // Public methods
+    // TODO ? Public methods // need to check comment lines
 
     /**
      * Returns the number of tiles available in the pile containing tiles of the given sort.
@@ -20,16 +32,13 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the number of tiles in the pile
      */
     public int deckSize(Tile.Kind kind) {
-        switch (kind) {
-            case START:
-                return startTiles.size();
-            case NORMAL:
-                return normalTiles.size();
-            case MENHIR:
-                return menhirTiles.size();
-            default:
-                throw new IllegalArgumentException("Invalid tile kind: " + kind);
-        }
+        return switch (kind) {
+            case START -> startTiles.size();
+            case NORMAL -> normalTiles.size();
+            case MENHIR -> menhirTiles.size();
+            // default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
+            // enum switch expressions that cover all known constants, the compiler inserts an implicit default clause.
+        };
     }
 
     /**
@@ -39,16 +48,12 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the top tile or null if the pile is empty
      */
     public Tile topTile(Tile.Kind kind) {
-        switch (kind) {
-            case START:
-                return startTiles.isEmpty() ? null : startTiles.get(0);
-            case NORMAL:
-                return normalTiles.isEmpty() ? null : normalTiles.get(0);
-            case MENHIR:
-                return menhirTiles.isEmpty() ? null : menhirTiles.get(0);
-            default:
-                throw new IllegalArgumentException("Invalid tile kind: " + kind);
-        }
+        return switch (kind) {
+            case START -> startTiles.isEmpty() ? null : startTiles.getFirst();
+            case NORMAL -> normalTiles.isEmpty() ? null : normalTiles.getFirst();
+            case MENHIR -> menhirTiles.isEmpty() ? null : menhirTiles.getFirst();
+            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
+        };
     }
 
     /**
@@ -59,25 +64,27 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @throws IllegalArgumentException if the pile is empty
      */
     public TileDecks withTopTileDrawn(Tile.Kind kind) {
-        switch (kind) {
-            case START:
+        return switch (kind) {
+            case START -> {
                 if (startTiles.isEmpty()) {
                     throw new IllegalArgumentException("Empty start tile pile");
                 }
-                return new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles, menhirTiles);
-            case NORMAL:
+                yield new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles, menhirTiles);
+            }
+            case NORMAL -> {
                 if (normalTiles.isEmpty()) {
                     throw new IllegalArgumentException("Empty normal tile pile");
                 }
-                return new TileDecks(startTiles, normalTiles.subList(1, normalTiles.size()), menhirTiles);
-            case MENHIR:
+                yield new TileDecks(startTiles, normalTiles.subList(1, normalTiles.size()), menhirTiles);
+            }
+            case MENHIR -> {
                 if (menhirTiles.isEmpty()) {
                     throw new IllegalArgumentException("Empty menhir tile pile");
                 }
-                return new TileDecks(startTiles, normalTiles, menhirTiles.subList(1, menhirTiles.size()));
-            default:
-                throw new IllegalArgumentException("Invalid tile kind: " + kind);
-        }
+                yield new TileDecks(startTiles, normalTiles, menhirTiles.subList(1, menhirTiles.size()));
+            }
+            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
+        };
     }
 
     /**
@@ -88,20 +95,17 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the new tile decks
      */
     public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
-        switch (kind) {
-            case START:
-                return new TileDecks(startTiles.subList(nextIndex(startTiles, predicate), startTiles.size()),
-                        normalTiles, menhirTiles);
-            case NORMAL:
-                return new TileDecks(startTiles,
-                        normalTiles.subList(nextIndex(normalTiles, predicate), normalTiles.size()),
-                        menhirTiles);
-            case MENHIR:
-                return new TileDecks(startTiles, normalTiles,
-                        menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
-            default:
-                throw new IllegalArgumentException("Invalid tile kind: " + kind);
-        }
+        return switch (kind) {
+            case START ->
+                    new TileDecks(startTiles.subList(nextIndex(startTiles, predicate), startTiles.size()),
+                            normalTiles, menhirTiles);
+            case NORMAL -> new TileDecks(startTiles,
+                    normalTiles.subList(nextIndex(normalTiles, predicate), normalTiles.size()),
+                    menhirTiles);
+            case MENHIR -> new TileDecks(startTiles, normalTiles,
+                    menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
+            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
+        };
     }
 
     // Helper method to find the index of the first element in the list that doesn't satisfy the predicate
