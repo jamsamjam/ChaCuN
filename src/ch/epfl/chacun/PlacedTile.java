@@ -140,7 +140,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
             return potentialOccupants;
         }
 
-        // If the tile is not occupied, add potential occupants based on the zones of its sides //TODO
+        // TODO 2.3. Potential occupants of a tile
+        // If the tile is not occupied, add potential occupants based on the zones of its sides
         if (occupant == null) {
             Set<Zone> tileZones = tile.zones();
             for (Zone zone : tileZones) {
