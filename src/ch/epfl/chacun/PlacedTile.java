@@ -139,7 +139,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         if (placer == null) {
             return potentialOccupants;
         }
-
+        //TODO
         for (Zone zone : tile.zones()) {
                 if (zone instanceof Zone.Lake) {
                     potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
