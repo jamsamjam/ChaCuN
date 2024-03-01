@@ -53,7 +53,6 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
             sideZones.addAll(side.zones());
             for (Zone zone : sideZones) {
                 if (zone instanceof Zone.River river && river.hasLake()) {
-                    // TODO
                     sideZones.add(river.lake());
                 }
             }
@@ -64,7 +63,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     /**
      * Lists the kinds of tiles that exist.
      */
-    enum Kind {
+    public enum Kind {
         START,
         NORMAL,
         MENHIR

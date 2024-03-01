@@ -19,10 +19,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     /**
      * Compact constructor of PlacedTile.
      */
-    // TODO param ?
     public PlacedTile {
         if (tile == null || rotation == null || pos == null) {
-            throw new IllegalArgumentException("Tile, rotation, and pos cannot be null");
+            throw new IllegalArgumentException();
         }
     }
 
@@ -52,6 +51,18 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
+     * Flips the side of the tile in the given direction, taking into account the rotation applied
+     * to the tile.
+     *
+     * @param direction the given direction
+     * @return the side of the tile in the given direction, taking into account the rotation
+     * applied to the tile
+     */
+    public TileSide side(Direction direction) {
+        return tile.sides().get(direction.rotated(rotation.negated()).ordinal());
+    }
+
+    /**
      * Returns the area of the tile whose identifier is the given one,
      * or throws IllegalArgumentException if the tile does not have an area with this identifier.
      *
@@ -64,7 +75,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
                 return zone;
             }
         }
-        throw new IllegalArgumentException("The tile does not have an area with this identifier");
+        throw new IllegalArgumentException();
     }
 
 
@@ -142,14 +153,13 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         if (placer == null) {
             return potentialOccupants;
         }
-
         for (Zone zone : tile.zones()) {
                 if (zone instanceof Zone.Lake) {
                     potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
                 } else if (zone instanceof Zone.River && !((Zone.River) zone).hasLake()) {
                     potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
                     potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
-            } else {
+                } else {
                     potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
                 }
             }
@@ -165,7 +175,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      */
     public PlacedTile withOccupant(Occupant occupant) {
         if (this.occupant != null) {
-            throw new IllegalArgumentException("Tile is already occupied");
+            throw new IllegalArgumentException();
         }
         return new PlacedTile(tile, placer, rotation, pos, occupant);
     }

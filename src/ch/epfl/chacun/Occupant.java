@@ -1,6 +1,8 @@
 package ch.epfl.chacun;
 import java.util.Objects;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Represents an occupant (pawn or hut) of an area.
  * Each occupant has a kind and a zone ID.
@@ -17,12 +19,9 @@ public record Occupant(Kind kind, int zoneId) {
      * @throws NullPointerException If kind is null
      * @throws IllegalArgumentException If zone ID is negative
      */
-    // TODO message ?
     public Occupant {
-        Objects.requireNonNull(kind, "Kind must not be null");
-        if (zoneId < 0) {
-            throw new IllegalArgumentException("Zone ID must be non-negative");
-        }
+        Objects.requireNonNull(kind);
+        checkArgument(zoneId < 0);
     }
 
     /**
