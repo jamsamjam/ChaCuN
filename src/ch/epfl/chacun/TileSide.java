@@ -31,7 +31,6 @@ public sealed interface TileSide {
      */
     record Forest(Zone.Forest forest) implements TileSide {
 
-        // TODO override in the first step
         @Override
         public List<Zone> zones() {
             return List.of(forest);

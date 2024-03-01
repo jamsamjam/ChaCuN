@@ -12,7 +12,7 @@ import java.util.Set;
  * @param placer the tile changer, or null for the starting tile
  * @param rotation the rotation applied to the tile during its placement
  * @param pos the position at which the tile was placed
- * @param occupant the occupant of the tile, or nullif it is not occupied
+ * @param occupant the occupant of the tile, or null if it is not occupied
  */
 public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant) {
 
@@ -140,18 +140,16 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
             return potentialOccupants;
         }
 
-        // If the tile is not occupied, add potential occupants based on the zones of its sides //TODO
-        if (occupant == null) {
-            for (Zone zone : tile.zones()) {
-                // each zone can have either PAWN or HUT occupants
-
-                potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
-                potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
+        for (Zone zone : tile.zones()) {
+                if (zone instanceof Zone.Lake) {
+                    potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
+                } else if (zone instanceof Zone.River && !((Zone.River) zone).hasLake()) {
+                    potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
+                    potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
+            } else {
+                    potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
+                }
             }
-        } else {
-            // If the tile is already occupied, return a set containing only the current occupant
-            potentialOccupants.add(occupant);
-        }
         return potentialOccupants;
     }
 
