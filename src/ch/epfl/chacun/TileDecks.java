@@ -29,7 +29,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @param kind the kind of tiles
      * @return the number of tiles in the pile
      */
-    public int deckSize(Tile.Kind kind) { //TODO
+    public int deckSize(Tile.Kind kind) {
         return switch (kind) {
             case START -> startTiles.size();
             case NORMAL -> normalTiles.size();
@@ -60,25 +60,12 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      */
     public TileDecks withTopTileDrawn(Tile.Kind kind) {
         return switch (kind) {
-            case START -> {
-                // TODO illegal exception case always?
-                if (startTiles.isEmpty()) {
-                    throw new IllegalArgumentException("Empty start tile pile");
-                }
-                yield new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles, menhirTiles);
-            }
-            case NORMAL -> {
-                if (normalTiles.isEmpty()) {
-                    throw new IllegalArgumentException("Empty normal tile pile");
-                }
-                yield new TileDecks(startTiles, normalTiles.subList(1, normalTiles.size()), menhirTiles);
-            }
-            case MENHIR -> {
-                if (menhirTiles.isEmpty()) {
-                    throw new IllegalArgumentException("Empty menhir tile pile");
-                }
-                yield new TileDecks(startTiles, normalTiles, menhirTiles.subList(1, menhirTiles.size()));
-            }
+            case START ->  new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles,
+                    menhirTiles);
+            case NORMAL -> new TileDecks(startTiles, normalTiles.subList(1, normalTiles.size()),
+                    menhirTiles);
+            case MENHIR -> new TileDecks(startTiles, normalTiles,
+                    menhirTiles.subList(1, menhirTiles.size()));
         };
     }
 
@@ -91,20 +78,18 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      */
     public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
         return switch (kind) {
-            case START ->
-                    new TileDecks(startTiles.subList(nextIndex(startTiles, predicate), startTiles.size()),
-                            normalTiles, menhirTiles);
-            case NORMAL -> new TileDecks(startTiles,
-                    normalTiles.subList(nextIndex(normalTiles, predicate), normalTiles.size()),
-                    menhirTiles);
+            case START -> new TileDecks(startTiles.subList(nextIndex(startTiles, predicate),
+                    startTiles.size()), normalTiles, menhirTiles);
+            case NORMAL -> new TileDecks(startTiles, normalTiles.subList(nextIndex(normalTiles,
+                    predicate), normalTiles.size()), menhirTiles);
             case MENHIR -> new TileDecks(startTiles, normalTiles,
                     menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
         };
     }
 
-    // TODO -- ask for new method
     /**
-     * Helper method which finds the index of the first element in the list that does not satisfy the given predicate.
+     * Helper method which finds the index of the first element in the list that does not satisfy
+     * the given predicate.
      *
      * @param tiles     the list of tiles to search
      * @param predicate the predicate to test elements against
