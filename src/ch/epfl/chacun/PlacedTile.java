@@ -51,6 +51,18 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
+     * Flips the side of the tile in the given direction, taking into account the rotation applied
+     * to the tile.
+     *
+     * @param direction the given direction
+     * @return the side of the tile in the given direction, taking into account the rotation
+     * applied to the tile
+     */
+    public TileSide side(Direction direction) {
+        return tile.sides().get(direction.rotated(rotation.negated()).ordinal());
+    }
+
+    /**
      * Returns the area of the tile whose identifier is the given one,
      * or throws IllegalArgumentException if the tile does not have an area with this identifier.
      *

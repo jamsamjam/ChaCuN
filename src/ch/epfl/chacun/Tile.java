@@ -62,7 +62,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     /**
      * Lists the kinds of tiles that exist.
      */
-    enum Kind {
+    public enum Kind {
         START,
         NORMAL,
         MENHIR
