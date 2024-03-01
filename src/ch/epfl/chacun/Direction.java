@@ -13,7 +13,6 @@ public enum Direction {
     N,
     E,
     S,
-    WW,
     W;
 
     private static final Direction[] AllDirections = values();
