@@ -20,7 +20,8 @@ public final class Points {
     public static int forClosedForest(int tileCount, int mushroomGroupCount) {
         Preconditions.checkArgument(tileCount > 1);
         Preconditions.checkArgument(mushroomGroupCount >= 0);
-        return (tileCount * 2) + (mushroomGroupCount * 3);
+        return 0;
+                //(tileCount * 2) + (mushroomGroupCount * 3);
     }
 
     /**
