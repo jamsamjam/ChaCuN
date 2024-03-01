@@ -10,6 +10,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
+
 public record Occupant(Kind kind, int zoneId) {
     /**
      * Constructor of Occupant.

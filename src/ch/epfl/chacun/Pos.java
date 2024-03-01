@@ -6,6 +6,7 @@ package ch.epfl.chacun;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
+
 public record Pos(int x, int y) {
     /**
      * The origin position (0, 0).

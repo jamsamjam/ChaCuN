@@ -6,6 +6,7 @@ package ch.epfl.chacun;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
+
 public final class Points {
     private Points() {}
 

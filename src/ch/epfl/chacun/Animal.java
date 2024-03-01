@@ -7,6 +7,7 @@ package ch.epfl.chacun;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
+
 public record Animal(int id, Kind kind) {
 
     /**
