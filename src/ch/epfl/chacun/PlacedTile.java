@@ -142,9 +142,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
 
         // If the tile is not occupied, add potential occupants based on the zones of its sides //TODO
         if (occupant == null) {
-            Set<Zone> tileZones = tile.zones();
-            for (Zone zone : tileZones) {
+            for (Zone zone : tile.zones()) {
                 // each zone can have either PAWN or HUT occupants
+
                 potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
                 potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
             }
