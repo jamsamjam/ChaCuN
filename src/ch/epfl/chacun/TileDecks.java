@@ -12,6 +12,7 @@ import java.util.function.Predicate;
  * @param normalTiles a list containing the remaining normal tiles
  * @param menhirTiles a list containing the remaining menhir tiles
  */
+
 public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile> menhirTiles) {
 
     /**
@@ -36,8 +37,6 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
             case START -> startTiles.size();
             case NORMAL -> normalTiles.size();
             case MENHIR -> menhirTiles.size();
-            // default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
-            // enum switch expressions that cover all known constants, the compiler inserts an implicit default clause.
         };
     }
 
@@ -52,7 +51,6 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
             case START -> startTiles.isEmpty() ? null : startTiles.getFirst();
             case NORMAL -> normalTiles.isEmpty() ? null : normalTiles.getFirst();
             case MENHIR -> menhirTiles.isEmpty() ? null : menhirTiles.getFirst();
-            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
         };
     }
 
@@ -83,7 +81,6 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
                 }
                 yield new TileDecks(startTiles, normalTiles, menhirTiles.subList(1, menhirTiles.size()));
             }
-            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
         };
     }
 
@@ -104,11 +101,17 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
                     menhirTiles);
             case MENHIR -> new TileDecks(startTiles, normalTiles,
                     menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
-            //default -> throw new IllegalArgumentException("Invalid tile kind: " + kind);
         };
     }
 
-    // Helper method to find the index of the first element in the list that doesn't satisfy the predicate
+    /**
+     * Helper method which finds the index of the first element in the list that does not satisfy the given predicate
+     *
+     * @param tiles     the list of tiles to search
+     * @param predicate the predicate to test elements against
+     * @return the index of the first element in the list that does not satisfy the predicate,
+     *         or the size of the list if all elements satisfy the predicate
+     */
     private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
         for (int i = 0; i < tiles.size(); i++) {
             if (!predicate.test(tiles.get(i))) {

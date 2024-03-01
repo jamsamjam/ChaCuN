@@ -17,6 +17,7 @@ import java.util.Set;
  * @param s the south side of the tile
  * @param w the west side of the tile
  */
+
 public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSide w) {
 
     /**
@@ -29,7 +30,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
     }
 
     /**
-     * Returns the set of border areas of the tile (except lakes).
+     * Returns the set of border areas of the tile (except lakes)
      *
      * @return the set of border areas of the tile (except lakes)
      */
@@ -68,4 +69,5 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
         NORMAL,
         MENHIR
     }
+
 }

@@ -67,6 +67,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         throw new IllegalArgumentException("The tile does not have an area with this identifier");
     }
 
+
     /**
      * Returns the area of the tile having a special power (at most one per tile)
      * or null if there are none.
@@ -126,6 +127,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         }
         return rivers;
     }
+
+
 
     /**
      * Returns the set of all potential occupants of the tile, or an empty set if the tile is the
