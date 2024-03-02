@@ -15,17 +15,16 @@ import java.util.*;
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
     // TODO
     public Area {
-        if (openConnections <= 0) {
+        if (openConnections < 0) {
             throw new IllegalArgumentException();
         }
         zones = Set.copyOf(zones);
         // TODO : the list is sorted beforehand? Or to be sorted?
-        //occupants = List.copyOf(occupants);
-        occupants = List.of(PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN,
-                PlayerColor.YELLOW, PlayerColor.PURPLE);
-        // not sorted yet?
-        List<PlayerColor> sortedOccupants = new ArrayList<>(occupants);
-        Collections.sort(sortedOccupants);
+        if (occupants != null) {
+            occupants = List.copyOf(occupants);
+            List<PlayerColor> sortedOccupants = new ArrayList<>(occupants);
+            Collections.sort(sortedOccupants);
+        }
     }
 
     /**
@@ -128,4 +127,106 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         }
         return count;
     }
+
+    /**
+     * Returns true iff the area is closed.
+     *
+     * @return true iff the area is closed
+     */
+    public boolean isClosed() {
+        return openConnections == 0;
+    }
+
+    /**
+     * Returns true iff the area is occupied by at least one occupant.
+     *
+     * @return true iff the area is occupied by at least one occupant
+     */
+    public boolean isOccupied() {
+        return occupants != null;
+    }
+
+    /**
+     * Returns the set of majority occupants of the area.
+     *
+     * @return the set of majority occupants of the area
+     */
+    public Set<PlayerColor> majorityOccupants() {
+        int[] colorCounts = new int[PlayerColor.values().length];
+        // TODO : PlayerColor.ALL.size() or PlayerColor.values().length
+
+        for(PlayerColor color : occupants) {
+            colorCounts[color.ordinal()]++;
+        }
+
+        int maxCount = Arrays.stream(colorCounts).max().getAsInt();
+
+        Set<PlayerColor> majorityOccupants = new HashSet<>();
+        if (maxCount > 0) {
+            for (PlayerColor color : PlayerColor.ALL) {
+                if (colorCounts[color.ordinal()] == maxCount) {
+                    majorityOccupants.add(color);
+                }
+            }
+        }
+
+        return majorityOccupants;
+    }
+
+    /**
+     * Returns the area resulting from connecting the receiver (this) to the given area (that).
+     *
+     * @param that the given area
+     * @return the area resulting from connecting the receiver (this) to the given area (that)
+     */
+    public Area<Z> connectTo(Area<Z> that) {
+        Set<Z> newZones = new HashSet<>(this.zones);
+        newZones.addAll(that.zones);
+
+        List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
+        newOccupants.addAll(that.occupants);
+
+        int newOpenConnections;
+        // TODO : case 나누는 경우 instruction 대로 하긴햇는데 왜인지 이해안감
+        if (this != that) {
+            // When an area is connected to a different area
+            newOpenConnections = this.openConnections + that.openConnections - 2;
+        } else {
+            // When connected to itself
+            newOpenConnections = this.openConnections - 2;
+        }
+
+        return new Area<>(newZones, newOccupants, newOpenConnections);
+    }
+
+    /**
+     * Returns an identical area to the receiver, except that it is occupied by the given occupant.
+     * Throws IllegalArgumentException if the receiver is already occupied.
+     *
+     * @param occupant the given occupant
+     * @return an identical area to the receiver, except that it is occupied by the given occupant
+     */
+    public Area<Z> withInitialOccupant(PlayerColor occupant) {
+        if (this.isOccupied()) {
+            throw new IllegalArgumentException();
+        }
+
+        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
+        /*if (occupants != null) {
+            newOccupants.addAll(occupants);
+        }*/
+        newOccupants.add(occupant);
+
+        return new Area<>(this.zones, newOccupants, this.openConnections);
+    }
+
+    /**
+     *
+     * @param occupant
+     * @return
+     */
+    /*public Area<Z> withoutOccupant(PlayerColor occupant) {}
+    public Area<Z> withoutOccupants() {}
+    public Set<Integer> tileIds() {}
+    public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {}*/
 }
