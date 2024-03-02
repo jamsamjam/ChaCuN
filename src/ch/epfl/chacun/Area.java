@@ -9,22 +9,29 @@ import java.util.*;
  * @author Sam Lee (375535)
  *
  * @param zones all the zones constituting the area
- * @param occupants the colors of any players occupying the area, sorted by color
+ * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
-    // TODO
+
+    /**
+     *
+     * @param zones
+     * @param occupants
+     * @param openConnections
+     */
     public Area {
         if (openConnections < 0) {
             throw new IllegalArgumentException();
         }
+
         zones = Set.copyOf(zones);
-        // TODO : the list is sorted beforehand? Or to be sorted?
-        if (occupants != null) {
-            occupants = List.copyOf(occupants);
-            List<PlayerColor> sortedOccupants = new ArrayList<>(occupants);
-            Collections.sort(sortedOccupants);
-        }
+        occupants = List.copyOf(occupants);
+
+        // Sort the received list of occupants by color.
+        List<PlayerColor> sortedOccupants = new ArrayList<>(occupants);
+        Collections.sort(sortedOccupants);
+        occupants = List.copyOf(sortedOccupants);
     }
 
     /**
@@ -143,7 +150,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return true iff the area is occupied by at least one occupant
      */
     public boolean isOccupied() {
-        return occupants != null;
+        return !occupants.isEmpty();
     }
 
     /**
@@ -160,8 +167,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         }
 
         int maxCount = Arrays.stream(colorCounts).max().getAsInt();
-
         Set<PlayerColor> majorityOccupants = new HashSet<>();
+
         if (maxCount > 0) {
             for (PlayerColor color : PlayerColor.ALL) {
                 if (colorCounts[color.ordinal()] == maxCount) {
@@ -169,7 +176,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
                 }
             }
         }
-
         return majorityOccupants;
     }
 
@@ -186,8 +192,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
         newOccupants.addAll(that.occupants);
 
+        // TODO : why x need to initialize here ?
         int newOpenConnections;
-        // TODO : case 나누는 경우 instruction 대로 하긴햇는데 왜인지 이해안감
         if (this != that) {
             // When an area is connected to a different area
             newOpenConnections = this.openConnections + that.openConnections - 2;
@@ -212,9 +218,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         }
 
         List<PlayerColor> newOccupants = new ArrayList<>(occupants);
-        /*if (occupants != null) {
-            newOccupants.addAll(occupants);
-        }*/
+        newOccupants.addAll(occupants);
         newOccupants.add(occupant);
 
         return new Area<>(this.zones, newOccupants, this.openConnections);
