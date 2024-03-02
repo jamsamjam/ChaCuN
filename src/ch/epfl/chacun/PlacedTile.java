@@ -63,11 +63,11 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns the area of the tile whose identifier is the given one,
-     * or throws IllegalArgumentException if the tile does not have an area with this identifier.
+     * Returns the zone of the tile whose identifier is the given one,
+     * or throws IllegalArgumentException if the tile does not have a zone with this identifier.
      *
      * @param id the given identifier
-     * @return the area of the tile whose identifier is the given one
+     * @return the zone of the tile whose identifier is the given one
      */
     public Zone zoneWithId(int id) {
         for (Zone zone : tile.zones()) {
@@ -80,10 +80,10 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
 
 
     /**
-     * Returns the area of the tile having a special power (at most one per tile)
+     * Returns the zone of the tile having a special power (at most one per tile)
      * or null if there are none.
      *
-     * @return  the area of the tile having a special power
+     * @return the zone of the tile having a special power
      */
     public Zone specialPowerZone() {
         for (Zone zone : tile.zones()) {
@@ -95,9 +95,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns all, possibly empty, forest areas of the tile.
+     * Returns all, possibly empty, forest zones of the tile.
      *
-     * @return the set, possibly empty, of forest areas of the tile
+     * @return the set, possibly empty, of forest zones of the tile
      */
     public Set<Zone.Forest> forestZones() {
         Set<Zone.Forest> forests = new HashSet<>();
@@ -110,9 +110,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns all, possibly empty, meadow areas of the tile.
+     * Returns all, possibly empty, meadow zones of the tile.
      *
-     * @return the set, possibly empty, of meadow areas of the tile
+     * @return the set, possibly empty, of meadow zones of the tile
      */
     public Set<Zone.Meadow> meadowZones() {
         Set<Zone.Meadow> meadows = new HashSet<>();
@@ -125,9 +125,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns all, possibly empty, river areas of the tile.
+     * Returns all, possibly empty, river zones of the tile.
      *
-     * @return the set, possibly empty, of river areas of the tile
+     * @return the set, possibly empty, of river zones of the tile
      */
     public Set<Zone.River> riverZones() {
         Set<Zone.River> rivers = new HashSet<>();
@@ -191,11 +191,11 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns the identifier of the area occupied by an occupant of the given kind,
+     * Returns the identifier of the zone occupied by an occupant of the given kind,
      * or -1 if the tile is not occupied, or if the occupant is not of the right kind.
      *
      * @param occupantKind the given kind
-     * @return the identifier of the area occupied by an occupant of the given kind,
+     * @return the identifier of the zone occupied by an occupant of the given kind,
      * or -1 if the tile is not occupied, or if the occupant is not of the right kind
      */
     public int idOfZoneOccupiedBy(Occupant.Kind occupantKind) {

@@ -72,7 +72,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     /**
      * Returns a new tile decks with tiles removed from the top of the pile based on the predicate.
      *
-     * @param kind      the kind of tiles
+     * @param kind the kind of tiles
      * @param predicate the predicate to test the tiles
      * @return the new tile decks
      */
@@ -91,7 +91,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * Helper method which finds the index of the first element in the list that does not satisfy
      * the given predicate.
      *
-     * @param tiles     the list of tiles to search
+     * @param tiles the list of tiles to search
      * @param predicate the predicate to test elements against
      * @return the index of the first element in the list that does not satisfy the predicate,
      *         or the size of the list if all elements satisfy the predicate

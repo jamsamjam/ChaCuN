@@ -4,7 +4,7 @@ import java.util.Objects;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
- * Represents an occupant (pawn or hut) of an area.
+ * Represents an occupant (pawn or hut) of a zone.
  * Each occupant has a kind and a zone ID.
  *
  * @author Gehna Yadav (379155)

@@ -1,5 +1,4 @@
-package ch.epfl.chacun;
-
+import ch.epfl.chacun.PlayerColor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

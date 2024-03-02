@@ -10,9 +10,9 @@ import java.util.List;
  */
 public sealed interface TileSide {
     /**
-     * Returns the areas that touch the edge represented by the receiver (this).
+     * Returns the zones that touch the edge represented by the receiver (this).
      *
-     * @return the areas that touch the edge represented by the receiver (this)
+     * @return the zones that touch the edge represented by the receiver (this)
      */
     List<Zone> zones();
 
