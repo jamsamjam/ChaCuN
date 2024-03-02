@@ -53,9 +53,9 @@ public final class Points {
     }
 
     /**
-     * Returns the number of points obtained by the majority fishermen of a hydrographic network.
+     * Returns the number of points obtained by the majority fishermen of a river system.
      *
-     * @param fishCount the number of fish present in this network
+     * @param fishCount the number of fish present in the system
      * @return the number of points
      */
     public static int forRiverSystem(int fishCount) {
@@ -64,10 +64,9 @@ public final class Points {
     }
 
     /**
-     * Returns the number of points obtained by the player placing the canoe in a hydrographic
-     * network.
+     * Returns the number of points obtained by the player placing the canoe in a river system.
      *
-     * @param lakeCount the number of lakes in the hydrographic network of which it is part
+     * @param lakeCount the number of lakes in the river system of which it is part
      * @return the number of points
      */
     public static int forLogboat(int lakeCount) {
@@ -76,8 +75,8 @@ public final class Points {
     }
 
     /**
-     * Returns the number of additional points obtained by the majority fishermen of the
-     * hydrographic network.
+     * Returns the number of additional points obtained by the majority fishermen of the river
+     * system.
      *
      * @param lakeCount the number of lakes containing the raft
      * @return the number of additional points
