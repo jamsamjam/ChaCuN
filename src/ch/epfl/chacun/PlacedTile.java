@@ -21,7 +21,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      */
     public PlacedTile {
         if (tile == null || rotation == null || pos == null) {
-            throw new IllegalArgumentException();
+            throw new NullPointerException();
         }
     }
 

@@ -20,6 +20,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @param occupants
      * @param openConnections
      */
+
+    // TODO : cache maven 삭제 어디서 ?
     public Area {
         if (openConnections < 0) {
             throw new IllegalArgumentException();
