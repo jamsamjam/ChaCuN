@@ -164,16 +164,22 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         int[] colorCounts = new int[PlayerColor.values().length];
         // TODO : PlayerColor.ALL.size() or PlayerColor.values().length
 
-        for(PlayerColor color : occupants) {
+        for (PlayerColor color : occupants) {
             colorCounts[color.ordinal()]++;
         }
 
-        int maxCount = Arrays.stream(colorCounts).max().getAsInt();
-        Set<PlayerColor> majorityOccupants = new HashSet<>();
+        // TODO : simpler way to find max element ?
+        int max = colorCounts[0];
+        for (int i = 1; i < colorCounts.length; i++) {
+            if (colorCounts[i] > max) {
+                max = colorCounts[i];
+            }
+        }
 
-        if (maxCount > 0) {
+        Set<PlayerColor> majorityOccupants = new HashSet<>();
+        if (max > 0) {
             for (PlayerColor color : PlayerColor.ALL) {
-                if (colorCounts[color.ordinal()] == maxCount) {
+                if (colorCounts[color.ordinal()] == max) {
                     majorityOccupants.add(color);
                 }
             }
@@ -209,9 +215,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
 
     /**
      * Returns an identical area to the receiver, except that it is occupied by the given occupant.
-     * Throws IllegalArgumentException if the receiver is already occupied.
      *
      * @param occupant the given occupant
+     * @throws IllegalArgumentException if the receiver is already occupied
      * @return an identical area to the receiver, except that it is occupied by the given occupant
      */
     public Area<Z> withInitialOccupant(PlayerColor occupant) {
@@ -227,12 +233,68 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     }
 
     /**
+     * Returns an identical area to the receiver, but which includes one less occupant of the given
+     * color.
      *
-     * @param occupant
-     * @return
+     * @param occupant the given occupant
+     * @throws IllegalArgumentException if the receiver contains no occupant of the given color
+     * @return an identical area to the receiver, but which includes one less occupant of the given
+     * color
      */
-    /*public Area<Z> withoutOccupant(PlayerColor occupant) {}
-    public Area<Z> withoutOccupants() {}
-    public Set<Integer> tileIds() {}
-    public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {}*/
+    public Area<Z> withoutOccupant(PlayerColor occupant) {
+        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
+
+        for (PlayerColor color : this.occupants) {
+            if (color.equals(occupant)) {
+                newOccupants.remove(color);
+                return new Area<>(this.zones, newOccupants, this.openConnections);
+            }
+        }
+
+        throw new IllegalArgumentException();
+    }
+
+    /**
+     * Returns an area identical to the receiver, but completely devoid of occupants.
+     *
+     * @return an area identical to the receiver, but completely devoid of occupants
+     */
+    public Area<Z> withoutOccupants() {
+        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
+        newOccupants.removeAll(occupants);
+
+        return new Area<>(this.zones, newOccupants, this.openConnections);
+    }
+
+    /**
+     * Returns the set of the tile ids containing the area.
+     *
+     * @return the set of the tile ids containing the area
+     */
+    public Set<Integer> tileIds() {
+        Set<Integer> tileIds = new HashSet<>();
+
+        // TODO : Z vs. Zone
+        for (Zone zone : zones) {
+            tileIds.add(zone.tileId());
+        }
+
+        return tileIds;
+    }
+
+    /**
+     * Returns the zone of the area that has the given special power, or null if none exists.
+     *
+     * @param specialPower the given special power
+     * @return the zone of the area that has the given special power, or null if none exists
+     */
+    public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {
+        for (Zone zone : zones) {
+            if (zone.specialPower() != null) {
+                return zone;
+                // TODO : more than one zone w/ special power?
+            }
+        }
+        return null;
+    }
 }

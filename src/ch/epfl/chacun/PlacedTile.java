@@ -19,6 +19,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     /**
      * Compact constructor of PlacedTile.
      */
+    // TODO : @throws should be added
     public PlacedTile {
         if (tile == null || rotation == null || pos == null) {
             throw new NullPointerException();
