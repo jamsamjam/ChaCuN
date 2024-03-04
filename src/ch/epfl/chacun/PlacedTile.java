@@ -139,8 +139,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         }
         return rivers;
     }
-
-
+    // TODO : ConcurrentModificationException ?
 
     /**
      * Returns the set of all potential occupants of the tile, or an empty set if the tile is the
@@ -149,7 +148,6 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * @return the set of all potential occupants of the tile, or an empty set if the tile is the
      * starting one
      */
-
     public Set<Occupant> potentialOccupants() {
         Set<Occupant> potentialOccupants = new HashSet<>();
         if (placer == null) {
