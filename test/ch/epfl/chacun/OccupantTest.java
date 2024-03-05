@@ -1,3 +1,5 @@
+package ch.epfl.chacun;
+
 import ch.epfl.chacun.Occupant;
 import org.junit.jupiter.api.Test;
 

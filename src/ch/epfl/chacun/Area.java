@@ -131,7 +131,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         int count = 0;
         for (Zone.Water zone : riverSystem.zones()) {
             if (zone instanceof Zone.Lake) {
-                count++; //TODO : lake double counting - should be tested
+                count++;
             }
         }
         return count;

@@ -14,18 +14,17 @@ import java.util.*;
 public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
     /**
      * Compact constructor of ZonePartition.
-     *
-     * @param areas the set of areas forming the partition
      */
     public ZonePartition {
         areas = Set.copyOf(areas);
     }
 
     /**
-     * Second constructor of ZonePartition.
+     * Second constructor of ZonePartition hat takes no arguments and initializes the partition
+     * with an empty set of areas.
      */
     public ZonePartition() {
-        this(Collections.emptySet()); //TODO
+        this(Collections.emptySet());
     }
 
     /**
@@ -91,7 +90,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not found or if it is not occupied by the given color
          */
         public void removeOccupant(Z zone, PlayerColor color) {
-            Area<Z> targetArea = areaContaining(zone);
+            /*Area<Z> targetArea = areaContaining(zone);
             List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
             if (targetArea == null || !occupants.contains(color)) {
                 throw new IllegalArgumentException("Area is not occupied by the given color.");
@@ -99,7 +98,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             occupants.remove(color);
             Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
             areas.remove(targetArea);
-            areas.add(newArea);
+            areas.add(newArea);*/
         }
 
         /**

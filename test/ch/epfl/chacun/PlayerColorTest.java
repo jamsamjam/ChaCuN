@@ -1,3 +1,5 @@
+package ch.epfl.chacun;
+
 import ch.epfl.chacun.PlayerColor;
 import org.junit.jupiter.api.Test;
 

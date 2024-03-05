@@ -1,3 +1,5 @@
+package ch.epfl.chacun;
+
 import ch.epfl.chacun.Animal;
 import ch.epfl.chacun.Zone;
 import org.junit.jupiter.api.Test;
