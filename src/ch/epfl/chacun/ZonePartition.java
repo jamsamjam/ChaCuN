@@ -43,13 +43,17 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         throw new IllegalArgumentException();
     }
 
+    /*static private areaContaining(Z Zone, Set<Area<Z>> areas) {
+
+    }*/
+
     /**
      * A builder class for constructing ZonePartition instances.
      *
      * @param <Z> the type parameter representing the type of zones
      */
     public final class Builder<Z extends Zone> {
-        private final Set<Area<Z>> areas;
+        private final HashSet<Area<Z>> areas;
 
         /**
          * Constructs a builder with the areas from the given partition.
@@ -57,11 +61,12 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @param partition the existing zone partition
          */
         public Builder(ZonePartition<Z> partition) {
-            this.areas = new HashSet<>(partition.areas);
+            areas = new HashSet<>(partition.areas);
         }
 
         /**
-         * Adds a new unoccupied area consisting solely of the given zone with the specified number of open connections.
+         * Adds a new unoccupied area consisting solely of the given zone with the specified number
+         * of open connections.
          *
          * @param zone the zone to be added
          * @param openConnections the number of open connections for the area
@@ -79,7 +84,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not found or if it is already occupied
          */
         public void addInitialOccupant(Z zone, PlayerColor color) {
-
+            //areaContaining(zone).withInitialOccupant(color);
         }
 
         /**
@@ -127,7 +132,25 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if one of the zones does not belong to an area of the partition
          */
         public void union(Z zone1, Z zone2) {
+            Area<Z> area1 = areaContaining(zone1);
+            Area<Z> area2 = areaContaining(zone2);
 
+            if (area1 == area2) {
+                return; // Both zones belong to the same area, no need to do anything
+            }
+
+            Set<Z> combinedZones = new HashSet<>(area1.zones());
+            combinedZones.addAll(area2.zones());
+
+            List<PlayerColor> combinedOccupants = new ArrayList<>(area1.occupants());
+            combinedOccupants.addAll(area2.occupants());
+
+            int combinedOpenConnections = area1.openConnections() + area2.openConnections() - 2;
+
+            Area<Z> newArea = new Area<>(combinedZones, combinedOccupants, combinedOpenConnections);
+            areas.remove(area1);
+            areas.remove(area2);
+            areas.add(newArea);
         }
 
         /**

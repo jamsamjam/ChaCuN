@@ -200,7 +200,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
         newOccupants.addAll(that.occupants);
 
-        int newOpenConnections = (this != that) ? openConnections * 2 - 2 : openConnections - 2;
+        int newOpenConnections = this.equals(that) ? openConnections - 2 : openConnections * 2 - 2;
 
        /* if (this != that) {
             newOpenConnections = openConnections + openConnections - 2;
