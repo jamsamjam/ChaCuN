@@ -84,6 +84,7 @@ public class ZonePartition <Z extends Zone> {
         public void addInitialOccupant(Z zone, PlayerColor color) {
             //TODO
             Area<Z> targetArea = areaContaining(zone);
+
             List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
             //why is it always false
             if (targetArea == null || !occupants.isEmpty()) {
