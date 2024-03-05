@@ -3,38 +3,36 @@ package ch.epfl.chacun;
 import java.util.*;
 
 /**
- * Represents a zone partition containing areas.
+ * Represents a zone partition of a given type.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  *
- * @param <Z> the type parameter representing the type of zones
+ * @param areas the set of areas forming the partition
+ * @param <Z> the type parameter representing the zone type
  */
-
-public class ZonePartition <Z extends Zone> {
-    private final Set<Area<Z>> areas;
-
+public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
     /**
-     * Constructs a zone partition with the given set of areas.
+     * Compact constructor of ZonePartition.
      *
      * @param areas the set of areas forming the partition
      */
-    public ZonePartition(Set<Area<Z>> areas) {
-        this.areas = Set.copyOf(areas);
+    public ZonePartition {
+        areas = Set.copyOf(areas);
     }
 
     /**
-     * Constructs an empty zone partition.
+     * Second constructor of ZonePartition.
      */
     public ZonePartition() {
-        this.areas = new HashSet<>();
+        this(Collections.emptySet()); //TODO
     }
 
     /**
-     * Finds and returns the area containing the specified zone.
+     * Returns the area containing the given zone.
      *
-     * @param zone the zone to find the containing area for
-     * @return the area containing the zone
+     * @param zone the given zone
+     * @return the area containing the given zone
      * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      */
     public Area<Z> areaContaining(Z zone) {
@@ -43,7 +41,7 @@ public class ZonePartition <Z extends Zone> {
                 return area;
             }
         }
-        throw new IllegalArgumentException("Zone does not belong to any area of the partition.");
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -82,18 +80,7 @@ public class ZonePartition <Z extends Zone> {
          * @throws IllegalArgumentException if the area is not found or if it is already occupied
          */
         public void addInitialOccupant(Z zone, PlayerColor color) {
-            //TODO
-            Area<Z> targetArea = areaContaining(zone);
 
-            List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
-            //why is it always false
-            if (targetArea == null || !occupants.isEmpty()) {
-                throw new IllegalArgumentException();
-            }
-            occupants.add(color);
-            Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
-            areas.remove(targetArea);
-            areas.add(newArea);
         }
 
         /**
@@ -141,25 +128,7 @@ public class ZonePartition <Z extends Zone> {
          * @throws IllegalArgumentException if one of the zones does not belong to an area of the partition
          */
         public void union(Z zone1, Z zone2) {
-            Area<Z> area1 = areaContaining(zone1);
-            Area<Z> area2 = areaContaining(zone2);
 
-            if (area1 == area2) {
-                return; // Both zones belong to the same area, no need to do anything
-            }
-
-            Set<Z> combinedZones = new HashSet<>(area1.zones());
-            combinedZones.addAll(area2.zones());
-
-            List<PlayerColor> combinedOccupants = new ArrayList<>(area1.occupants());
-            combinedOccupants.addAll(area2.occupants());
-
-            int combinedOpenConnections = area1.openConnections() + area2.openConnections() - 2;
-
-            Area<Z> newArea = new Area<>(combinedZones, combinedOccupants, combinedOpenConnections);
-            areas.remove(area1);
-            areas.remove(area2);
-            areas.add(newArea);
         }
 
         /**

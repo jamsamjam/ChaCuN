@@ -14,8 +14,10 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
+// TODO : @param Z
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
-
+// TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
+//  parameter, as in the following examples: Cell<String>
     /**
      * A compact constructor of Area.
      * // TODO not positive or zero ?
@@ -198,12 +200,13 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
         newOccupants.addAll(that.occupants);
 
-        int newOpenConnections;
-        if (this != that) {
+        int newOpenConnections = (this != that) ? openConnections * 2 - 2 : openConnections - 2;
+
+       /* if (this != that) {
             newOpenConnections = openConnections + openConnections - 2;
         } else {
             newOpenConnections = openConnections - 2;
-        }
+        }*/
         // TODO : List.copyOf(occupants).addAll(that.occupants)
         return new Area<>(newZones, newOccupants, newOpenConnections);
     }
@@ -251,7 +254,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Area<Z> withoutOccupants() {
         List<PlayerColor> newOccupants = new ArrayList<>(occupants);
         newOccupants.removeAll(occupants);
-
         return new Area<>(zones, newOccupants, openConnections);
     }
 
