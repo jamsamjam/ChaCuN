@@ -2,6 +2,8 @@ package ch.epfl.chacun;
 
 import java.util.*;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Represents a zone partition of a given type.
  *
@@ -43,7 +45,8 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         throw new IllegalArgumentException();
     }
 
-    private static Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
+    private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
+        // TODO
         for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
                 return area;
@@ -90,7 +93,9 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not found or if it is already occupied
          */
         public void addInitialOccupant(Z zone, PlayerColor color) {
-            //areaContaining(zone).withInitialOccupant(color);
+            Area<Z> area = ZonePartition.areaContaining(zone, areas);
+            areas.add(area.withInitialOccupant(color));
+            areas.remove(area);
         }
 
         /**
@@ -101,15 +106,9 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not found or if it is not occupied by the given color
          */
         public void removeOccupant(Z zone, PlayerColor color) {
-            /*Area<Z> targetArea = areaContaining(zone);
-            List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
-            if (targetArea == null || !occupants.contains(color)) {
-                throw new IllegalArgumentException("Area is not occupied by the given color.");
-            }
-            occupants.remove(color);
-            Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
-            areas.remove(targetArea);
-            areas.add(newArea);*/
+            Area<Z> area = ZonePartition.areaContaining(zone, areas);
+            areas.add(area.withoutOccupant(color));
+            areas.remove(area);
         }
 
         /**
@@ -119,15 +118,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not part of the partition
          */
         public void removeAllOccupantsOf(Area<Z> area) {
-            /*if (!areas.contains(area)) {
-                throw new IllegalArgumentException("Area is not part of the partition.");
-            }
+            checkArgument(areas.contains(area));
 
-            List<PlayerColor> emptyOccupants = Collections.emptyList();
-            Area<Z> newArea = new Area<>(area.zones(), emptyOccupants, area.openConnections());
-
+            areas.add(area.withoutOccupants());
             areas.remove(area);
-            areas.add(newArea);*/
         }
 
         /**
@@ -135,28 +129,18 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          *
          * @param zone1 the first zone to connect
          * @param zone2 the second zone to connect
-         * @throws IllegalArgumentException if one of the zones does not belong to an area of the partition
+         * @throws IllegalArgumentException if one of the zones does not belong to an area of the
+         * partition
          */
         public void union(Z zone1, Z zone2) {
-            /*Area<Z> area1 = areaContaining(zone1);
-            Area<Z> area2 = areaContaining(zone2);
+            // TODO : checkArgument(??);
 
-            if (area1 == area2) {
-                return; // Both zones belong to the same area, no need to do anything
+            Area<Z> area1 = ZonePartition.areaContaining(zone1, areas);
+            Area<Z> area2 = ZonePartition.areaContaining(zone2, areas);
+
+            if (!area1.equals(area2)) {
+                area1.connectTo(area2);
             }
-
-            Set<Z> combinedZones = new HashSet<>(area1.zones());
-            combinedZones.addAll(area2.zones());
-
-            List<PlayerColor> combinedOccupants = new ArrayList<>(area1.occupants());
-            combinedOccupants.addAll(area2.occupants());
-
-            int combinedOpenConnections = area1.openConnections() + area2.openConnections() - 2;
-
-            Area<Z> newArea = new Area<>(combinedZones, combinedOccupants, combinedOpenConnections);
-            areas.remove(area1);
-            areas.remove(area2);
-            areas.add(newArea);*/
         }
 
         /**
@@ -167,5 +151,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         public ZonePartition<Z> build() {
             return new ZonePartition<>(areas);
         }
+        // TODO : purpose?
     }
 }

@@ -202,11 +202,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
 
         int newOpenConnections = this.equals(that) ? openConnections - 2 : openConnections * 2 - 2;
 
-       /* if (this != that) {
-            newOpenConnections = openConnections + openConnections - 2;
-        } else {
-            newOpenConnections = openConnections - 2;
-        }*/
         // TODO : List.copyOf(occupants).addAll(that.occupants)
         return new Area<>(newZones, newOccupants, newOpenConnections);
     }
