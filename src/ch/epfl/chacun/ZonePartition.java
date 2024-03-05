@@ -43,16 +43,21 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         throw new IllegalArgumentException();
     }
 
-    /*static private areaContaining(Z Zone, Set<Area<Z>> areas) {
-
-    }*/
+    private static Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
+        for (Area<Z> area : areas) {
+            if (area.zones().contains(zone)) {
+                return area;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
 
     /**
      * A builder class for constructing ZonePartition instances.
      *
      * @param <Z> the type parameter representing the type of zones
      */
-    public final class Builder<Z extends Zone> {
+    public static final class Builder<Z extends Zone> {
         private final HashSet<Area<Z>> areas;
 
         /**
@@ -72,9 +77,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @param openConnections the number of open connections for the area
          */
         public void addSingleton(Z zone, int openConnections) {
-            Area<Z> newArea = new Area<>(Set.of(zone), new ArrayList<>(), openConnections);
+            Area<Z> newArea = new Area<>(Set.of(zone), Collections.emptyList(), openConnections);
             areas.add(newArea);
         }
+        // TODO new ArrayList<>() mutable
 
         /**
          * Adds an initial occupant of the given color to the area containing the specified zone.
@@ -113,7 +119,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if the area is not part of the partition
          */
         public void removeAllOccupantsOf(Area<Z> area) {
-            if (!areas.contains(area)) {
+            /*if (!areas.contains(area)) {
                 throw new IllegalArgumentException("Area is not part of the partition.");
             }
 
@@ -121,7 +127,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             Area<Z> newArea = new Area<>(area.zones(), emptyOccupants, area.openConnections());
 
             areas.remove(area);
-            areas.add(newArea);
+            areas.add(newArea);*/
         }
 
         /**
@@ -132,7 +138,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @throws IllegalArgumentException if one of the zones does not belong to an area of the partition
          */
         public void union(Z zone1, Z zone2) {
-            Area<Z> area1 = areaContaining(zone1);
+            /*Area<Z> area1 = areaContaining(zone1);
             Area<Z> area2 = areaContaining(zone2);
 
             if (area1 == area2) {
@@ -150,7 +156,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             Area<Z> newArea = new Area<>(combinedZones, combinedOccupants, combinedOpenConnections);
             areas.remove(area1);
             areas.remove(area2);
-            areas.add(newArea);
+            areas.add(newArea);*/
         }
 
         /**

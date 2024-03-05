@@ -238,12 +238,11 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         for (PlayerColor color : occupants) {
             if (color.equals(occupant)) {
                 newOccupants.remove(color);
-
                 return new Area<>(zones, newOccupants, openConnections);
             }
         }
         throw new IllegalArgumentException();
-        // TODO
+        // TODO should we use check.. method
     }
 
     /**
