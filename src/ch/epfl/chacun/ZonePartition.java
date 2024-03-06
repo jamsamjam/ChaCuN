@@ -37,22 +37,23 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      */
     public Area<Z> areaContaining(Z zone) {
-        for (Area<Z> area : areas) {
+        areaContaining(zone, areas);
+
+        /*for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
                 return area;
             }
         }
-        throw new IllegalArgumentException();
+        checkArgument(true);*/
     }
 
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
-        // TODO
         for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
                 return area;
             }
         }
-        throw new IllegalArgumentException();
+        checkArgument(true);
     }
 
     /**
