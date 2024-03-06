@@ -46,6 +46,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             }
         }
         checkArgument(true);*/
+        // TODO
     }
 
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {

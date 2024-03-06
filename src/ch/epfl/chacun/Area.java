@@ -236,7 +236,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
             }
         }
         throw new IllegalArgumentException();
-        // checkArgument(true);
         // TODO
     }
 
