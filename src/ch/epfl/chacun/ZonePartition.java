@@ -38,6 +38,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      */
     public Area<Z> areaContaining(Z zone) {
         areaContaining(zone, areas);
+        return null;
 
         /*for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
@@ -53,7 +54,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
                 return area;
             }
         }
-        checkArgument(true);
+        throw new IllegalArgumentException();
+
+        // checkArgument(true);
+        // return null;
     }
 
     /**

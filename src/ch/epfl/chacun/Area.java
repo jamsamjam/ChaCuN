@@ -235,8 +235,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
                 return new Area<>(zones, newOccupants, openConnections);
             }
         }
-        checkArgument(true);
-        // TODO throws iLlegalArgumentException();
+        throw new IllegalArgumentException();
+        // checkArgument(true);
+        // TODO
     }
 
     /**
