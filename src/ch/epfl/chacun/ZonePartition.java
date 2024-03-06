@@ -43,7 +43,7 @@ public class ZonePartition <Z extends Zone> {
                 return area;
             }
         }
-        throw new IllegalArgumentException("Zone does not belong to any area of the partition.");
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -85,10 +85,9 @@ public class ZonePartition <Z extends Zone> {
             //TODO
             Area<Z> targetArea = areaContaining(zone);
             List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
-            //why is it always false
-            if (targetArea == null || !occupants.isEmpty()) {
-                throw new IllegalArgumentException();
-            }
+
+            Preconditions.checkArgument(occupants.isEmpty());
+
             occupants.add(color);
             Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
             areas.remove(targetArea);
@@ -102,12 +101,17 @@ public class ZonePartition <Z extends Zone> {
          * @param color the color of the occupant to be removed
          * @throws IllegalArgumentException if the area is not found or if it is not occupied by the given color
          */
+
         public void removeOccupant(Z zone, PlayerColor color) {
             Area<Z> targetArea = areaContaining(zone);
             List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
+
             if (targetArea == null || !occupants.contains(color)) {
                 throw new IllegalArgumentException("Area is not occupied by the given color.");
             }
+
+            Preconditions.checkArgument(occupants.isEmpty());
+
             occupants.remove(color);
             Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
             areas.remove(targetArea);
@@ -120,10 +124,9 @@ public class ZonePartition <Z extends Zone> {
          * @param area the area from which all occupants are removed
          * @throws IllegalArgumentException if the area is not part of the partition
          */
+
         public void removeAllOccupantsOf(Area<Z> area) {
-            if (!areas.contains(area)) {
-                throw new IllegalArgumentException("Area is not part of the partition.");
-            }
+            Preconditions.checkArgument(areas.contains(area));
 
             List<PlayerColor> emptyOccupants = Collections.emptyList();
             Area<Z> newArea = new Area<>(area.zones(), emptyOccupants, area.openConnections());
