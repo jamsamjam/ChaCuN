@@ -2,42 +2,51 @@ package ch.epfl.chacun;
 
 import java.util.*;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
- * Represents a zone partition containing areas.
+ * Represents a zone partition of a given type.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  *
- * @param <Z> the type parameter representing the type of zones
+ * @param areas the set of areas forming the partition
+ * @param <Z> the type parameter representing the zone type
  */
-
-public class ZonePartition <Z extends Zone> {
-    private final Set<Area<Z>> areas;
-
+public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
     /**
-     * Constructs a zone partition with the given set of areas.
-     *
-     * @param areas the set of areas forming the partition
+     * Compact constructor of ZonePartition.
      */
-    public ZonePartition(Set<Area<Z>> areas) {
-        this.areas = Set.copyOf(areas);
+    public ZonePartition {
+        areas = Set.copyOf(areas);
     }
 
     /**
-     * Constructs an empty zone partition.
+     * Second constructor of ZonePartition hat takes no arguments and initializes the partition
+     * with an empty set of areas.
      */
     public ZonePartition() {
-        this.areas = new HashSet<>();
+        this(Collections.emptySet());
     }
 
     /**
-     * Finds and returns the area containing the specified zone.
+     * Returns the area containing the given zone.
      *
-     * @param zone the zone to find the containing area for
-     * @return the area containing the zone
+     * @param zone the given zone
+     * @return the area containing the given zone
      * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      */
     public Area<Z> areaContaining(Z zone) {
+        for (Area<Z> area : areas) {
+            if (area.zones().contains(zone)) {
+                return area;
+            }
+        }
+        throw new IllegalArgumentException();
+    }
+
+    private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
+        // TODO
         for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
                 return area;
@@ -51,8 +60,8 @@ public class ZonePartition <Z extends Zone> {
      *
      * @param <Z> the type parameter representing the type of zones
      */
-    public final class Builder<Z extends Zone> {
-        private final Set<Area<Z>> areas;
+    public static final class Builder<Z extends Zone> {
+        private final HashSet<Area<Z>> areas;
 
         /**
          * Constructs a builder with the areas from the given partition.
@@ -60,19 +69,21 @@ public class ZonePartition <Z extends Zone> {
          * @param partition the existing zone partition
          */
         public Builder(ZonePartition<Z> partition) {
-            this.areas = new HashSet<>(partition.areas);
+            areas = new HashSet<>(partition.areas);
         }
 
         /**
-         * Adds a new unoccupied area consisting solely of the given zone with the specified number of open connections.
+         * Adds a new unoccupied area consisting solely of the given zone with the specified number
+         * of open connections.
          *
          * @param zone the zone to be added
          * @param openConnections the number of open connections for the area
          */
         public void addSingleton(Z zone, int openConnections) {
-            Area<Z> newArea = new Area<>(Set.of(zone), new ArrayList<>(), openConnections);
+            Area<Z> newArea = new Area<>(Set.of(zone), Collections.emptyList(), openConnections);
             areas.add(newArea);
         }
+        // TODO new ArrayList<>() mutable
 
         /**
          * Adds an initial occupant of the given color to the area containing the specified zone.
@@ -82,16 +93,9 @@ public class ZonePartition <Z extends Zone> {
          * @throws IllegalArgumentException if the area is not found or if it is already occupied
          */
         public void addInitialOccupant(Z zone, PlayerColor color) {
-            //TODO
-            Area<Z> targetArea = areaContaining(zone);
-            List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
-
-            Preconditions.checkArgument(occupants.isEmpty());
-
-            occupants.add(color);
-            Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
-            areas.remove(targetArea);
-            areas.add(newArea);
+            Area<Z> area = ZonePartition.areaContaining(zone, areas);
+            areas.add(area.withInitialOccupant(color));
+            areas.remove(area);
         }
 
         /**
@@ -101,21 +105,10 @@ public class ZonePartition <Z extends Zone> {
          * @param color the color of the occupant to be removed
          * @throws IllegalArgumentException if the area is not found or if it is not occupied by the given color
          */
-
         public void removeOccupant(Z zone, PlayerColor color) {
-            Area<Z> targetArea = areaContaining(zone);
-            List<PlayerColor> occupants = new ArrayList<>(targetArea.occupants());
-
-            if (targetArea == null || !occupants.contains(color)) {
-                throw new IllegalArgumentException("Area is not occupied by the given color.");
-            }
-
-            Preconditions.checkArgument(occupants.isEmpty());
-
-            occupants.remove(color);
-            Area<Z> newArea = new Area<>(targetArea.zones(), occupants, targetArea.openConnections());
-            areas.remove(targetArea);
-            areas.add(newArea);
+            Area<Z> area = ZonePartition.areaContaining(zone, areas);
+            areas.add(area.withoutOccupant(color));
+            areas.remove(area);
         }
 
         /**
@@ -124,15 +117,11 @@ public class ZonePartition <Z extends Zone> {
          * @param area the area from which all occupants are removed
          * @throws IllegalArgumentException if the area is not part of the partition
          */
-
         public void removeAllOccupantsOf(Area<Z> area) {
-            Preconditions.checkArgument(areas.contains(area));
+            checkArgument(areas.contains(area));
 
-            List<PlayerColor> emptyOccupants = Collections.emptyList();
-            Area<Z> newArea = new Area<>(area.zones(), emptyOccupants, area.openConnections());
-
+            areas.add(area.withoutOccupants());
             areas.remove(area);
-            areas.add(newArea);
         }
 
         /**
@@ -140,28 +129,18 @@ public class ZonePartition <Z extends Zone> {
          *
          * @param zone1 the first zone to connect
          * @param zone2 the second zone to connect
-         * @throws IllegalArgumentException if one of the zones does not belong to an area of the partition
+         * @throws IllegalArgumentException if one of the zones does not belong to an area of the
+         * partition
          */
         public void union(Z zone1, Z zone2) {
-            Area<Z> area1 = areaContaining(zone1);
-            Area<Z> area2 = areaContaining(zone2);
+            // TODO : checkArgument(??);
 
-            if (area1 == area2) {
-                return; // Both zones belong to the same area, no need to do anything
+            Area<Z> area1 = ZonePartition.areaContaining(zone1, areas);
+            Area<Z> area2 = ZonePartition.areaContaining(zone2, areas);
+
+            if (!area1.equals(area2)) {
+                area1.connectTo(area2);
             }
-
-            Set<Z> combinedZones = new HashSet<>(area1.zones());
-            combinedZones.addAll(area2.zones());
-
-            List<PlayerColor> combinedOccupants = new ArrayList<>(area1.occupants());
-            combinedOccupants.addAll(area2.occupants());
-
-            int combinedOpenConnections = area1.openConnections() + area2.openConnections() - 2;
-
-            Area<Z> newArea = new Area<>(combinedZones, combinedOccupants, combinedOpenConnections);
-            areas.remove(area1);
-            areas.remove(area2);
-            areas.add(newArea);
         }
 
         /**
@@ -172,5 +151,6 @@ public class ZonePartition <Z extends Zone> {
         public ZonePartition<Z> build() {
             return new ZonePartition<>(areas);
         }
+        // TODO : purpose?
     }
 }

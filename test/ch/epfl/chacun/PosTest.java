@@ -1,3 +1,5 @@
+package ch.epfl.chacun;
+
 import ch.epfl.chacun.Direction;
 import ch.epfl.chacun.Pos;
 import org.junit.jupiter.api.Test;

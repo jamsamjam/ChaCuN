@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -19,11 +20,10 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     /**
      * Compact constructor of PlacedTile.
      */
-    // TODO : @throws should be added
     public PlacedTile {
-        if (tile == null || rotation == null || pos == null) {
-            throw new NullPointerException();
-        }
+        Objects.requireNonNull(tile);
+        Objects.requireNonNull(rotation);
+        Objects.requireNonNull(pos);
     }
 
     /**
@@ -139,7 +139,6 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         }
         return rivers;
     }
-    // TODO : ConcurrentModificationException ?
 
     /**
      * Returns the set of all potential occupants of the tile, or an empty set if the tile is the

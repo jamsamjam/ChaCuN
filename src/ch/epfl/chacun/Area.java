@@ -2,6 +2,8 @@ package ch.epfl.chacun;
 
 import java.util.*;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Represents an area.
  *
@@ -12,20 +14,18 @@ import java.util.*;
  * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
+// TODO : @param Z
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
-
+// TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
+//  parameter, as in the following examples: Cell<String>
     /**
-     *
-     * @param zones
-     * @param occupants
-     * @param openConnections
+     * A compact constructor of Area.
+     * // TODO not positive or zero ?
+     * @throws IllegalArgumentException if open connection is not positive or zero
      */
-
-    // TODO : cache maven 삭제 어디서 ?
     public Area {
-        if (openConnections < 0) {
-            throw new IllegalArgumentException();
-        }
+        // TODO modify all, @throws
+        checkArgument(openConnections >= 0);
 
         zones = Set.copyOf(zones);
         occupants = List.copyOf(occupants);
@@ -131,7 +131,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         int count = 0;
         for (Zone.Water zone : riverSystem.zones()) {
             if (zone instanceof Zone.Lake) {
-                count++; //TODO : lake double counting?
+                count++;
             }
         }
         return count;
@@ -145,6 +145,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public boolean isClosed() {
         return openConnections == 0;
     }
+    // TODO should use it in the 1st method?
 
     /**
      * Returns true iff the area is occupied by at least one occupant.
@@ -161,14 +162,13 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return the set of majority occupants of the area
      */
     public Set<PlayerColor> majorityOccupants() {
-        int[] colorCounts = new int[PlayerColor.values().length];
-        // TODO : PlayerColor.ALL.size() or PlayerColor.values().length
+        int[] colorCounts = new int[PlayerColor.ALL.size()];
 
         for (PlayerColor color : occupants) {
             colorCounts[color.ordinal()]++;
         }
 
-        // TODO : simpler way to find max element ?
+        // TODO : optimal -> converge two loops
         int max = colorCounts[0];
         for (int i = 1; i < colorCounts.length; i++) {
             if (colorCounts[i] > max) {
@@ -200,16 +200,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
         newOccupants.addAll(that.occupants);
 
-        // TODO : why x need to initialize here ?
-        int newOpenConnections;
-        if (this != that) {
-            // When an area is connected to a different area
-            newOpenConnections = this.openConnections + that.openConnections - 2;
-        } else {
-            // When connected to itself
-            newOpenConnections = this.openConnections - 2;
-        }
+        int newOpenConnections = this.equals(that) ? openConnections - 2 : openConnections * 2 - 2;
 
+        // TODO : List.copyOf(occupants).addAll(that.occupants)
         return new Area<>(newZones, newOccupants, newOpenConnections);
     }
 
@@ -221,15 +214,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return an identical area to the receiver, except that it is occupied by the given occupant
      */
     public Area<Z> withInitialOccupant(PlayerColor occupant) {
-        if (this.isOccupied()) {
-            throw new IllegalArgumentException();
-        }
-
-        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
-        newOccupants.addAll(occupants);
-        newOccupants.add(occupant);
-
-        return new Area<>(this.zones, newOccupants, this.openConnections);
+        checkArgument(!isOccupied());
+        return new Area<>(zones, List.of(occupant), openConnections);
     }
 
     /**
@@ -244,14 +230,14 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Area<Z> withoutOccupant(PlayerColor occupant) {
         List<PlayerColor> newOccupants = new ArrayList<>(occupants);
 
-        for (PlayerColor color : this.occupants) {
+        for (PlayerColor color : occupants) {
             if (color.equals(occupant)) {
                 newOccupants.remove(color);
-                return new Area<>(this.zones, newOccupants, this.openConnections);
+                return new Area<>(zones, newOccupants, openConnections);
             }
         }
-
         throw new IllegalArgumentException();
+        // TODO should we use check.. method
     }
 
     /**
@@ -262,8 +248,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Area<Z> withoutOccupants() {
         List<PlayerColor> newOccupants = new ArrayList<>(occupants);
         newOccupants.removeAll(occupants);
-
-        return new Area<>(this.zones, newOccupants, this.openConnections);
+        return new Area<>(zones, newOccupants, openConnections);
     }
 
     /**
@@ -274,11 +259,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Set<Integer> tileIds() {
         Set<Integer> tileIds = new HashSet<>();
 
-        // TODO : Z vs. Zone
-        for (Zone zone : zones) {
+        for (var zone : zones) {
             tileIds.add(zone.tileId());
         }
-
         return tileIds;
     }
 
@@ -292,7 +275,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         for (Zone zone : zones) {
             if (zone.specialPower() != null) {
                 return zone;
-                // TODO : more than one zone w/ special power?
             }
         }
         return null;
