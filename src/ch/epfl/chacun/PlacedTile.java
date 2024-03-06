@@ -19,6 +19,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
 
     /**
      * Compact constructor of PlacedTile.
+     *
+     * @throws NullPointerException if tile, rotation, or pos equals to null
      */
     public PlacedTile {
         Objects.requireNonNull(tile);
