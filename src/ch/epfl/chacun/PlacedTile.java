@@ -21,7 +21,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     /**
      * Compact constructor of PlacedTile.
      *
-     * @throws NullPointerException if tile, rotation, or pos equals to null
+     * @throws NullPointerException if any of tile, rotation, or pos equals to null
      */
     public PlacedTile {
         Objects.requireNonNull(tile);
@@ -67,8 +67,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     }
 
     /**
-     * Returns the zone of the tile whose identifier is the given one,
-     * or throws IllegalArgumentException if the tile does not have a zone with this identifier.
+     * Returns the zone of the tile whose identifier is the given one.
      *
      * @param id the given identifier
      * @return the zone of the tile whose identifier is the given one
