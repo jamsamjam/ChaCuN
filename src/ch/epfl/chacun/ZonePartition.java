@@ -40,12 +40,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         areaContaining(zone, areas);
         return null;
 
-        /*for (Area<Z> area : areas) {
-            if (area.zones().contains(zone)) {
-                return area;
-            }
-        }
-        checkArgument(true);*/
         // TODO
     }
 
@@ -87,6 +81,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          */
         public void addSingleton(Z zone, int openConnections) {
             Area<Z> newArea = new Area<>(Set.of(zone), Collections.emptyList(), openConnections);
+
+            // TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
+            //  parameter, as in the following examples: Cell<String>
+
             areas.add(newArea);
         }
         // TODO new ArrayList<>() mutable
@@ -139,8 +137,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * partition
          */
         public void union(Z zone1, Z zone2) {
-            // TODO : checkArgument(??);
-
             Area<Z> area1 = ZonePartition.areaContaining(zone1, areas);
             Area<Z> area2 = ZonePartition.areaContaining(zone2, areas);
 

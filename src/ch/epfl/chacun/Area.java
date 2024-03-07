@@ -14,17 +14,15 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
-// TODO : @param Z
+// TODO : @param Z, attribute check, step 4 questions
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
-// TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
-//  parameter, as in the following examples: Cell<String>
     /**
      * A compact constructor of Area.
-     * // TODO not positive or zero ?
+     *
      * @throws IllegalArgumentException if open connection is not positive or zero
      */
     public Area {
-        checkArgument(openConnections >= 0);
+        checkArgument(openConnections >= 0); // TODO
 
         zones = Set.copyOf(zones);
         occupants = List.copyOf(occupants);

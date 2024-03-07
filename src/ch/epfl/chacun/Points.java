@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Calculates points obtained in different situations.
  *
@@ -18,8 +20,8 @@ public final class Points {
      * @return the number of points
      */
     public static int forClosedForest(int tileCount, int mushroomGroupCount) {
-        Preconditions.checkArgument(tileCount > 1);
-        Preconditions.checkArgument(mushroomGroupCount >= 0);
+        checkArgument(tileCount > 1);
+        checkArgument(mushroomGroupCount >= 0);
         return (tileCount * 2) + (mushroomGroupCount * 3);
     }
 
@@ -32,8 +34,8 @@ public final class Points {
      * @return the number of points
      */
     public static int forClosedRiver(int tileCount, int fishCount) {
-        Preconditions.checkArgument(tileCount > 1);
-        Preconditions.checkArgument(fishCount >= 0);
+        checkArgument(tileCount > 1);
+        checkArgument(fishCount >= 0);
         return tileCount + fishCount;
     }
 
@@ -46,9 +48,9 @@ public final class Points {
      * @return the number of points
      */
     public static int forMeadow(int mammothCount, int aurochsCount, int deerCount) {
-        Preconditions.checkArgument(mammothCount >= 0);
-        Preconditions.checkArgument(aurochsCount >= 0);
-        Preconditions.checkArgument(deerCount >= 0);
+        checkArgument(mammothCount >= 0);
+        checkArgument(aurochsCount >= 0);
+        checkArgument(deerCount >= 0);
         return mammothCount * 3 + aurochsCount * 2 + deerCount;
     }
 
@@ -59,7 +61,7 @@ public final class Points {
      * @return the number of points
      */
     public static int forRiverSystem(int fishCount) {
-        Preconditions.checkArgument(fishCount >= 0);
+        checkArgument(fishCount >= 0);
         return fishCount;
     }
 
@@ -70,7 +72,7 @@ public final class Points {
      * @return the number of points
      */
     public static int forLogboat(int lakeCount) {
-        Preconditions.checkArgument(lakeCount > 0);
+        checkArgument(lakeCount > 0);
         return lakeCount * 2;
     }
 
@@ -82,7 +84,7 @@ public final class Points {
      * @return the number of additional points
      */
     public static int forRaft(int lakeCount) {
-        Preconditions.checkArgument(lakeCount > 0);
+        checkArgument(lakeCount > 0);
         return lakeCount;
     }
 }
