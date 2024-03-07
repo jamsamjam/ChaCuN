@@ -3,6 +3,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Represents a tile that has been placed.
  *
@@ -16,7 +18,6 @@ import java.util.Set;
  * @param occupant the occupant of the tile, or null if it is not occupied
  */
 public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant) {
-
     /**
      * Compact constructor of PlacedTile.
      *
@@ -79,8 +80,9 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
                 return zone;
             }
         }
-        Preconditions.checkArgument(false); // Using Preconditions to throw IllegalArgumentException
-        return null;
+        //checkArgument(true);
+        //return null;
+        throw new IllegalArgumentException(); //TODO
     }
 
 
@@ -178,7 +180,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * @return a placed tile identical to the receiver
      */
     public PlacedTile withOccupant(Occupant occupant) {
-        Preconditions.checkArgument(this.occupant == null); // Using Preconditions to throw IllegalArgumentException
+        checkArgument(this.occupant == null);
         return new PlacedTile(tile, placer, rotation, pos, occupant);
     }
 
