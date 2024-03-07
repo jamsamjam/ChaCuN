@@ -34,8 +34,8 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * Returns the area containing the given zone.
      *
      * @param zone the given zone
-     * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      * @return the area containing the given zone
+     * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      */
     public Area<Z> areaContaining(Z zone) {
         for (Area<Z> area : areas) {
@@ -53,8 +53,8 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * @param zone  the zone to search for
      * @param areas the set of areas to search within
      * @param <Z>   the type of zone
-     * @throws IllegalArgumentException if no area contains the specified zone
      * @return the area containing the specified zone
+     * @throws IllegalArgumentException if no area contains the specified zone
      */
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
         for (Area<Z> area : areas) {

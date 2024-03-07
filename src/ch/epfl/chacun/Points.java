@@ -15,8 +15,8 @@ public final class Points {
      *
      * @param tileCount the number of tiles making up the forest
      * @param mushroomGroupCount the number of mushrooms it contains
-     * @throws IllegalArgumentException if the tile count is less than or equal to 1 or if the mushroom group count is negative
      * @return the number of points
+     * @throws IllegalArgumentException if the tile count is less than or equal to 1 or if the mushroom group count is negative
      */
     public static int forClosedForest(int tileCount, int mushroomGroupCount) {
         Preconditions.checkArgument(tileCount > 1);
@@ -30,8 +30,8 @@ public final class Points {
      * @param tileCount the number of tiles making up the river
      * @param fishCount the number of fish (in the river itself or in one of the possible lakes
      *                  at the ends)
-     * @throws IllegalArgumentException if tileCount is less than or equal to 1, or if fishCount is negative.
      * @return the number of points
+     * @throws IllegalArgumentException if tileCount is less than or equal to 1, or if fishCount is negative.
      */
     public static int forClosedRiver(int tileCount, int fishCount) {
         Preconditions.checkArgument(tileCount > 1);
@@ -45,8 +45,8 @@ public final class Points {
      * @param mammothCount the number of mammoths
      * @param aurochsCount the number of aurochs
      * @param deerCount the number of deer (the ones devoured by smilodons not being included)
-     * @throws IllegalArgumentException if mammothCount, aurochsCount, or deerCount is negative.
      * @return the number of points
+     * @throws IllegalArgumentException if mammothCount, aurochsCount, or deerCount is negative.
      */
     public static int forMeadow(int mammothCount, int aurochsCount, int deerCount) {
         Preconditions.checkArgument(mammothCount >= 0);
@@ -59,8 +59,8 @@ public final class Points {
      * Returns the number of points obtained by the majority fishermen of a river system.
      *
      * @param fishCount the number of fish present in the system
-     * @throws IllegalArgumentException if fishCount is negative.
      * @return the number of points
+     * @throws IllegalArgumentException if fishCount is negative.
      */
     public static int forRiverSystem(int fishCount) {
         Preconditions.checkArgument(fishCount >= 0);
@@ -71,8 +71,8 @@ public final class Points {
      * Returns the number of points obtained by the player placing the canoe in a river system.
      *
      * @param lakeCount the number of lakes in the river system of which it is part
-     * @throws IllegalArgumentException if lakeCount is not greater than 0.
      * @return the number of points
+     * @throws IllegalArgumentException if lakeCount is not greater than 0.
      */
     public static int forLogboat(int lakeCount) {
         Preconditions.checkArgument(lakeCount > 0);
@@ -84,8 +84,8 @@ public final class Points {
      * system.
      *
      * @param lakeCount the number of lakes containing the raft
-     * @throws IllegalArgumentException if lakeCount is not greater than 0.
      * @return the number of additional points
+     * @throws IllegalArgumentException if lakeCount is not greater than 0.
      */
     public static int forRaft(int lakeCount) {
         Preconditions.checkArgument(lakeCount > 0);

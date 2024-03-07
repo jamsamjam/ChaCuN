@@ -211,8 +211,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * Returns an identical area to the receiver, except that it is occupied by the given occupant.
      *
      * @param occupant the given occupant
-     * @throws IllegalArgumentException if the receiver is already occupied
      * @return an identical area to the receiver, except that it is occupied by the given occupant
+     * @throws IllegalArgumentException if the receiver is already occupied
      */
     public Area<Z> withInitialOccupant(PlayerColor occupant) {
         checkArgument(!isOccupied());
@@ -224,9 +224,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * color.
      *
      * @param occupant the given occupant
-     * @throws IllegalArgumentException if the receiver contains no occupant of the given color
      * @return an identical area to the receiver, but which includes one less occupant of the given
      * color
+     * @throws IllegalArgumentException if the receiver contains no occupant of the given color
      */
     public Area<Z> withoutOccupant(PlayerColor occupant) {
         List<PlayerColor> newOccupants = new ArrayList<>(occupants);
