@@ -68,6 +68,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * or throws IllegalArgumentException if the tile does not have a zone with this identifier.
      *
      * @param id the given identifier
+     * @throws IllegalArgumentException if the zone with the specified ID is not found
      * @return the zone of the tile whose identifier is the given one
      */
     public Zone zoneWithId(int id) {
@@ -76,7 +77,8 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
                 return zone;
             }
         }
-        throw new IllegalArgumentException();
+        Preconditions.checkArgument(false); // Using Preconditions to throw IllegalArgumentException
+        return null;
     }
 
 
@@ -170,12 +172,11 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * or raises IllegalArgumentException if the receiver is already occupied.
      *
      * @param occupant the given occupant
+     * @throws IllegalArgumentException if the receiver is already occupied
      * @return a placed tile identical to the receiver
      */
     public PlacedTile withOccupant(Occupant occupant) {
-        if (this.occupant != null) {
-            throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(this.occupant == null); // Using Preconditions to throw IllegalArgumentException
         return new PlacedTile(tile, placer, rotation, pos, occupant);
     }
 

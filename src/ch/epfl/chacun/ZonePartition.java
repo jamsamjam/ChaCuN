@@ -13,6 +13,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param areas the set of areas forming the partition
  * @param <Z> the type parameter representing the zone type
  */
+
 public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
     /**
      * Compact constructor of ZonePartition.
@@ -33,8 +34,8 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * Returns the area containing the given zone.
      *
      * @param zone the given zone
-     * @return the area containing the given zone
      * @throws IllegalArgumentException if the zone does not belong to any area of the partition
+     * @return the area containing the given zone
      */
     public Area<Z> areaContaining(Z zone) {
         for (Area<Z> area : areas) {
@@ -42,19 +43,28 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
                 return area;
             }
         }
-        throw new IllegalArgumentException();
+        Preconditions.checkArgument(false);
+        return null;
     }
 
+    /**
+     * Finds and returns the area containing the specified zone.
+     *
+     * @param zone  the zone to search for
+     * @param areas the set of areas to search within
+     * @param <Z>   the type of zone
+     * @throws IllegalArgumentException if no area contains the specified zone
+     * @return the area containing the specified zone
+     */
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
-        // TODO
         for (Area<Z> area : areas) {
             if (area.zones().contains(zone)) {
                 return area;
             }
         }
-        throw new IllegalArgumentException();
+        Preconditions.checkArgument(false);
+        return null; // This line will never be reached, but required to satisfy the return type
     }
-
     /**
      * A builder class for constructing ZonePartition instances.
      *
@@ -119,7 +129,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          */
         public void removeAllOccupantsOf(Area<Z> area) {
             checkArgument(areas.contains(area));
-
             areas.add(area.withoutOccupants());
             areas.remove(area);
         }
@@ -134,7 +143,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          */
         public void union(Z zone1, Z zone2) {
             // TODO : checkArgument(??);
-
             Area<Z> area1 = ZonePartition.areaContaining(zone1, areas);
             Area<Z> area2 = ZonePartition.areaContaining(zone2, areas);
 
