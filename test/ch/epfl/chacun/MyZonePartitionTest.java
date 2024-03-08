@@ -75,17 +75,19 @@ class MyZonePartitionTest {
         // Create a zone partition with the area
         ZonePartition.Builder<Zone> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(area)));
 
+        PlayerColor initialOccupant = PlayerColor.BLUE;
+
         // Add an initial occupant
-        builder.addInitialOccupant(zoneLake, PlayerColor.BLUE);
+        builder.addInitialOccupant(zoneLake, initialOccupant);
 
         // Build the partition
         ZonePartition<Zone> partition = builder.build();
 
         // Assert that the resulting area after building the partition contains the initial occupant
-        assertTrue(partition.areas().iterator().next().occupant().isPresent()); // Ensure an occupant is present
-        assertEquals(PlayerColor.BLUE, partition.areas().iterator().next().occupant().get()); // Ensure the occupant color is correct
+        assertTrue(area.isOccupied());
+        assertEquals(1, area.occupants().size());
+        assertTrue(area.occupants().contains(initialOccupant));
     }
-
 
 
     @Test
@@ -109,7 +111,7 @@ class MyZonePartitionTest {
         ZonePartition<Zone> partition = builder.build();
 
         // Check if the area no longer contains the occupant
-        assertFalse();
+        assertTrue(area.isOccupied());
     }
 
     @Test
