@@ -73,7 +73,7 @@ class MyZonePartitionTest {
         var zoneRiver2 = new Zone.River(3, 5, null);
 
         var a1 = new Area<Zone.Lake>(Set.of(zoneLake1, zoneLake2), List.of(), 1);
-        var a2 = new Area<Zone.River>(Set.of(zoneRiver1, zoneRiver2), List.of(), 1);
+        //var a2 = new Area<Zone.River>(Set.of(zoneRiver1, zoneRiver2), List.of(), 1);
 
         ZonePartition.Builder<Zone.Lake> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(a1)));
         PlayerColor initialOccupant = PlayerColor.BLUE;
@@ -81,9 +81,7 @@ class MyZonePartitionTest {
         builder.addInitialOccupant(zoneLake1, initialOccupant);
         ZonePartition<Zone.Lake> partition = builder.build();
 
-        assertTrue(a1.isOccupied());
-        assertEquals(1, a1.occupants().size());
-        assertTrue(a1.occupants().contains(initialOccupant));
+        assertTrue(partition.areas().contains(a1.withInitialOccupant(initialOccupant)));
     }
 
 
