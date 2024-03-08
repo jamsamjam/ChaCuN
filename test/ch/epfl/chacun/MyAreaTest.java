@@ -199,38 +199,33 @@ class MyAreaTest {
         Area<Zone> areaWithoutOccupants = area.withoutOccupants();
 
         // Check if all occupants are removed correctly
-        assertFalse(areaWithoutOccupants.isOccupied(), "Area should not be occupied after removing all occupants");
-        assertTrue(areaWithoutOccupants.occupants().isEmpty(), "Area should have no occupants after removing all");
+        assertFalse(areaWithoutOccupants.isOccupied());
+        assertTrue(areaWithoutOccupants.occupants().isEmpty());
     }
 
     @Test
     void testTileIds() {
-        var zone1 = new Zone.Lake(1, 2, null);
-        var zone2 = new Zone.Lake(2, 1, null);
-        var zone3 = new Zone.Lake(3, 1, null);
+        var zone1 = new Zone.Lake(11, 2, null);
+        var zone2 = new Zone.Lake(22, 1, null);
+        var zone3 = new Zone.Lake(33, 1, null);
 
-        Area<Zone> area = new Area<>(Set.of(zone1, zone2, zone3), List.of(), 0);
+        Area<Zone.Water> area = new Area<>(Set.of(zone1, zone2, zone3), List.of(), 0);
 
-        assertEquals(3, area.tileIds().size(), "Area should have 3 unique tile IDs");
-        assertTrue(area.tileIds().contains(1), "Area should contain tile ID 1");
-        assertTrue(area.tileIds().contains(2), "Area should contain tile ID 2");
-        assertTrue(area.tileIds().contains(3), "Area should contain tile ID 3");
+        assertEquals(3, area.tileIds().size());
+        assertTrue(area.tileIds().contains(1));
+        assertTrue(area.tileIds().contains(2));
+        assertTrue(area.tileIds().contains(3));
     }
 
     @Test
     void testZoneWithSpecialPower() {
-        var zone1 = new Zone.Lake(1, 2, Zone.SpecialPower.SHAMAN);
-        var zone2 = new Zone.Lake(2, 1, null);
-        var zone3 = new Zone.Lake(3, 1, null);
+        var zone1 = new Zone.Lake(11, 2, Zone.SpecialPower.SHAMAN);
+        var zone2 = new Zone.Lake(22, 1, null);
+        var zone3 = new Zone.Lake(33, 1, null);
 
         Area<Zone> area = new Area<>(Set.of(zone1, zone2, zone3), List.of(), 0);
 
-        // Check if zone with special power is returned correctly
         assertEquals(zone1, area.zoneWithSpecialPower(Zone.SpecialPower.SHAMAN));
-
-        // Check if null is returned when there is no zone with the given special power
-        assertNull(area.zoneWithSpecialPower(Zone.SpecialPower.WILD_FIRE));
+        assertEquals(null, area.zoneWithSpecialPower(Zone.SpecialPower.WILD_FIRE));
     }
-
-
 }
