@@ -79,9 +79,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
                 return zone;
             }
         }
-        //checkArgument(true);
-        //return null;
-        throw new IllegalArgumentException(); //TODO
+        throw new IllegalArgumentException();
     }
 
 

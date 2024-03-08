@@ -14,7 +14,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
-// TODO : @param Z, attribute check, step 4 questions
 public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
     /**
      * A compact constructor of Area.
@@ -22,7 +21,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @throws IllegalArgumentException if open connection is not positive or zero
      */
     public Area {
-        checkArgument(openConnections >= 0); // TODO
+        checkArgument(openConnections >= 0);
 
         zones = Set.copyOf(zones);
         occupants = List.copyOf(occupants);
@@ -121,7 +120,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     /**
      * Returns the number of lakes in the given river system.
      *
-     * @param riverSystem the given river system.
+     * @param riverSystem the given river system
      * @return the number of lakes in the given river system
      */
     public static int lakeCount(Area<Zone.Water> riverSystem) {
@@ -142,7 +141,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public boolean isClosed() {
         return openConnections == 0;
     }
-    // TODO should use it in the 1st method?
 
     /**
      * Returns true iff the area is occupied by at least one occupant.
@@ -161,15 +159,12 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Set<PlayerColor> majorityOccupants() {
         int[] colorCounts = new int[PlayerColor.ALL.size()];
 
+        int max = colorCounts[0];
         for (PlayerColor color : occupants) {
             colorCounts[color.ordinal()]++;
-        }
 
-        // TODO : optimal -> converge two loops
-        int max = colorCounts[0];
-        for (int i = 1; i < colorCounts.length; i++) {
-            if (colorCounts[i] > max) {
-                max = colorCounts[i];
+            if (colorCounts[color.ordinal()] > max) {
+                max = colorCounts[color.ordinal()];
             }
         }
 
@@ -191,15 +186,18 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return the area resulting from connecting the receiver (this) to the given area (that)
      */
     public Area<Z> connectTo(Area<Z> that) {
-        Set<Z> newZones = new HashSet<>(this.zones);
-        newZones.addAll(that.zones);
+        Set<Z> newZones = new HashSet<>(zones);
+        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
+        int newOpenConnections;
 
-        List<PlayerColor> newOccupants = new ArrayList<>(this.occupants);
-        newOccupants.addAll(that.occupants);
+        if (this.equals(that)) {
+            newOpenConnections = openConnections - 2;
+        } else {
+            newZones.addAll(zones);
+            newOccupants.addAll(occupants);
+            newOpenConnections = this.openConnections + that.openConnections - 2;
+        }
 
-        int newOpenConnections = this.equals(that) ? openConnections - 2 : openConnections * 2 - 2;
-
-        // TODO : List.copyOf(occupants).addAll(that.occupants)
         return new Area<>(newZones, newOccupants, newOpenConnections);
     }
 
@@ -234,7 +232,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
             }
         }
         throw new IllegalArgumentException();
-        // TODO
     }
 
     /**
@@ -243,9 +240,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return an area identical to the receiver, but completely devoid of occupants
      */
     public Area<Z> withoutOccupants() {
-        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
-        newOccupants.removeAll(occupants);
-        return new Area<>(zones, newOccupants, openConnections);
+        return new Area<>(zones, List.of(), openConnections);
     }
 
     /**
@@ -255,7 +250,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public Set<Integer> tileIds() {
         Set<Integer> tileIds = new HashSet<>();
-
         for (var zone : zones) {
             tileIds.add(zone.tileId());
         }
