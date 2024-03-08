@@ -26,7 +26,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * with an empty set of areas.
      */
     public ZonePartition() {
-        this(Collections.emptySet());
+        this(Set.of());
     }
 
     /**
@@ -47,9 +47,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             }
         }
         throw new IllegalArgumentException();
-
-        //checkArgument(true);
-        //return null;
     }
 
     /**
@@ -77,14 +74,9 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @param openConnections the number of open connections for the area
          */
         public void addSingleton(Z zone, int openConnections) {
-            Area<Z> newArea = new Area<>(Set.of(zone), Collections.emptyList(), openConnections);
-
-            // TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
-            // parameter, as in the following examples: Cell<String>
-
+            Area<Z> newArea = new Area<>(Set.of(zone), List.of(), openConnections);
             areas.add(newArea);
         }
-        // TODO new ArrayList<>() mutable
 
         /**
          * Adds an initial occupant of the given color to the area containing the specified zone.
@@ -148,8 +140,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @return the constructed zone partition
          */
         public ZonePartition<Z> build() {
-            return new ZonePartition<>(areas);
+            return new ZonePartition<>(areas); // TODO watch videos
         }
-        // TODO : purpose?
     }
 }
