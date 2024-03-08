@@ -22,7 +22,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @throws IllegalArgumentException if open connection is not positive or zero
      */
     public Area {
-        checkArgument(openConnections >= 0); // TODO
+        checkArgument(openConnections >= 0);
 
         zones = Set.copyOf(zones);
         occupants = List.copyOf(occupants);
@@ -234,7 +234,6 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
             }
         }
         throw new IllegalArgumentException();
-        // TODO
     }
 
     /**

@@ -37,10 +37,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
      * @throws IllegalArgumentException if the zone does not belong to any area of the partition
      */
     public Area<Z> areaContaining(Z zone) {
-        areaContaining(zone, areas);
-        return null;
-
-        // TODO
+        return areaContaining(zone, areas);
     }
 
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
@@ -51,8 +48,8 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
         }
         throw new IllegalArgumentException();
 
-        // checkArgument(true);
-        // return null;
+        //checkArgument(true);
+        //return null;
     }
 
     /**
@@ -83,7 +80,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             Area<Z> newArea = new Area<>(Set.of(zone), Collections.emptyList(), openConnections);
 
             // TODO : To use a generic type such as Cell, you must specify the concrete type to use for its type
-            //  parameter, as in the following examples: Cell<String>
+            // parameter, as in the following examples: Cell<String>
 
             areas.add(newArea);
         }
