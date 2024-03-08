@@ -193,8 +193,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         if (this.equals(that)) {
             newOpenConnections = openConnections - 2;
         } else {
-            newZones.addAll(zones);
-            newOccupants.addAll(occupants);
+            newZones.addAll(that.zones);
+            newOccupants.addAll(that.occupants);
             newOpenConnections = this.openConnections + that.openConnections - 2;
         }
 

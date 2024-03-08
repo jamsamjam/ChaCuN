@@ -159,8 +159,8 @@ class MyAreaTest {
         Area<Zone> connectedArea = area1.connectTo(area2);
 
         assertEquals(1, connectedArea.openConnections());
-        assertTrue(connectedArea.occupants().contains(PlayerColor.RED));
-        assertTrue(connectedArea.occupants().contains(PlayerColor.BLUE));
+        assertEquals(true, connectedArea.occupants().contains(PlayerColor.RED));
+        assertEquals(true, connectedArea.occupants().contains(PlayerColor.BLUE));
     }
 
     @Test
@@ -175,11 +175,62 @@ class MyAreaTest {
         assertTrue(areaWithOccupant.occupants().contains(initialOccupant));
     }
 
+    @Test
+    void testWithoutOccupant() {
+        // Create an area with initial occupants
+        PlayerColor occupantToRemove = PlayerColor.BLUE;
+        Area<Zone> area = new Area<>(Set.of(), List.of(PlayerColor.RED, PlayerColor.GREEN, occupantToRemove), 2);
 
+        // Remove an occupant
+        Area<Zone> areaWithoutOccupant = area.withoutOccupant(occupantToRemove);
 
+        // Check if the occupant is removed correctly
+        assertTrue(areaWithoutOccupant.isOccupied(), "Area should still be occupied after removing an occupant");
+        assertEquals(2, areaWithoutOccupant.occupants().size(), "Area should have two occupants after removing one");
+        assertFalse(areaWithoutOccupant.occupants().contains(occupantToRemove), "Area should not contain the removed occupant");
+    }
 
+    @Test
+    void testWithoutOccupants() {
+        // Create an area with initial occupants
+        Area<Zone> area = new Area<>(Set.of(), List.of(PlayerColor.RED, PlayerColor.GREEN, PlayerColor.BLUE), 2);
 
+        // Remove all occupants
+        Area<Zone> areaWithoutOccupants = area.withoutOccupants();
 
+        // Check if all occupants are removed correctly
+        assertFalse(areaWithoutOccupants.isOccupied(), "Area should not be occupied after removing all occupants");
+        assertTrue(areaWithoutOccupants.occupants().isEmpty(), "Area should have no occupants after removing all");
+    }
+
+    @Test
+    void testTileIds() {
+        var zone1 = new Zone.Lake(1, 2, null);
+        var zone2 = new Zone.Lake(2, 1, null);
+        var zone3 = new Zone.Lake(3, 1, null);
+
+        Area<Zone> area = new Area<>(Set.of(zone1, zone2, zone3), List.of(), 0);
+
+        assertEquals(3, area.tileIds().size(), "Area should have 3 unique tile IDs");
+        assertTrue(area.tileIds().contains(1), "Area should contain tile ID 1");
+        assertTrue(area.tileIds().contains(2), "Area should contain tile ID 2");
+        assertTrue(area.tileIds().contains(3), "Area should contain tile ID 3");
+    }
+
+    @Test
+    void testZoneWithSpecialPower() {
+        var zone1 = new Zone.Lake(1, 2, Zone.SpecialPower.SHAMAN);
+        var zone2 = new Zone.Lake(2, 1, null);
+        var zone3 = new Zone.Lake(3, 1, null);
+
+        Area<Zone> area = new Area<>(Set.of(zone1, zone2, zone3), List.of(), 0);
+
+        // Check if zone with special power is returned correctly
+        assertEquals(zone1, area.zoneWithSpecialPower(Zone.SpecialPower.SHAMAN));
+
+        // Check if null is returned when there is no zone with the given special power
+        assertNull(area.zoneWithSpecialPower(Zone.SpecialPower.WILD_FIRE));
+    }
 
 
 }
