@@ -74,7 +74,7 @@ class MyZonePartitionTest {
         builder.addInitialOccupant(zoneLake1, initialOccupant);
         ZonePartition<Zone.Lake> partition = builder.build();
 
-        assertTrue(partition.areas().contains(a1.withoutOccupant(initialOccupant)));
+        assertTrue(partition.areas().contains(a1.withInitialOccupant(initialOccupant)));
     }
 
 
