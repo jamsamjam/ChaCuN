@@ -3,6 +3,7 @@ package ch.epfl.chacun;
 import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,27 +67,23 @@ class MyZonePartitionTest {
 
     @Test
     void addInitialOccupantWorks() {
-        // Create a zone
-        Zone.Lake zoneLake = new Zone.Lake(1, 0, null);
+        var zoneLake1 = new Zone.Lake(1, 0, Zone.SpecialPower.RAFT);
+        var zoneLake2 = new Zone.Lake(2, 4, Zone.SpecialPower.WILD_FIRE);
+        var zoneRiver1 = new Zone.River(1, 4, null);
+        var zoneRiver2 = new Zone.River(3, 5, null);
 
-        // Create an area
-        Area<Zone> area = new Area<>(Set.of(zoneLake), Collections.emptyList(), 2);
+        var a1 = new Area<Zone.Lake>(Set.of(zoneLake1, zoneLake2), List.of(), 1);
+        var a2 = new Area<Zone.River>(Set.of(zoneRiver1, zoneRiver2), List.of(), 1);
 
-        // Create a zone partition with the area
-        ZonePartition.Builder<Zone> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(area)));
-
+        ZonePartition.Builder<Zone.Lake> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(a1)));
         PlayerColor initialOccupant = PlayerColor.BLUE;
 
-        // Add an initial occupant
-        builder.addInitialOccupant(zoneLake, initialOccupant);
+        builder.addInitialOccupant(zoneLake1, initialOccupant);
+        ZonePartition<Zone.Lake> partition = builder.build();
 
-        // Build the partition
-        ZonePartition<Zone> partition = builder.build();
-
-        // Assert that the resulting area after building the partition contains the initial occupant
-        assertTrue(area.isOccupied());
-        assertEquals(1, area.occupants().size());
-        assertTrue(area.occupants().contains(initialOccupant));
+        assertTrue(a1.isOccupied());
+        assertEquals(1, a1.occupants().size());
+        assertTrue(a1.occupants().contains(initialOccupant));
     }
 
 
