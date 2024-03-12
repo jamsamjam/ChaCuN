@@ -49,19 +49,12 @@ class MyZonePartitionTest {
 
     @Test
     void addSingletonWorks() {
-        // Create a zone
         Zone.Lake zoneLake = new Zone.Lake(1, 0, null);
-
-        // Create an empty zone partition
         ZonePartition.Builder<Zone> builder = new ZonePartition.Builder<>(new ZonePartition<>());
-
-        // Add a singleton area
         builder.addSingleton(zoneLake, 2);
 
-        // Build the partition
         ZonePartition<Zone> partition = builder.build();
 
-        // Ensure the partition contains the added area
         assertEquals(1, partition.areas().size());
     }
 
@@ -84,56 +77,44 @@ class MyZonePartitionTest {
         assertTrue(partition.areas().contains(a1.withInitialOccupant(initialOccupant)));
     }
 
+
+
     @Test
     void removeOccupantWorks() {
-        // Create a zone
-        Zone.Lake zoneLake = new Zone.Lake(1, 0, null);
+        var zoneLake1 = new Zone.Lake(1, 0, Zone.SpecialPower.RAFT);
+        var zoneLake2 = new Zone.Lake(2, 4, Zone.SpecialPower.WILD_FIRE);
 
-        // Create an area with an initial occupant
-        Set<Zone> zoneSet = new HashSet<>();
-        zoneSet.add(zoneLake);
-        Area<Zone> area = new Area<>(zoneSet, Collections.emptyList(), 2);
-        area = area.withInitialOccupant(PlayerColor.BLUE);
+        PlayerColor initialOccupant = PlayerColor.BLUE;
+        var a1 = new Area<Zone.Lake>(Set.of(zoneLake1, zoneLake2), List.of(initialOccupant), 1);
 
-        // Create a zone partition with the area
-        ZonePartition.Builder<Zone> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(area)));
+        ZonePartition.Builder<Zone.Lake> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(a1)));
 
-        // Remove the occupant
-        builder.removeOccupant(zoneLake, PlayerColor.BLUE);
 
-        // Build the partition
-        ZonePartition<Zone> partition = builder.build();
+        builder.removeOccupant(zoneLake1, initialOccupant);
+        ZonePartition<Zone.Lake> partition = builder.build();
 
-        // Check if the area no longer contains the occupant
-        assertTrue(area.isOccupied());
+        assertTrue(partition.areas().contains(a1.withoutOccupant(initialOccupant)));
     }
 
     @Test
     void unionWorks() {
-        // Create two zones
         Zone.Lake zoneLake1 = new Zone.Lake(1, 0, null);
         Zone.Lake zoneLake2 = new Zone.Lake(2, 0, null);
 
-        // Create two separate areas, each containing one of the zones
-        Set<Zone> zoneSet1 = new HashSet<>();
-        zoneSet1.add(zoneLake1);
-        Area<Zone> area1 = new Area<>(zoneSet1, Collections.emptyList(), 2);
+        Area<Zone.Lake> area1 = new Area<>(Set.of(zoneLake1), List.of(), 2);
+        Area<Zone.Lake> area2 = new Area<>(Set.of(zoneLake2), List.of(), 2);
 
-        Set<Zone> zoneSet2 = new HashSet<>();
-        zoneSet2.add(zoneLake2);
-        Area<Zone> area2 = new Area<>(zoneSet2, Collections.emptyList(), 2);
+        ZonePartition.Builder<Zone.Lake> builder = new ZonePartition.Builder<>(new ZonePartition<>((Set.of(area1, area2))));
 
-        // Create a zone partition with the areas
-        ZonePartition.Builder<Zone> builder = new ZonePartition.Builder<>(new ZonePartition<>(Set.of(area1, area2)));
-
-        // Union the areas
         builder.union(zoneLake1, zoneLake2);
 
-        // Build the partition
-        ZonePartition<Zone> partition = builder.build();
+        ZonePartition<Zone.Lake> partition = builder.build();
 
-        // Check if the areas have been merged
         assertEquals(1, partition.areas().size());
+        assertFalse(partition.areas().contains(area1));
+        assertFalse(partition.areas().contains(area2));
+        assertTrue(partition.areas().iterator().next().zones().contains(zoneLake1));
+        assertTrue(partition.areas().iterator().next().zones().contains(zoneLake2));
     }
 
 }

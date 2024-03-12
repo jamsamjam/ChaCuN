@@ -8,10 +8,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
-
 public final class Points {
-    private Points() {}
-
     /**
      * Returns the number of points obtained by the majority pickers of a closed forest.
      *

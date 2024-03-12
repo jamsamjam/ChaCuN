@@ -112,7 +112,6 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          */
         public void removeAllOccupantsOf(Area<Z> area) {
             checkArgument(areas.contains(area));
-
             areas.add(area.withoutOccupants());
             areas.remove(area);
         }
@@ -130,8 +129,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
             Area<Z> area2 = ZonePartition.areaContaining(zone2, areas);
 
             if (!area1.equals(area2)) {
-                area1.connectTo(area2);
+                areas.add(area1.connectTo(area2));
             }
+            areas.remove(area1);
+            areas.remove(area2);
         }
 
         /**
