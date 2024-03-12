@@ -54,6 +54,7 @@ public sealed interface TileSide {
             return List.of(meadow);
         }
 
+        // TODO
         @Override
         public boolean isSameKindAs(TileSide that) {
             return that instanceof Meadow;
