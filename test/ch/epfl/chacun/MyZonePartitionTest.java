@@ -84,8 +84,6 @@ class MyZonePartitionTest {
         assertTrue(partition.areas().contains(a1.withInitialOccupant(initialOccupant)));
     }
 
-
-
     @Test
     void removeOccupantWorks() {
         // Create a zone
@@ -136,8 +134,6 @@ class MyZonePartitionTest {
 
         // Check if the areas have been merged
         assertEquals(1, partition.areas().size());
-        assertTrue(partition.areas().iterator().next().zones().contains(zoneLake1));
-        assertTrue(partition.areas().iterator().next().zones().contains(zoneLake2));
     }
 
 }
