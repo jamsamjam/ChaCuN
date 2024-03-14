@@ -10,7 +10,7 @@ package ch.epfl.chacun;
 public final class Preconditions {
     // TODO The purpose of this private constructor is to make it impossible to create instances of
     //  the class, since it clearly makes no sense — it only serves as a container for a static method.
-    private Preconditions () {}
+    private Preconditions() {}
 
     /**
      * Throws IllegalArgumentException if the argument is false, and does nothing otherwise.
