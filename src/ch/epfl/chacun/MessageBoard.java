@@ -14,12 +14,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param messages the list of messages to be displayed on the board
  */
 public record MessageBoard(TextMaker textMaker, List<Message> messages) {
-
-    // TODO pile pit (point>0), canoe (x)
-    // For each meadow or hydrographic network occupied and reporting a non-zero number
-    // of points, a message is displayed on the display board.
-
-
     /**
      * Constructs a new MessageBoard with the specified text maker and messages.
      */
@@ -84,89 +78,123 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
+     * Returns an identical display board to the receiver, unless placing the stake pit earned
+     * points for the given player who placed it.
      *
-     * @param scorer
-     * @param adjacentMeadow
-     * @return
+     * @param scorer the given player
+     * @param adjacentMeadow the given meadow
+     * @return the given meadow comprising the same occupants as the meadow containing the pit,
+     * but only the areas within its reach
      */
     public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
+        int points = meadowPoints(adjacentMeadow);
 
+        if (points > 0) {
+            return this.withMessage(textMaker.playerScoredHuntingTrap(scorer, points,
+                    meadowAnimals(adjacentMeadow)));
+        }
+        return this;
     }
 
     /**
-     * Adds a scored logboat event to the message board.
+     * Returns an identical display board to the receiver, but with a new message indicating that
+     * the given player has obtained the points corresponding to the installation of the canoe in
+     * the given hydrographic network.
      *
-     * @param scorer The player who scored with the logboat.
-     * @param riverSystem The river system area where the logboat is placed.
-     * @return This MessageBoard instance.
+     * @param scorer the player who scored with the logboat
+     * @param riverSystem the river system area where the logboat is placed
+     * @return an identical display board to the receiver, but with a new message
      */
     public MessageBoard withScoredLogboat(PlayerColor scorer, Area<Zone.Water> riverSystem) {
-        if (riverSystem.isOccupied()) {
-            int points = Area.riverSystemFishCount(riverSystem);
-            int lakeCount = Area.lakeCount(riverSystem);
-            return this.withMessage(textMaker.playerScoredLogboat(scorer, points, lakeCount));
+        return this.withMessage(textMaker.playerScoredLogboat(scorer,
+                Area.riverSystemFishCount(riverSystem), Area.lakeCount(riverSystem)));
+    }
+
+    /**
+     * Returns an identical display table to the receiver, unless the given meadow is occupied and
+     * the points it brings to its majority occupants.
+     *
+     * @param meadow the given meadow
+     * @param cancelledAnimals the given canceled animals
+     * @return an identical display table to the receiver, unless the given meadow is occupied and
+     * the points it brings to its majority occupants
+     */
+    public MessageBoard withScoredMeadow(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
+        int points = meadowPoints(meadow);
+
+        if (meadow.isOccupied() && points > 0) {
+            return this.withMessage(textMaker.playersScoredMeadow(meadow.majorityOccupants(),
+                    points, meadowAnimals(meadow)));
         }
         return this;
     }
 
-    public MessageBoard withScoredMeadow(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
-        //int mammothCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.MAMMOTH).count();
-       // int aurochsCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.AUROCHS).count();
-        //int deerCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.DEER).count();
-        //int points = Points.forMeadow(mammothCount, aurochsCount, deerCount);
-        //if (points > 0) {
-         //   String message = textMaker.playersScoredMeadow(meadow.majorityOccupants(), points, meadow.animals());
-         //   return this.withMessage(message);
-        //}
-        return this;
-    }
-
     /**
-     * Adds a scored river system event to the message board.
+     * Returns an identical display table to the receiver, unless the given hydrographic network is
+     * occupied and the points it brings to its majority occupants are greater than 0.
      *
-     * @param riverSystem The river system area to evaluate for scoring.
-     * @return This MessageBoard instance.
+     * @param riverSystem the given riverSystem
+     * @return an identical display table to the receiver, unless the given hydrographic network is
+     *      * occupied and the points it brings to its majority occupants are greater than 0.
      */
     public MessageBoard withScoredRiverSystem(Area<Zone.Water> riverSystem) {
-        if (riverSystem.isOccupied()) {
-            int points = Area.riverSystemFishCount(riverSystem);
-            int fishCount = Area.riverSystemFishCount(riverSystem);
-            return this.withMessage(textMaker.playersScoredRiverSystem(riverSystem.majorityOccupants(), points, fishCount));
+        int fishCount = Area.riverSystemFishCount(riverSystem);
+        int points = forRiverSystem(fishCount);
+        if (riverSystem.isOccupied() && points > 0 ) {
+            return this.withMessage(
+                    textMaker.playersScoredRiverSystem(riverSystem.majorityOccupants(), points,
+                            fishCount));
         }
         return this;
     }
 
+    /**
+     * Returns an identical display board to the receiver, unless the given meadow, which contains
+     * the large pile pit, is occupied and the points are greater than 0.
+     *
+     * @param adjacentMeadow the given meadow
+     * @param cancelledAnimals the given canceled animals
+     * @return an identical display board to the receiver, unless the given meadow, which contains
+     * the large pile pit, is occupied and the points are greater than 0
+     */
     public MessageBoard withScoredPitTrap(Area<Zone.Meadow> adjacentMeadow, Set<Animal> cancelledAnimals) {
-        //int points = Points.forPitTrap(adjacentMeadow, cancelledAnimals);
-       // if (points > 0) {
-          //  String message = textMaker.playerScoredHuntingTrap(PlayerColor.RED, points, cancelledAnimals);
-          //  return this.withMessage(message);
-       // }
+        int points = meadowPoints(adjacentMeadow);
+
+        if (adjacentMeadow.isOccupied() && points > 0) {
+            return this.withMessage(textMaker.playersScoredPitTrap(adjacentMeadow.majorityOccupants(),
+                    points, meadowAnimals(adjacentMeadow)));
+        }
         return this;
     }
 
 
     /**
-     * Adds a scored raft event to the message board.
+     * Returns an identical display table to the receiver, unless the given hydrographic network is
+     * occupied.
      *
-     * @param riverSystem The river system area to evaluate for scoring.
-     * @return This MessageBoard instance.
+     * @param riverSystem the given river system
+     * @return an identical display table to the receiver, unless the given hydrographic network is
+     * occupied.
      */
     public MessageBoard withScoredRaft(Area<Zone.Water> riverSystem) {
         if (riverSystem.isOccupied()) {
-            int points = Area.riverSystemFishCount(riverSystem);
+            int fishCount = Area.riverSystemFishCount(riverSystem);
+            int points = forRiverSystem(fishCount);
             int lakeCount = Area.lakeCount(riverSystem);
-            return this.withMessage(textMaker.playersScoredRaft(riverSystem.majorityOccupants(), points, lakeCount));
+
+            return this.withMessage(textMaker.playersScoredRaft(riverSystem.majorityOccupants(),
+                    points, lakeCount));
         }
         return this;
     }
 
     /**
-     * Adds a winners event to the message board.
+     * Returns an identical scoreboard to the receiver, but with a new message indicating that the
+     * given player(s) won the game with the given number of points.
      *
-     * @param winners The set of players who are winners.
-     * @param points The points earned by the winners.
-     * @return This MessageBoard instance.
+     * @param winners the given player(s)
+     * @param points the given number of points
+     * @return an identical scoreboard to the receiver, but with a new message
      */
     public MessageBoard withWinners(Set<PlayerColor> winners, int points) {
         return this.withMessage(textMaker.playersWon(winners, points));
@@ -182,6 +210,25 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         List<Message> updatedMessages = new ArrayList<>(messages);
         updatedMessages.add(new Message(messageText, 0, Set.of(), Set.of()));
         return new MessageBoard(textMaker, updatedMessages);
+    }
+
+    private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow) {
+        Set<Animal> animalSet = animals(meadow, Collections.emptySet());
+        Map<Animal.Kind, Integer> animalMap = new HashMap<>();
+
+        for (Animal animal : animalSet) {
+            animalMap.put(animal.kind(), animalMap.getOrDefault(animal.kind(), 0) + 1);
+        }
+
+        return animalMap;
+    }
+
+    private int meadowPoints(Area<Zone.Meadow> meadow) {
+        Map<Animal.Kind, Integer> animalMap = meadowAnimals(meadow);
+
+        return forMeadow(animalMap.getOrDefault(Kind.MAMMOTH, 0),
+                animalMap.getOrDefault(Kind.AUROCHS, 0),
+                animalMap.getOrDefault(Kind.DEER, 0));
     }
 
     /**
