@@ -96,8 +96,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 }
             }
 
-            // Go through the rivers attached to a lake and, in the aquatic areas partition,
-            // connect their area with that of the lake
+
             for (Zone zone : tile.zones()) {
                 if (zone instanceof Zone.River river && river.hasLake()) {
                     riverSystemBuilder.union(river, river.lake());
@@ -170,9 +169,8 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 case Zone.Meadow m1 -> meadowBuilder.removeOccupant(m1, player);
                 case Zone.River r1 -> {
                     riverBuilder.removeOccupant(r1, player);
-                    riverSystemBuilder.removeOccupant(r1, player);
                 }
-                case Zone.Lake l1 -> throw new IllegalArgumentException();
+                default -> throw new IllegalArgumentException();
             }
         }
 

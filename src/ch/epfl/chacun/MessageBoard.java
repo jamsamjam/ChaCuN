@@ -209,7 +209,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
-        Set<Animal> animalSet = animals(meadow, cancelledAnimals);
+        Set<Animal> animalSet = Area.animals(meadow, cancelledAnimals);
         Map<Animal.Kind, Integer> animalMap = new HashMap<>();
 
         for (Animal animal : animalSet) {
@@ -222,9 +222,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     private int meadowPoints(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
         Map<Animal.Kind, Integer> animalMap = meadowAnimals(meadow, cancelledAnimals);
 
-        return forMeadow(animalMap.getOrDefault(Kind.MAMMOTH, 0),
-                animalMap.getOrDefault(Kind.AUROCHS, 0),
-                animalMap.getOrDefault(Kind.DEER, 0));
+        return forMeadow(animalMap.getOrDefault(Animal.Kind.MAMMOTH, 0),
+                animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
+                animalMap.getOrDefault(Animal.Kind.DEER, 0));
     }
 
     /**
