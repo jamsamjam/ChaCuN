@@ -1,6 +1,10 @@
 package ch.epfl.chacun;
 import java.util.*;
 
+import ch.epfl.chacun.Animal;
+import ch.epfl.chacun.Area;
+
+
 import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -42,7 +46,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param forest the scored forest area
      * @return the updated message board
      */
-    MessageBoard withScoredForest(Area<Zone.Forest> forest) {
+    public MessageBoard withScoredForest(Area<Zone.Forest> forest) {
         if (forest.isOccupied()) {
             return this.withMessage(textMaker.playersScoredForest(forest.majorityOccupants(),
                     forClosedForest(forest.tileIds().size(), Area.mushroomGroupCount(forest)),
@@ -213,7 +217,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow) {
-        Set<Animal> animalSet = animals(meadow, Collections.emptySet());
+        Set<Animal> animalSet = Area.animals(meadow, Collections.emptySet());
         Map<Animal.Kind, Integer> animalMap = new HashMap<>();
 
         for (Animal animal : animalSet) {
@@ -226,9 +230,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     private int meadowPoints(Area<Zone.Meadow> meadow) {
         Map<Animal.Kind, Integer> animalMap = meadowAnimals(meadow);
 
-        return forMeadow(animalMap.getOrDefault(Kind.MAMMOTH, 0),
-                animalMap.getOrDefault(Kind.AUROCHS, 0),
-                animalMap.getOrDefault(Kind.DEER, 0));
+        return forMeadow(animalMap.getOrDefault(Animal.Kind.MAMMOTH, 0),
+                animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
+                animalMap.getOrDefault(Animal.Kind.DEER, 0));
     }
 
     /**

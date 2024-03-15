@@ -98,37 +98,52 @@ class MyZonePartitionsTest {
 
     @Test
     void removePawnWorks() {
-        var zoneRiver = new Zone.River(1, 0, null);
+        // Create a zone forest and an initial occupant
+        var zoneForest = new Zone.Forest(1, Zone.Forest.Kind.PLAIN);
+        var zoneMeadow = new Zone.Meadow(2, List.of(), null);
+        var zoneRiver = new Zone.River(3, 0, null);
 
-        PlayerColor initialOccupant = PlayerColor.RED;
+        // Create a tile with different zones
+        var sN = new TileSide.Forest(zoneForest);
+        var sE = new TileSide.Meadow(zoneMeadow);
+        var sS = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var sW = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var tile = new Tile(1, Tile.Kind.NORMAL, sN, sE, sS, sW);
 
-        var a1 = new Area<>(Set.of(zoneRiver), List.of(initialOccupant), 1);
+
+        var a1 = new Area<>(Set.of(zoneRiver), List.of(PlayerColor.RED), 1);
 
         var builder = new ZonePartitions.Builder(ZonePartitions.EMPTY);
 
-        builder.addTile(new Tile(1, Tile.Kind.NORMAL, null, null, null, null));
+        builder.addTile(tile);
 
-        builder.removePawn(initialOccupant, zoneRiver);
+        builder.addInitialOccupant(PlayerColor.RED, Occupant.Kind.PAWN, zoneRiver);
+
+        builder.removePawn(PlayerColor.RED, zoneRiver);
 
         ZonePartitions partitions = builder.build();
 
-        assertTrue(partitions.rivers().areas().contains(a1.withoutOccupant(initialOccupant)));
+        assertTrue(partitions.rivers().areas().contains(a1.withoutOccupant(PlayerColor.RED)));
     }
 
     @Test
     void clearGatherersWorks() {
         // Create a zone forest and an initial occupant
         var zoneForest = new Zone.Forest(1, Zone.Forest.Kind.PLAIN);
+        var zoneMeadow = new Zone.Meadow(2, List.of(), null);
+        var zoneRiver = new Zone.River(3, 0, null);
+
+        // Create a tile with different zones
+        var sN = new TileSide.Forest(zoneForest);
+        var sE = new TileSide.Meadow(zoneMeadow);
+        var sS = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var sW = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var tile = new Tile(1, Tile.Kind.NORMAL, sN, sE, sS, sW);
+
         PlayerColor initialOccupant = PlayerColor.RED;
 
         // Create an area with the zone forest and initial occupant
         var a1 = new Area<>(Set.of(zoneForest), List.of(initialOccupant), 1);
-
-        // Create a valid tile with placeholder TileSide objects
-        var tile = new Tile(1, Tile.Kind.NORMAL, new TileSide.Forest(null),
-                new TileSide.Meadow(null),
-                new TileSide.River(null, null, null),
-                new TileSide.River(null, null, null));
 
         // Create a builder with empty initial partitions
         var builder = new ZonePartitions.Builder(ZonePartitions.EMPTY);
@@ -148,18 +163,23 @@ class MyZonePartitionsTest {
 
     @Test
     void clearFishersWorks() {
-        // Create a zone river and an initial occupant
-        var zoneRiver = new Zone.River(1, 0, null);
+
+        // Create a zone forest and an initial occupant
+        var zoneForest = new Zone.Forest(1, Zone.Forest.Kind.PLAIN);
+        var zoneMeadow = new Zone.Meadow(2, List.of(), null);
+        var zoneRiver = new Zone.River(3, 0, null);
+
+        // Create a tile with different zones
+        var sN = new TileSide.Forest(zoneForest);
+        var sE = new TileSide.Meadow(zoneMeadow);
+        var sS = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var sW = new TileSide.River(zoneMeadow, zoneRiver, zoneMeadow);
+        var tile = new Tile(1, Tile.Kind.NORMAL, sN, sE, sS, sW);
+
         PlayerColor initialOccupant = PlayerColor.GREEN;
 
         // Create an area with the zone river and initial occupant
         var a1 = new Area<>(Set.of(zoneRiver), List.of(initialOccupant), 1);
-
-        // Create a valid tile with placeholder TileSide objects
-        var tile = new Tile(1, Tile.Kind.NORMAL, new TileSide.Forest(null),
-                new TileSide.Meadow(null),
-                new TileSide.River(null, null, null),
-                new TileSide.River(null, null, null));
 
         // Create a builder with empty initial partitions
         var builder = new ZonePartitions.Builder(ZonePartitions.EMPTY);
