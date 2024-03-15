@@ -5,7 +5,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
  * The MessageBoard class represents the contents of a bulletin board.
- *
+
  *  * @author Gehna Yadav (379155)
  *  * @author Sam Lee (375535)
  *
@@ -201,7 +201,6 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
          * @param tileIds The set of tile IDs associated with the message.
          *
          * @throws IllegalArgumentException if the provided text is null or if points are negative.
-
          */
         public Message {
             checkArgument(text!=null);
@@ -210,5 +209,4 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
             tileIds = Set.copyOf(tileIds);
         }
     }
-
 }
