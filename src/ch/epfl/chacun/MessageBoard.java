@@ -1,23 +1,27 @@
 package ch.epfl.chacun;
 import java.util.*;
 
+import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
- * The MessageBoard class represents the contents of a bulletin board.
+ * Represents the contents of a bulletin board.
 
- *  * @author Gehna Yadav (379155)
- *  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
  *
+ * @param textMaker the TextMaker object providing text for messages
+ * @param messages the list of messages to be displayed on the board
  */
-
 public record MessageBoard(TextMaker textMaker, List<Message> messages) {
+
+    // TODO pile pit (point>0), canoe (x)
+    // For each meadow or hydrographic network occupied and reporting a non-zero number
+    // of points, a message is displayed on the display board.
+
 
     /**
      * Constructs a new MessageBoard with the specified text maker and messages.
-     *
-     * @param textMaker the TextMaker object providing text for messages
-     * @param messages the list of messages to be displayed on the board
      */
     public MessageBoard {
         messages = List.copyOf(messages);
@@ -46,10 +50,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     MessageBoard withScoredForest(Area<Zone.Forest> forest) {
         if (forest.isOccupied()) {
-            Set<PlayerColor> scorers = forest.majorityOccupants();
-            int points = forest.tileIds().size() * 2;
-            int mushroomGroupCount = Area.mushroomGroupCount(forest);
-            return this.withMessage(textMaker.playersScoredForest(scorers, points, mushroomGroupCount, forest.tileIds().size()));
+            return this.withMessage(textMaker.playersScoredForest(forest.majorityOccupants(),
+                    forClosedForest(forest.tileIds().size(), Area.mushroomGroupCount(forest)),
+                    Area.mushroomGroupCount(forest), forest.tileIds().size()));
         }
         return this;
     }
@@ -62,10 +65,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @return the updated message board
      */
     public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) {
-        if (Area.hasMenhir(forest)) {
-            return this.withMessage(textMaker.playerClosedForestWithMenhir(player));
-        }
-        return this;
+      return this.withMessage(textMaker.playerClosedForestWithMenhir(player));
     }
 
     /**
@@ -76,24 +76,21 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public MessageBoard withScoredRiver(Area<Zone.River> river) {
         if (river.isOccupied()) {
-            Set<PlayerColor> scorers = river.majorityOccupants();
-            int points = river.tileIds().size() * 3;
-            int fishCount = Area.riverFishCount(river);
-            return this.withMessage(textMaker.playersScoredRiver(scorers, points, fishCount, river.tileIds().size()));
+            return this.withMessage(textMaker.playersScoredRiver(river.majorityOccupants(),
+                    forClosedRiver(river.tileIds().size(), Area.riverFishCount(river)),
+                    Area.riverFishCount(river), river.tileIds().size()));
         }
         return this;
     }
 
+    /**
+     *
+     * @param scorer
+     * @param adjacentMeadow
+     * @return
+     */
     public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
-       // int mammothCount = (int) adjacentMeadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.MAMMOTH).count();
-      //  int aurochsCount = (int) adjacentMeadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.AUROCHS).count();
-       // int deerCount = (int) adjacentMeadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.DEER).count();
-       // int points = Points.forMeadow(mammothCount, aurochsCount, deerCount);
-       // if (points > 0) {
-//String message = textMaker.playerScoredHuntingTrap(scorer, points, animalsMap(adjacentMeadow, new HashSet<>()));
-        //    return this.withMessage(message);
-       // }
-        return this;
+
     }
 
     /**
@@ -190,21 +187,21 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     /**
      * The Message class represents a message on the message board.
      * It contains text, points, scorers, and tile IDs associated with the message.
+     *
+     * @param text the text content of the message
+     * @param points the points associated with the message, which can be zero
+     * @param scorers the set of players who are associated with the message, which can be empty
+     * @param tileIds the set of tile IDs associated with the message, which can be empty
      */
     public record Message(String text, int points, Set<PlayerColor> scorers, Set<Integer> tileIds) {
         /**
          * Constructs a Message object with the provided parameters.
          *
-         * @param text The text content of the message.
-         * @param points The points associated with the message.
-         * @param scorers The set of players who are associated with the message.
-         * @param tileIds The set of tile IDs associated with the message.
-         *
-         * @throws IllegalArgumentException if the provided text is null or if points are negative.
+         * @throws IllegalArgumentException if the provided text is null or if points are negative
          */
         public Message {
-            checkArgument(text!=null);
-            checkArgument(points>=0);
+            checkArgument(text != null);
+            checkArgument(points >= 0);
             scorers = Set.copyOf(scorers);
             tileIds = Set.copyOf(tileIds);
         }

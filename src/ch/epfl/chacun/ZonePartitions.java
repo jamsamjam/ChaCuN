@@ -64,8 +64,8 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 for (Zone zone : side.zones()) {
                     openConnections[zone.localId()]++;
                     if (zone instanceof Zone.River river && river.hasLake()) {
-                        openConnections[((Zone.River) zone).lake().localId()]++;
-                        // TODO lake double counted?
+                        openConnections[river.localId()]++;
+                        openConnections[river.lake().localId()]++;
                     }
                 }
             }
@@ -82,12 +82,13 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                             meadowBuilder.addSingleton(meadow, openConnectionCount);
 
                     case Zone.River river -> {
+                        riverSystemBuilder.addSingleton(river, openConnectionCount);
+
                         // Adjust open connection count if river is connected to a lake
                         if (river.hasLake()) {
                             openConnectionCount--;
                         }
                         riverBuilder.addSingleton(river, openConnectionCount);
-                        riverSystemBuilder.addSingleton(river, openConnectionCount);
                     }
 
                     case Zone.Lake lake ->
@@ -121,9 +122,9 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
 
-                case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow d1)
-                        when s2 instanceof TileSide.River(Zone.Meadow m2, Zone.River r2,
-                                                          Zone.Meadow d2) ->
+                case TileSide.River(Zone.Meadow z1, Zone.River r1, Zone.Meadow z11)
+                        when s2 instanceof TileSide.River(Zone.Meadow z2, Zone.River r2,
+                                                          Zone.Meadow z22) ->
                         riverBuilder.union(r1, r2);
 
                 default -> throw new IllegalArgumentException();

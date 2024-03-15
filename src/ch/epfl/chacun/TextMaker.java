@@ -124,8 +124,8 @@ public interface TextMaker {
      * du message s'il ne désire placer aucun occupant.
      * @return le texte en question
      */
-
     String clickToOccupy();
+
     /**
      * Retourne un texte demandant au joueur actuel de cliquer sur le pion qu'il désire reprendre, ou sur le texte
      * du message s'il ne désire reprendre aucun pion.
