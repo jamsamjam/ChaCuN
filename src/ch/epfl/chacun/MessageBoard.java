@@ -1,6 +1,7 @@
 package ch.epfl.chacun;
 import java.util.*;
 
+import static ch.epfl.chacun.Area.animals;
 import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -91,6 +92,12 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
 
+        Set<Animal> availableAnimals = animals(adjacentMeadow, Collections.emptySet());
+
+        // Calculate the points based on the counts of each type of animal
+         //forMeadow(mammothCount, aurochsCount, deerCount);
+
+return null;
     }
 
     /**
@@ -110,14 +117,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     public MessageBoard withScoredMeadow(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
-        //int mammothCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.MAMMOTH).count();
-       // int aurochsCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.AUROCHS).count();
-        //int deerCount = (int) meadow.animals().stream().filter(animal -> animal.kind() == Animal.Kind.DEER).count();
-        //int points = Points.forMeadow(mammothCount, aurochsCount, deerCount);
-        //if (points > 0) {
-         //   String message = textMaker.playersScoredMeadow(meadow.majorityOccupants(), points, meadow.animals());
-         //   return this.withMessage(message);
-        //}
+
         return this;
     }
 
@@ -137,11 +137,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     public MessageBoard withScoredPitTrap(Area<Zone.Meadow> adjacentMeadow, Set<Animal> cancelledAnimals) {
-        //int points = Points.forPitTrap(adjacentMeadow, cancelledAnimals);
-       // if (points > 0) {
-          //  String message = textMaker.playerScoredHuntingTrap(PlayerColor.RED, points, cancelledAnimals);
-          //  return this.withMessage(message);
-       // }
+
         return this;
     }
 
