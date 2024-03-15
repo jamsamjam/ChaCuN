@@ -42,7 +42,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param forest the scored forest area
      * @return the updated message board
      */
-    MessageBoard withScoredForest(Area<Zone.Forest> forest) {
+    public MessageBoard withScoredForest(Area<Zone.Forest> forest) {
         if (forest.isOccupied()) {
             return this.withMessage(textMaker.playersScoredForest(forest.majorityOccupants(),
                     forClosedForest(forest.tileIds().size(), Area.mushroomGroupCount(forest)),
@@ -87,11 +87,11 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * but only the areas within its reach
      */
     public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
-        int points = meadowPoints(adjacentMeadow);
+        int points = meadowPoints(adjacentMeadow, Set.of());
 
         if (points > 0) {
             return this.withMessage(textMaker.playerScoredHuntingTrap(scorer, points,
-                    meadowAnimals(adjacentMeadow)));
+                    meadowAnimals(adjacentMeadow, Set.of())));
         }
         return this;
     }
@@ -107,7 +107,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public MessageBoard withScoredLogboat(PlayerColor scorer, Area<Zone.Water> riverSystem) {
         return this.withMessage(textMaker.playerScoredLogboat(scorer,
-                Area.riverSystemFishCount(riverSystem), Area.lakeCount(riverSystem)));
+                forLogboat(Area.lakeCount(riverSystem)), Area.lakeCount(riverSystem)));
     }
 
     /**
@@ -120,11 +120,11 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * the points it brings to its majority occupants
      */
     public MessageBoard withScoredMeadow(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
-        int points = meadowPoints(meadow);
+        int points = meadowPoints(meadow, cancelledAnimals);
 
         if (meadow.isOccupied() && points > 0) {
             return this.withMessage(textMaker.playersScoredMeadow(meadow.majorityOccupants(),
-                    points, meadowAnimals(meadow)));
+                    points, meadowAnimals(meadow, cancelledAnimals)));
         }
         return this;
     }
@@ -158,11 +158,11 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * the large pile pit, is occupied and the points are greater than 0
      */
     public MessageBoard withScoredPitTrap(Area<Zone.Meadow> adjacentMeadow, Set<Animal> cancelledAnimals) {
-        int points = meadowPoints(adjacentMeadow);
+        int points = meadowPoints(adjacentMeadow, cancelledAnimals);
 
         if (adjacentMeadow.isOccupied() && points > 0) {
             return this.withMessage(textMaker.playersScoredPitTrap(adjacentMeadow.majorityOccupants(),
-                    points, meadowAnimals(adjacentMeadow)));
+                    points, meadowAnimals(adjacentMeadow, cancelledAnimals)));
         }
         return this;
     }
@@ -178,12 +178,8 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public MessageBoard withScoredRaft(Area<Zone.Water> riverSystem) {
         if (riverSystem.isOccupied()) {
-            int fishCount = Area.riverSystemFishCount(riverSystem);
-            int points = forRiverSystem(fishCount);
-            int lakeCount = Area.lakeCount(riverSystem);
-
             return this.withMessage(textMaker.playersScoredRaft(riverSystem.majorityOccupants(),
-                    points, lakeCount));
+                    forRaft(Area.lakeCount(riverSystem)), Area.lakeCount(riverSystem)));
         }
         return this;
     }
@@ -212,8 +208,8 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         return new MessageBoard(textMaker, updatedMessages);
     }
 
-    private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow) {
-        Set<Animal> animalSet = animals(meadow, Collections.emptySet());
+    private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
+        Set<Animal> animalSet = animals(meadow, cancelledAnimals);
         Map<Animal.Kind, Integer> animalMap = new HashMap<>();
 
         for (Animal animal : animalSet) {
@@ -223,8 +219,8 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         return animalMap;
     }
 
-    private int meadowPoints(Area<Zone.Meadow> meadow) {
-        Map<Animal.Kind, Integer> animalMap = meadowAnimals(meadow);
+    private int meadowPoints(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
+        Map<Animal.Kind, Integer> animalMap = meadowAnimals(meadow, cancelledAnimals);
 
         return forMeadow(animalMap.getOrDefault(Kind.MAMMOTH, 0),
                 animalMap.getOrDefault(Kind.AUROCHS, 0),
