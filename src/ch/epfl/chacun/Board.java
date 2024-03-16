@@ -8,7 +8,11 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
  * Represents the game board.
+ *
+ * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
+
 public final class Board {
     /**
      * Array of placed tiles, containing 625 elements mostly equal to null.
@@ -23,12 +27,26 @@ public final class Board {
      * Contains the partitions on the board (those of the zones of the placed tiles).
      */
     private final ZonePartitions zonePartitions;
+    /**
+     * Set of cancelled animals on the board.
+     */
     private final Set<Animal> canceledAnimals;
-
-    //TODO :) need to check if REACH and EMPTY is correct
+    /**
+     * Represents the range of the board.
+     */
     public static final int REACH = 12;
-    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of()); //is this how we create an empty board?
-
+    /**
+     * Empty board instance.
+     */
+    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
+    /**
+     * Constructs a new Board instance.
+     *
+     * @param placedTiles      Array of placed tiles
+     * @param tileIndexes      Array of tile indexes
+     * @param zonePartitions   Zone partitions
+     * @param canceledAnimals  Set of cancelled animals
+     */
     private Board(PlacedTile[] placedTiles, int[] tileIndexes, ZonePartitions zonePartitions, Set<Animal> canceledAnimals) {
         this.placedTiles = placedTiles;
         this.tileIndexes = tileIndexes;
@@ -36,6 +54,12 @@ public final class Board {
         this.canceledAnimals = canceledAnimals;
     }
 
+    /**
+     * Returns the placed tile at the specified position on the board.
+     *
+     * @param pos The position to query
+     * @return The placed tile at the specified position, or null if no tile is present
+     */
     public PlacedTile tileAt(Pos pos) {
         //TODO: is this index calculation valid? // do we just need to use tileIndexes here?
         int index = (pos.y() + REACH) * (2 * REACH + 1) + (pos.x() + REACH);
@@ -45,6 +69,13 @@ public final class Board {
         return null;
     }
 
+    /**
+     * Returns the placed tile with the specified tile ID.
+     *
+     * @param tileId The ID of the tile to retrieve
+     * @return The placed tile with the specified ID
+     * @throws IllegalArgumentException If no tile with the given ID is found
+     */
     public PlacedTile tileWithId(int tileId) {
         for (int i = 0; i < tileIndexes.length; i++) {
             if (tileIndexes[i] == tileId) {
@@ -53,21 +84,38 @@ public final class Board {
         }
         throw new IllegalArgumentException();
     }
+
+    /**
+     * Returns a set containing all cancelled animals on the board.
+     *
+     * @return A set of cancelled animals
+     */
     public Set<Animal> cancelledAnimals() {
-        return Set.copyOf(canceledAnimals); //here we can submit a new copyof or a new hashset() ---does it make a difference?
+        return Set.copyOf(canceledAnimals);
     }
 
+    /**
+     * Returns a set containing all occupants present on the board.
+     *
+     * @return A set of occupants
+     */
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
             if (tile != null) {
-                //TODO :) check if it is the potential occupants we are adding here?
                 allOccupants.add(tile.occupant());
             }
         }
         return allOccupants;
     }
 
+    /**
+     * Returns the forest area containing the specified forest zone.
+     *
+     * @param forest The forest zone to search for
+     * @return The forest area containing the specified zone
+     * @throws IllegalArgumentException If the specified forest zone does not belong to the board
+     */
     public Area<Zone.Forest> forestArea(Zone.Forest forest) {
         // TODO checkArgument();
         return zonePartitions.forests().areaContaining(forest);
@@ -89,40 +137,61 @@ public final class Board {
         throw new IllegalArgumentException();*/
     }
 
+    /**
+     * Returns the meadow area containing the specified meadow zone.
+     *
+     * @param meadow The meadow zone to search for
+     * @return The meadow area containing the specified zone
+     * @throws IllegalArgumentException If the specified meadow zone does not belong to the board
+     */
     public Area<Zone.Meadow> meadowArea(Zone.Meadow meadow) {
-        Set<Zone.Meadow> foundMeadows = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
             if (tile != null && tile.meadowZones().contains(meadow)) {
-                foundMeadows.add(meadow);
-                return new Area<>(foundMeadows, List.of(), 0);
+                return zonePartitions.meadows().areaContaining(meadow);
             }
         }
         throw new IllegalArgumentException();
     }
 
+    /**
+     * Returns the river area containing the specified river zone.
+     *
+     * @param riverZone The river zone to search for
+     * @return The river area containing the specified zone
+     * @throws IllegalArgumentException If the specified river zone does not belong to the board
+     */
     public Area<Zone.River> riverArea(Zone.River riverZone) {
-        Set<Zone.River> foundRivers = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
             if (tile != null && tile.riverZones().contains(riverZone)) {
-                foundRivers.add(riverZone);
-                return new Area<>(foundRivers, List.of(), 0);
+                return zonePartitions.rivers().areaContaining(riverZone);
             }
         }
         throw new IllegalArgumentException();
     }
 
+    /**
+     * Returns the river system area containing the specified water zone.
+     *
+     * @param water The water zone to search for
+     * @return The river system area containing the specified zone
+     * @throws IllegalArgumentException If the specified water zone does not belong to the board
+     *                                  or if the method is not yet implemented
+     */
     public Area<Zone.Water> riverSystemArea(Zone.Water water) {
-        Set<Zone.Water> foundWaters = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
-            //TODO: IF CONDOTION is missing here! im not sure what zone we are checking with riversystem!
-            if (tile != null) {
-                foundWaters.add(water);
-                return new Area<>(foundWaters, List.of(), 0);
-            }
+            //TODO check what sort of zones are being used here??
+            //if (tile != null && tile.riverZones().contains(water)) {
+              //  return zonePartitions.rivers().areaContaining(water);
+            //}
         }
-        throw new IllegalArgumentException();
+        return null; //just for now
     }
 
+    /**
+     * Returns a set containing all meadow areas on the board.
+     *
+     * @return A set of meadow areas
+     */
     public Set<Area<Zone.Meadow>> meadowAreas() {
         Set<Area<Zone.Meadow>> meadowAreas = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
@@ -135,6 +204,11 @@ public final class Board {
         return meadowAreas;
     }
 
+    /**
+     * Returns the set of areas representing the hydrographic network on the board.
+     *
+     * @return The set of areas representing the hydrographic network
+     */
     public Set<Area<Zone.Water>> riverSystemAreas() {
         Set<Area<Zone.Water>> riverSystemAreas = new HashSet<>();
         for (PlacedTile tile : placedTiles) {
@@ -148,10 +222,17 @@ public final class Board {
         return riverSystemAreas;
     }
 
+    /**
+     * Returns the area representing the meadow adjacent to the given position.
+     *
+     * @param pos         The position to check for adjacent meadow
+     * @param meadowZone  The meadow zone to which the adjacent meadow belongs
+     * @return The area representing the adjacent meadow
+     */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> zones = new HashSet<>();
         List<PlayerColor> occupants = new ArrayList<>();
-        // TODO
+        //TODO
         /*for (PlacedTile tile : placedTiles) {
             if(tile.pos().equals(neiboringpos)) {
                 zones.add(tile.meadowZones());
@@ -160,6 +241,13 @@ public final class Board {
         Area<Zone.Meadow> adjacentMeadow = new Area<>(zones, occupants, 0);
         return null; }
 
+    /**
+     * Returns the count of occupants of the specified kind belonging to the given player on the board.
+     *
+     * @param player        The player whose occupants are counted
+     * @param occupantKind The kind of occupant to count
+     * @return The count of occupants of the specified kind belonging to the given player
+     */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
         for (PlacedTile tile : placedTiles) {
@@ -171,6 +259,11 @@ public final class Board {
         return count;
     }
 
+    /**
+     * Returns the set of positions on the board where a tile can be inserted.
+     *
+     * @return The set of insertion positions on the board
+     */
     public Set<Pos> insertionPositions() {
         //TODO: need to check the for loops here -- in my opinion there should be two and they are both going through the reach
         Set<Pos> positions = new HashSet<>();
@@ -186,6 +279,11 @@ public final class Board {
         return positions;
     }
 
+    /**
+     * Returns the last placed tile on the board.
+     *
+     * @return The last placed tile, or null if the board is empty
+     */
     public PlacedTile lastPlacedTile() {
         for (int i = placedTiles.length - 1; i >= 0; i--) {
             if (placedTiles[i] != null) {
@@ -195,10 +293,20 @@ public final class Board {
         return null;
     }
 
+    /**
+     * Returns the set of forest areas closed by placing the last tile on the board.
+     *
+     * @return The set of forest areas closed by the last tile, or an empty set if the board is empty
+     */
     public Set<Area<Zone.Forest>> forestsClosedByLastTile() {
         //TODO strugulling with this one!  -- GEHNA tODO
         return null; }
 
+    /**
+     * Returns the set of river areas closed by placing the last tile on the board.
+     *
+     * @return The set of river areas closed by the last tile, or an empty set if the board is empty
+     */
     Set<Area<Zone.River>> riversClosedByLastTile() {
         //TODO strugulling with this one!  -- GEHNA tODO
         return null;
@@ -223,7 +331,8 @@ public final class Board {
      * board, possibly after rotation
      */
     boolean couldPlaceTile(Tile tile) {
-
+        //TODO
+        return false;
     }
 
     /**
@@ -284,6 +393,8 @@ public final class Board {
                 return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
         }
+        //giving error if there was no return here
+        return null;
     }
 
     /**
@@ -319,7 +430,7 @@ public final class Board {
 
     /**
      *
-     * @param o
+     * @param
      * @return
      */
     @Override
@@ -338,6 +449,6 @@ public final class Board {
      */
     @Override
     public int hashCode() {
-
+        return 0;
     }
 }
