@@ -1,9 +1,8 @@
 package ch.epfl.chacun;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
+
+import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -212,8 +211,6 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     boolean canAddTile(PlacedTile tile) {
-        // TODO
-        // each edge of the tile which touches an edge of an already placed tile is of the same type as it
         return insertionPositions().contains(tile.pos());
     }
 
@@ -226,7 +223,7 @@ public final class Board {
      * board, possibly after rotation
      */
     boolean couldPlaceTile(Tile tile) {
-        //
+
     }
 
     /**
@@ -239,7 +236,14 @@ public final class Board {
      */
     Board withNewTile(PlacedTile tile) {
         checkArgument(tileIndexes.length != 0 && canAddTile(tile));
-        return this.withNewTile(tile);
+
+        PlacedTile[] myPlacedTiles = placedTiles.clone();
+        int[] myTileIndexes = tileIndexes.clone();
+
+        // add tile to placedTile
+        myTileIndexes[myTileIndexes.length] = tile.id();
+
+        return new Board(myPlacedTiles, myTileIndexes, zonePartitions, canceledAnimals);
     }
 
     /**
@@ -247,12 +251,18 @@ public final class Board {
      *
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant in addition
+     * @throws IllegalArgumentException if the tile on which the occupant would be located is
+     * already occupied
      */
     Board withOccupant(Occupant occupant) {
-        for (PlacedTile tile : placedTiles) {
+        PlacedTile[] myPlacedTiles = placedTiles.clone();
+
+        for (PlacedTile tile : myPlacedTiles) {
             if (tile.potentialOccupants().contains(occupant)
                     && tile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-                return this.withOccupant(occupant);
+                Objects.requireNonNull(lastPlacedTile()).withOccupant(occupant); //TODO
+
+                return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
         }
         throw new IllegalArgumentException();
@@ -265,17 +275,19 @@ public final class Board {
      * @return an identical board to the receiver, but with the given occupant less
      */
     Board withoutOccupant(Occupant occupant) {
-        for (PlacedTile tile : placedTiles) {
+        PlacedTile[] myPlacedTiles = placedTiles.clone();
+
+        for (PlacedTile tile : myPlacedTiles) {
             if (tile.occupant().equals(occupant)) {
                 tile.withNoOccupant();
-                return this;
+
+                return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
         }
-        return this; // TODO
     }
 
     /**
-     * eturns a board identical to the receiver but without any occupant in the given forests and rivers.
+     * Returns a board identical to the receiver but without any occupant in the given forests and rivers.
      *
      * @param forests the given forests
      * @param rivers the given rivers
@@ -300,7 +312,32 @@ public final class Board {
      * of cancelled animals
      */
     Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
-        canceledAnimals.addAll(newlyCancelledAnimals);
+        Set<Animal> myCanceledAnimals = Set.copyOf(canceledAnimals);
+        // myCanceledAnimals.addAll(newlyCancelledAnimals);
         return new Board(placedTiles, tileIndexes, zonePartitions, canceledAnimals);
+    }
+
+    /**
+     *
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Board board = (Board) o;
+        return Arrays.equals(placedTiles, board.placedTiles) &&
+                Arrays.equals(tileIndexes, board.tileIndexes) &&
+                Objects.equals(zonePartitions, board.zonePartitions) &&
+                Objects.equals(canceledAnimals, board.canceledAnimals);
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public int hashCode() {
+
     }
 }
