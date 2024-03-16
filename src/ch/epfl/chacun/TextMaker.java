@@ -3,133 +3,148 @@ package ch.epfl.chacun;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Implemented by classes capable of generating all the text which appears in the graphical interface
+ * - mainly the messages, but also the number of points of each player, their name, etc.
+ *
+ * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
+ */
 public interface TextMaker {
     /**
-     * Retourne le nom du joueur de couleur donnée.
-     * @param playerColor la couleur du joueur
-     * @return le nom du joueur
+     * Returns the name of the player with the given color.
+     *
+     * @param playerColor the color of the player
+     * @return player name
      */
     String playerName(PlayerColor playerColor);
 
     /**
-     * Retourne la représentation textuelle du nombre de points donnés (p. ex. "3 points").
-     * @param points le nombre de points
-     * @return la représentation textuelle du nombre de points
+     * Returns the textual representation of the given number of points (e.g. "3 points").
+     *
+     * @param points the number of points
+     * @return the textual representation of the number of points
      */
     String points(int points);
 
     /**
-     * Retourne le texte d'un message déclarant qu'un joueur a fermé une forêt avec un menhir.
-     * @param player le joueur ayant fermé la forêt
-     * @return le texte du message
+     * Returns the text of a message declaring that a player has closed a forest with a menhir.
+     *
+     * @param player the player who closed the forest
+     * @return the message text
      */
     String playerClosedForestWithMenhir(PlayerColor player);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'une forêt nouvellement
-     * fermée, constituée d'un certain nombre de tuiles et comportant un certain nombre de groupes de champignons,
-     * ont remporté les points correspondants.
-     * @param scorers les occupants majoritaires de la forêt
-     * @param points les points remportés
-     * @param mushroomGroupCount le nombre de groupes de champignons que la forêt contient
-     * @param tileCount le nombre de tuiles qui constitue la forêt
-     * @return le texte du message
+     * Returns the text of a message stating that the majority occupants of a newly
+     * closed forest, consisting of a certain number of tiles and containing a certain number of mushroom groups,
+     * have won the corresponding points.
+     *
+     * @param scorers the forest's majority occupants
+     * @param points points won
+     * @param mushroomGroupCount the number of mushroom groups in the forest
+     * @param tileCount the number of tiles in the forest
      */
     String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'une rivière nouvellement
-     * fermée, constituée d'un certain nombre de tuiles et comportant un certain nombre de poissons,
-     * ont remporté les points correspondants.
-     * @param scorers les occupants majoritaires de la rivière
-     * @param points les points remportés
-     * @param fishCount le nombre de poissons nageant dans la rivière ou les lacs adjacents
-     * @param tileCount le nombre de tuiles qui constitue la rivière
-     * @return le texte du message
+     * Returns the text of a message declaring that the majority occupants of a newly
+     * closed river with a certain number of tiles and a certain number of fish,
+     * have won the corresponding points.* @param scorers the river's majority occupants.
+     *
+     * @param points the points won
+     * @param fishCount the number of fish swimming in the river or adjacent lakes
+     * @param tileCount the number of tiles making up the river
      */
     String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount);
 
     /**
-     * Retourne le texte d'un message déclarant qu'un joueur a déposé la fosse à pieux dans un pré contenant,
-     * sur les 8 tuiles voisines de la fosse, certains animaux, et remporté les points correspondants.
-     * @param scorer le joueur ayant déposé la fosse à pieux
-     * @param points les points remportés
-     * @param animals les animaux présents dans le même pré que la fosse et sur les 8 tuiles voisines
-     * @return le texte du message
+     * Returns the text of a message stating that a player has placed the stake pit in a meadow containing,
+     * on the 8 tiles next to the pit, certain animals, and won the corresponding points.
+     *
+     * @param scorer the player who deposited the stake pit
+     * @param points the points won
+     * @param animals present in the same meadow as the pit and on the 8 neighboring tiles
      */
     String playerScoredHuntingTrap(PlayerColor scorer, int points, Map<Animal.Kind, Integer> animals);
 
     /**
-     * Retourne le texte d'un message déclarant qu'un joueur a déposé la pirogue dans un réseau hydrographique
-     * comportant un certain nombre de lacs, et remporté les points correspondants.
-     * @param scorer le joueur ayant déposé la pirogue
-     * @param points les points remportés
-     * @param lakeCount le nombre de lacs accessibles à la pirogue
-     * @return le texte du message
+     * Returns the text of a message declaring that a player has deposited the pirogue in a river system
+     * with a certain number of lakes, and won the corresponding points.
+     *
+     * @param scorer the player who deposited the pirogue
+     * @param points the points won* @param lakeCount the number of lakes accessible to the canoe
+     * @return message text
      */
     String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'un pré contenant certains
-     * animaux ont remporté les points correspondants.
-     * @param scorers les occupants majoritaires du pré
-     * @param points les points remportés
-     * @param animals les animaux présents dans le pré (sans ceux ayant été précédemment annulés)
-     * @return le texte du message
+     * Returns the text of a message declaring that the majority occupants of a meadow containing certain
+     * animals have won the corresponding points.
+     *
+     * @param scorers the meadow's majority occupants
+     * @param points the points won
+     * @param animals the animals present in the meadow (without those previously cancelled)
+     * @return message text
      */
     String playersScoredMeadow(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'un réseau hydrographique
-     * comportant un certain nombre de poissons ont remporté les points correspondants.
-     * @param scorers les occupants majoritaires du réseau hydrographique
-     * @param points les points remportés
-     * @param fishCount le nombre de poissons nageant dans le réseau hydrographique
-     * @return le texte du message
+     * Returns the text of a message declaring that the majority occupants of a river system
+     * with a certain number of fish have won the corresponding points.
+     *
+     * @param scorers the majority occupants of the river system
+     * @param points the points won
+     * @param fishCount the number of fish swimming in the river system
+     * @return message text
      */
     String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'un pré contenant la
-     * grande fosse à pieux et, sur les 8 tuiles voisines d'elles, certains animaux, ont remporté les
-     * points correspondants.
-     * @param scorers les occupants majoritaires du pré contenant la fosse à pieux
-     * @param points les points remportés
-     * @param animals les animaux présents sur les tuiles voisines de la fosse (sans ceux ayant été précédemment annulés)
-     * @return le texte du message
+     * Returns the text of a message stating that the majority occupants of a meadow containing
+     * and, on the 8 tiles next to them, some animals, have won the corresponding points.
+     *
+     * @param scorers the majority occupants of the meadow containing the stake pit
+     * @param points points won
+     * @param animals the animals present on the tiles adjacent to the pit (without those previously cancelled)
+     * @return message text
      */
     String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals);
 
     /**
-     * Retourne le texte d'un message déclarant que les occupants majoritaires d'un réseau hydrographique
-     * contenant le radeau ont remporté les points correspondants.
-     * @param scorers les occupants majoritaires du réseau hydrographique comportant le radeau
-     * @param points les points remportés
-     * @param lakeCount le nombre de lacs contenus dans le réseau hydrographique
-     * @return le texte du message
+     * Returns the text of a message declaring that the majority occupants of a river system
+     * containing the raft have won the corresponding points.
+     *
+     * @param scorers the majority occupants of the river system containing the raft
+     * @param points the points won
+     * @param lakeCount the number of lakes contained in the hydrographic network
+     * @return message text
      */
     String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount);
 
     /**
-     * Retourne le texte d'un message déclarant qu'un ou plusieurs joueurs ont remporté la partie, avec un
-     * certain nombre de points.
-     * @param winners l'ensemble des joueurs ayant remporté la partie
-     * @param points les points des vainqueurs
-     * @return le texte du message
+     * Returns the text of a message declaring that one or more players have won the game, with a
+     * certain number of points.
+     *
+     * @param winners all players who won the game
+     * @param points the points of the winners
+     * @return message text
      */
     String playersWon(Set<PlayerColor> winners, int points);
 
     /**
-     * Retourne un texte demandant au joueur actuel de cliquer sur l'occupant qu'il désire placer, ou sur le texte
-     * du message s'il ne désire placer aucun occupant.
-     * @return le texte en question
+     * Returns a text asking the current player to click on the occupant he wishes to place,
+     * or on the text if no occupant is to be placed.
+     *
+     * @return the text in question
      */
     String clickToOccupy();
 
     /**
-     * Retourne un texte demandant au joueur actuel de cliquer sur le pion qu'il désire reprendre, ou sur le texte
-     * du message s'il ne désire reprendre aucun pion.
-     * @return le texte en question
+     * Returns a text asking the current player to click on the pawn he wishes to take back,
+     * or on the text if he doesn't want to pick up any pawns.
+     *
+     * @return the text in question
      */
     String clickToUnoccupy();
 }
