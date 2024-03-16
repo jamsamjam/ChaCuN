@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MyMessageBoardTest {
+
     private MessageBoard.Message getMessage() {
         Set<PlayerColor> myPlayer = new HashSet<>();
         myPlayer.add(PlayerColor.BLUE); myPlayer.add(PlayerColor.RED);
