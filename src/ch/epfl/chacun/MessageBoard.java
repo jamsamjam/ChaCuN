@@ -115,7 +115,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         /*Set<PlayerColor> scorers = new HashSet<>(); // TODO
         scorers.add(scorer);*/
 
-        if (points > 0) {
+        if (points > 0) { // TODO
             messages.add(new Message(textMaker.playerScoredHuntingTrap(scorer, points,
                     meadowAnimals(adjacentMeadow, Set.of())),
                     points, Set.of(scorer), adjacentMeadow.tileIds()));
