@@ -118,7 +118,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
 
-                case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m3)
+                case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m2)
                         when s2 instanceof TileSide.River(Zone.Meadow mm1, Zone.River r2,
                                                           Zone.Meadow mm2) -> {
                         riverBuilder.union(r1, r2);
