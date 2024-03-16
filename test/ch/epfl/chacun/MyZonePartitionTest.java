@@ -54,7 +54,6 @@ class MyZonePartitionTest {
         builder.addSingleton(zoneLake, 2);
 
         ZonePartition<Zone> partition = builder.build();
-
         assertEquals(1, partition.areas().size());
     }
 
