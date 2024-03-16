@@ -193,11 +193,11 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
 
     /**
      * Returns the identifier of the zone occupied by an occupant of the given kind,
-     * or -1 if the tile is not occupied, or if the occupant is not of the right kind.
+     * or -1 if the tile is not occupied or the occupant is not of the right kind.
      *
      * @param occupantKind the given kind
      * @return the identifier of the zone occupied by an occupant of the given kind,
-     * or -1 if the tile is not occupied, or if the occupant is not of the right kind
+     * or -1 if the tile is not occupied or the occupant is not of the right kind
      */
     public int idOfZoneOccupiedBy(Occupant.Kind occupantKind) {
         if (occupant == null || occupant.kind() != occupantKind) {

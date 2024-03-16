@@ -124,7 +124,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         riverBuilder.union(r1, r2);
                         meadowBuilder.union(m1, mm2);
                         meadowBuilder.union(m2, mm1);
-                        }
+                        } //TODO
                 default -> throw new IllegalArgumentException();
             }
         }
