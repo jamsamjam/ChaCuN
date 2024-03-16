@@ -32,10 +32,10 @@ public class Board {
                 return placedTiles[i];
             }
         }
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException(); //does pre-conditions class need to be used here?
     }
     public Set<Animal> cancelledAnimals() {
-        return Set.copyOf(canceledAnimals);
+        return Set.copyOf(canceledAnimals); //here we can submit a new copyof or a new hashset
     }
 
     public Set<Occupant> occupants() {
