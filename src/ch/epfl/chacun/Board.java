@@ -58,10 +58,11 @@ public final class Board {
      * @return The placed tile at the specified position, or null if no tile is present
      */
     public PlacedTile tileAt(Pos pos) {
-        //TODO: is this index calculation valid? // do we just need to use tileIndexes here?
-        int index =
-        if (index >= 0 && index < placedTiles.length) {
-            return placedTiles[index];
+        // TODO check valid pos?
+        for (PlacedTile tile : placedTiles) {
+            if (tile.pos().equals(pos)) {
+                return tile;
+            }
         }
         return null;
     }
@@ -209,14 +210,15 @@ public final class Board {
             }
         }*/
         Area<Zone.Meadow> adjacentMeadow = new Area<>(zones, occupants, 0);
-        return null; }
+        return null;
+    }
 
     /**
      * Returns the count of occupants of the specified kind belonging to the given player on the board.
      *
-     * @param player        The player whose occupants are counted
-     * @param occupantKind The kind of occupant to count
-     * @return The count of occupants of the specified kind belonging to the given player
+     * @param player the given player
+     * @param occupantKind the specified kin
+     * @return the count of occupants of the specified kind belonging to the given player
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
@@ -232,7 +234,7 @@ public final class Board {
     /**
      * Returns the set of positions on the board where a tile can be inserted.
      *
-     * @return The set of insertion positions on the board
+     * @return the set of insertion positions on the board
      */
     public Set<Pos> insertionPositions() {
         Set<Pos> positions = new HashSet<>();
@@ -248,8 +250,6 @@ public final class Board {
             }
         }
 
-
-
         return positions;
     }
 
@@ -259,12 +259,19 @@ public final class Board {
      * @return The last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
-        for (int i = placedTiles.length - 1; i >= 0; i--) {
+        if (tileIndexes.length != 0) {
+            return placedTiles[tileIndexes[tileIndexes.length - 1]];
+        }
+        return null;
+
+        // TODO null if the board is empty ?
+
+        /*for (int i = placedTiles.length - 1; i >= 0; i--) {
             if (placedTiles[i] != null) {
                 return placedTiles[i];
             }
         }
-        return null;
+        return null;*/
     }
 
     /**
@@ -305,9 +312,6 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     boolean canAddTile(PlacedTile tile) {
-        for (var side : ) {
-
-        }
         return insertionPositions().contains(tile.pos());
     }
 
@@ -321,6 +325,7 @@ public final class Board {
      */
     boolean couldPlaceTile(Tile tile) {
         //TODO roate
+        return false;
     }
 
     /**
@@ -335,10 +340,10 @@ public final class Board {
         checkArgument(tileIndexes.length != 0 && canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = tileIndexes.clone();
+        int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
 
-        // add tile to placedTile
-        myTileIndexes[myTileIndexes.length] = tile.id();
+        // myPlacedTiles[] = tile; TODO position?
+        myTileIndexes[myTileIndexes.length] = tile.id(); // why outOfBound ?
 
         return new Board(myPlacedTiles, myTileIndexes, zonePartitions, canceledAnimals);
     }

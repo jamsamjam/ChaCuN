@@ -403,7 +403,7 @@ class MessageBoardTest {
         assertEquals(expectedMessage.text(), actualMessage.text());
         assertEquals(expectedMessage.points(), actualMessage.points());
         // Ignore scorers, as the specification was somewhat ambiguous, but it should be empty
-        // assertEquals(expectedMessage.scorers(), actualMessage.scorers());
+        assertEquals(expectedMessage.scorers(), actualMessage.scorers());
         assertEquals(expectedMessage.tileIds(), actualMessage.tileIds());
     }
 }
