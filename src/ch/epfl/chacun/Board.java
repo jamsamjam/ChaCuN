@@ -38,6 +38,7 @@ public final class Board {
     /**
      * Empty board instance.
      */
+    //TODO check
     public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
     /**
      * Constructs a new Board instance.
@@ -62,7 +63,7 @@ public final class Board {
      */
     public PlacedTile tileAt(Pos pos) {
         //TODO: is this index calculation valid? // do we just need to use tileIndexes here?
-        int index = (pos.y() + REACH) * (2 * REACH + 1) + (pos.x() + REACH);
+        int index =
         if (index >= 0 && index < placedTiles.length) {
             return placedTiles[index];
         }
@@ -125,16 +126,6 @@ public final class Board {
                 // return areaContaining(forest)??
             }
         }*/
-
-        //TODO :) need to check the return statement here and if the condition in the if statement is correct
-        /*Set<Zone.Forest> foundForests = new HashSet<>();
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null && tile.forestZones().contains(forest)) {
-                foundForests.add(forest);
-                return new Area<>(foundForests, List.of(), 0);
-            }
-        }
-        throw new IllegalArgumentException();*/
     }
 
     /**
@@ -271,7 +262,10 @@ public final class Board {
             for (int x = -Board.REACH; x <= Board.REACH; x++) {
                 Pos pos = new Pos(x, y);
                 PlacedTile tile = tileAt(pos);
-                if (tile == null) {
+                if (tile == null && (tileAt(new Pos(pos.x(), pos.y() - 1)) != null ||
+                        tileAt(new Pos(pos.x() - 1, pos.y())) != null ||
+                        tileAt(new Pos(pos.x() + 1, pos.y())) != null ||
+                        tileAt(new Pos(pos.x(), pos.y() + 1)) != null)){
                     positions.add(pos);
                 }
             }
