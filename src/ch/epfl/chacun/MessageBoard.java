@@ -14,7 +14,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param textMaker the TextMaker object providing text for messages
  * @param messages the list of messages to be displayed on the board
  */
-
+// TOdo check class
 public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     /**
      * Constructs a new MessageBoard with the specified text maker and messages.

@@ -34,8 +34,7 @@ public final class Board {
     /**
      * Empty board instance.
      */
-    //TODO check
-    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
+    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of()); // TODO
 
     /**
      * Constructs a new Board instance.
@@ -138,6 +137,7 @@ public final class Board {
                 return zonePartitions.meadows().areaContaining(meadow);
             }
         }
+        checkArgument(zonePartitions.meadows().areas().contains(meadow));
         throw new IllegalArgumentException();
     }
 
@@ -166,13 +166,12 @@ public final class Board {
      *                                  or if the method is not yet implemented
      */
     public Area<Zone.Water> riverSystemArea(Zone.Water water) {
-        for (PlacedTile tile : placedTiles) {
+        return zonePartitions.riverSystems().areaContaining(water);
+        //for (PlacedTile tile : placedTiles) {
             //TODO check what sort of zones are being used here??
             //if (tile != null && tile.riverZones().contains(water)) {
               //  return zonePartitions.rivers().areaContaining(water);
             //}
-        }
-        return null; //just for now
     }
 
     /**
@@ -181,15 +180,7 @@ public final class Board {
      * @return A set of meadow areas
      */
     public Set<Area<Zone.Meadow>> meadowAreas() {
-        Set<Area<Zone.Meadow>> meadowAreas = new HashSet<>();
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null) {
-                for (Zone.Meadow meadow : tile.meadowZones()) {
-                    meadowAreas.add(meadowArea(meadow));
-                }
-            }
-        }
-        return meadowAreas;
+        return zonePartitions.meadows().areas();
     }
 
     /**
@@ -198,16 +189,7 @@ public final class Board {
      * @return The set of areas representing the hydrographic network
      */
     public Set<Area<Zone.Water>> riverSystemAreas() {
-        Set<Area<Zone.Water>> riverSystemAreas = new HashSet<>();
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null) {
-                //TODO: are we going through the river zones here?
-                for (Zone.River river : tile.riverZones()) {
-                    riverSystemAreas.add(riverSystemArea(river));
-                }
-            }
-        }
-        return riverSystemAreas;
+        return zonePartitions.riverSystems().areas();
     }
 
     /**
@@ -253,20 +235,21 @@ public final class Board {
      * @return The set of insertion positions on the board
      */
     public Set<Pos> insertionPositions() {
-        //TODO: need to check the for loops here -- in my opinion there should be two and they are both going through the reach
         Set<Pos> positions = new HashSet<>();
-        for (int y = -Board.REACH; y <= Board.REACH; y++) {
-            for (int x = -Board.REACH; x <= Board.REACH; x++) {
-                Pos pos = new Pos(x, y);
-                PlacedTile tile = tileAt(pos);
-                if (tile == null && (tileAt(new Pos(pos.x(), pos.y() - 1)) != null ||
-                        tileAt(new Pos(pos.x() - 1, pos.y())) != null ||
-                        tileAt(new Pos(pos.x() + 1, pos.y())) != null ||
-                        tileAt(new Pos(pos.x(), pos.y() + 1)) != null)){
-                    positions.add(pos);
+
+        for (PlacedTile tile : placedTiles) {
+            for (Direction d : Direction.values()){
+                if (tile != null) {
+                    Pos pos = tile.pos();
+                    if (tileAt(pos.neighbor(d)) == null) {
+                        positions.add(pos.neighbor(d));
+                    }
                 }
             }
         }
+
+
+
         return positions;
     }
 
@@ -290,8 +273,20 @@ public final class Board {
      * @return The set of forest areas closed by the last tile, or an empty set if the board is empty
      */
     public Set<Area<Zone.Forest>> forestsClosedByLastTile() {
-        //TODO strugulling with this one!  -- GEHNA tODO
-        return null; }
+        Set<Area<Zone.Forest>> forests = new HashSet<>();
+
+        for (var area : zonePartitions.forests().areas()) {
+            if (area.isClosed() && lastPlacedTile() != null) {
+                for (var zone : lastPlacedTile().forestZones()) {
+                    if (area.zones().contains(zone)) {
+                        forests.add(area);
+                    }
+                }
+            }
+        }
+
+        return forests;
+    }
 
     /**
      * Returns the set of river areas closed by placing the last tile on the board.
@@ -305,11 +300,14 @@ public final class Board {
 
     /**
      * Returns true iff the given placed tile could be added to the board.
-     *
+     * //TODO
      * @param tile the given placed tile
      * @return true iff the given placed tile could be added to the board
      */
     boolean canAddTile(PlacedTile tile) {
+        for (var side : ) {
+
+        }
         return insertionPositions().contains(tile.pos());
     }
 
@@ -322,8 +320,7 @@ public final class Board {
      * board, possibly after rotation
      */
     boolean couldPlaceTile(Tile tile) {
-        //TODO
-        return false;
+        //TODO roate
     }
 
     /**

@@ -122,6 +122,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.River(Zone.Meadow mm1, Zone.River r2,
                                                           Zone.Meadow mm2) -> {
                         riverBuilder.union(r1, r2);
+                        riverSystemBuilder.union(r1, r2); // TODO
                         meadowBuilder.union(m1, mm2);
                         meadowBuilder.union(m2, mm1);
                         } //TODO
