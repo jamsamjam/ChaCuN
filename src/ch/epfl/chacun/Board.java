@@ -1,7 +1,5 @@
 package ch.epfl.chacun;
 
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
-
 import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -54,39 +52,38 @@ public final class Board {
     /**
      * Returns the placed tile at the specified position on the board.
      *
-     * @param pos The position to query
-     * @return The placed tile at the specified position, or null if no tile is present
+     * @param pos the specified position
+     * @return the placed tile at the specified position, or null if no tile is present
      */
     public PlacedTile tileAt(Pos pos) {
-        // TODO check valid pos?
-        for (PlacedTile tile : placedTiles) {
-            if (tile.pos().equals(pos)) {
-                return tile;
-            }
-        }
-        return null;
+        return placedTiles[25 * (pos.y() + REACH) + (pos.x() + REACH)]; // TODO 25 or REACH*2+1 ? placedTiles.size() sqrt
     }
 
     /**
      * Returns the placed tile with the specified tile ID.
      *
-     * @param tileId The ID of the tile to retrieve
-     * @return The placed tile with the specified ID
-     * @throws IllegalArgumentException If no tile with the given ID is found
+     * @param tileId the ID of the tile to retrieve
+     * @return the placed tile with the specified ID
+     * @throws IllegalArgumentException if no tile with the given ID is found
      */
     public PlacedTile tileWithId(int tileId) {
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (PlacedTile tile : placedTiles) { // TODO iterating over placedTiles
+            if (tile.id() == tileId) {
+                return tile;
+            }
+        }
+        /*for (int i = 0; i < tileIndexes.length; i++) {
             if (tileIndexes[i] == tileId) {
                 return placedTiles[i];
             }
-        }
+        }*/
         throw new IllegalArgumentException();
     }
 
     /**
      * Returns a set containing all cancelled animals on the board.
      *
-     * @return A set of cancelled animals
+     * @return a set of cancelled animals
      */
     public Set<Animal> cancelledAnimals() {
         return Set.copyOf(canceledAnimals);
@@ -95,7 +92,7 @@ public final class Board {
     /**
      * Returns a set containing all occupants present on the board.
      *
-     * @return A set of occupants
+     * @return a set of occupants
      */
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
@@ -110,75 +107,52 @@ public final class Board {
     /**
      * Returns the forest area containing the specified forest zone.
      *
-     * @param forest The forest zone to search for
-     * @return The forest area containing the specified zone
-     * @throws IllegalArgumentException If the specified forest zone does not belong to the board
+     * @param forest the forest zone to search for
+     * @return the forest area containing the specified zone
+     * @throws IllegalArgumentException if the specified forest zone does not belong to the board
      */
     public Area<Zone.Forest> forestArea(Zone.Forest forest) {
-        // TODO checkArgument();
         return zonePartitions.forests().areaContaining(forest);
-
-        /*for (PlacedTile tile : placedTiles) {
-            if (tile != null && !tile.forestZones().isEmpty()) {
-                // return areaContaining(forest)??
-            }
-        }*/
     }
 
     /**
      * Returns the meadow area containing the specified meadow zone.
      *
-     * @param meadow The meadow zone to search for
-     * @return The meadow area containing the specified zone
-     * @throws IllegalArgumentException If the specified meadow zone does not belong to the board
+     * @param meadow the meadow zone to search for
+     * @return the meadow area containing the specified zone
+     * @throws IllegalArgumentException if the specified meadow zone does not belong to the board
      */
     public Area<Zone.Meadow> meadowArea(Zone.Meadow meadow) {
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null && tile.meadowZones().contains(meadow)) {
-                return zonePartitions.meadows().areaContaining(meadow);
-            }
-        }
-        checkArgument(zonePartitions.meadows().areas().contains(meadow));
-        throw new IllegalArgumentException();
+        return zonePartitions.meadows().areaContaining(meadow);
     }
 
     /**
      * Returns the river area containing the specified river zone.
      *
-     * @param riverZone The river zone to search for
-     * @return The river area containing the specified zone
-     * @throws IllegalArgumentException If the specified river zone does not belong to the board
+     * @param riverZone the river zone to search for
+     * @return the river area containing the specified zone
+     * @throws IllegalArgumentException if the specified river zone does not belong to the board
      */
     public Area<Zone.River> riverArea(Zone.River riverZone) {
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null && tile.riverZones().contains(riverZone)) {
-                return zonePartitions.rivers().areaContaining(riverZone);
-            }
-        }
-        throw new IllegalArgumentException();
+        return zonePartitions.rivers().areaContaining(riverZone);
     }
 
     /**
      * Returns the river system area containing the specified water zone.
      *
-     * @param water The water zone to search for
-     * @return The river system area containing the specified zone
-     * @throws IllegalArgumentException If the specified water zone does not belong to the board
+     * @param water the water zone to search for
+     * @return the river system area containing the specified zone
+     * @throws IllegalArgumentException if the specified water zone does not belong to the board
      *                                  or if the method is not yet implemented
      */
     public Area<Zone.Water> riverSystemArea(Zone.Water water) {
         return zonePartitions.riverSystems().areaContaining(water);
-        //for (PlacedTile tile : placedTiles) {
-            //TODO check what sort of zones are being used here??
-            //if (tile != null && tile.riverZones().contains(water)) {
-              //  return zonePartitions.rivers().areaContaining(water);
-            //}
     }
 
     /**
      * Returns a set containing all meadow areas on the board.
      *
-     * @return A set of meadow areas
+     * @return a set of meadow areas
      */
     public Set<Area<Zone.Meadow>> meadowAreas() {
         return zonePartitions.meadows().areas();
@@ -187,7 +161,7 @@ public final class Board {
     /**
      * Returns the set of areas representing the hydrographic network on the board.
      *
-     * @return The set of areas representing the hydrographic network
+     * @return the set of areas representing the hydrographic network
      */
     public Set<Area<Zone.Water>> riverSystemAreas() {
         return zonePartitions.riverSystems().areas();
@@ -196,9 +170,9 @@ public final class Board {
     /**
      * Returns the area representing the meadow adjacent to the given position.
      *
-     * @param pos         The position to check for adjacent meadow
-     * @param meadowZone  The meadow zone to which the adjacent meadow belongs
-     * @return The area representing the adjacent meadow
+     * @param pos the position to check for adjacent meadow
+     * @param meadowZone the meadow zone to which the adjacent meadow belongs
+     * @return the area representing the adjacent meadow
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> zones = new HashSet<>();
@@ -223,9 +197,9 @@ public final class Board {
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
         for (PlacedTile tile : placedTiles) {
-            if (tile != null ) {
-                //TODO: For Gehna need to finish!
-                return 0;
+            if (tile != null && tile.occupant() != null
+                    && tile.occupant().kind() == occupantKind && tile.placer() == player) {
+                count++;
                 }
             }
         return count;
@@ -249,35 +223,25 @@ public final class Board {
                 }
             }
         }
-
         return positions;
     }
 
     /**
      * Returns the last placed tile on the board.
      *
-     * @return The last placed tile, or null if the board is empty
+     * @return the last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
         if (tileIndexes.length != 0) {
             return placedTiles[tileIndexes[tileIndexes.length - 1]];
         }
         return null;
-
-        // TODO null if the board is empty ?
-
-        /*for (int i = placedTiles.length - 1; i >= 0; i--) {
-            if (placedTiles[i] != null) {
-                return placedTiles[i];
-            }
-        }
-        return null;*/
     }
 
     /**
      * Returns the set of forest areas closed by placing the last tile on the board.
      *
-     * @return The set of forest areas closed by the last tile, or an empty set if the board is empty
+     * @return the set of forest areas closed by the last tile, or an empty set if the board is empty
      */
     public Set<Area<Zone.Forest>> forestsClosedByLastTile() {
         Set<Area<Zone.Forest>> forests = new HashSet<>();
@@ -298,20 +262,34 @@ public final class Board {
     /**
      * Returns the set of river areas closed by placing the last tile on the board.
      *
-     * @return The set of river areas closed by the last tile, or an empty set if the board is empty
+     * @return the set of river areas closed by the last tile, or an empty set if the board is empty
      */
     Set<Area<Zone.River>> riversClosedByLastTile() {
-        //TODO strugulling with this one!  -- GEHNA tODO
-        return null;
+        Set<Area<Zone.River>> rivers = new HashSet<>();
+
+        for (var area : zonePartitions.rivers().areas()) {
+            if (area.isClosed() && lastPlacedTile() != null) {
+                for (var zone : lastPlacedTile().riverZones()) {
+                    if (area.zones().contains(zone)) {
+                        rivers.add(area);
+                    }
+                }
+            }
+        }
+        return rivers;
+
     }
 
     /**
-     * Returns true iff the given placed tile could be added to the board.
-     * //TODO
+     * Returns true iff the given placed tile could be added to the board,
+     * i.e. if its position is an insertion position and each edge of the tile which touches an edge
+     * of an already placed tile is of the same type as it.
+     *
      * @param tile the given placed tile
      * @return true iff the given placed tile could be added to the board
      */
     boolean canAddTile(PlacedTile tile) {
+        // TODO rotation?
         return insertionPositions().contains(tile.pos());
     }
 
@@ -324,8 +302,7 @@ public final class Board {
      * board, possibly after rotation
      */
     boolean couldPlaceTile(Tile tile) {
-        //TODO roate
-        return false;
+        // TODO
     }
 
     /**
@@ -359,10 +336,22 @@ public final class Board {
     Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
 
+        PlacedTile lastPlaced = lastPlacedTile();
+        if (lastPlaced != null) {
+            for (int i = 0; i < myPlacedTiles.length; i++) {
+                if (myPlacedTiles[i].equals(lastPlaced)) {
+                    myPlacedTiles[i] = lastPlaced.withOccupant(occupant);
+
+                    return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
+                }
+            }
+        }
+
         for (PlacedTile tile : myPlacedTiles) {
             if (tile.potentialOccupants().contains(occupant)
                     && tile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-                Objects.requireNonNull(lastPlacedTile()).withOccupant(occupant); //TODO
+
+                //myPlacedTiles lastPlacedTile().withOccupant(occupant)
 
                 return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
@@ -386,8 +375,6 @@ public final class Board {
                 return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
         }
-        //giving error if there was no return here
-        return null;
     }
 
     /**
@@ -433,6 +420,5 @@ public final class Board {
 
     @Override
     public int hashCode() {
-        return 0;
     }
 }
