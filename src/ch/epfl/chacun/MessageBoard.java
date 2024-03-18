@@ -1,8 +1,5 @@
 package ch.epfl.chacun;
 
-import static ch.epfl.chacun.Area.animals;
-import static ch.epfl.chacun.Animal.Kind;
-
 import java.util.*;
 
 import static ch.epfl.chacun.Points.*;
@@ -22,7 +19,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     /**
      * Constructs a new MessageBoard with the specified text maker and messages.
      */
-    public MessageBoard {
+    public MessageBoard { //TODO
         messages = List.copyOf(messages);
     }
 
@@ -43,7 +40,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical display table to the receiver, unless the given forest is occupied, in
+     * Returns an identical message board to the receiver, unless the given forest is occupied, in
      * which case the table contains a new message indicating that its majority occupants have won
      * the points associated with its closure.
      *
@@ -57,20 +54,24 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
             int mushroomGroupCount = Area.mushroomGroupCount(forest);
             int tileCount = forest.tileIds().size();
 
-            messages.add(new Message(textMaker.playersScoredForest(scorers, points, mushroomGroupCount, tileCount),
-                    points, scorers, forest.tileIds()));
+            Message newMessage = new Message(textMaker.playersScoredForest(scorers, points, mushroomGroupCount, tileCount),
+                    points, scorers, forest.tileIds());
+
+            List<Message> updatedMessages = new ArrayList<>(this.messages);
+            updatedMessages.add(newMessage);
+            return new MessageBoard(this.textMaker, updatedMessages);
         }
         return this;
     }
 
     /**
-     * Returns an identical display board to the receiver, but with a new message indicating that
+     * Returns an identical message board to the receiver, but with a new message indicating that
      * the given player has the right to play a second round after having closed the given forest,
      * because it contains one or more menhirs.
      *
      * @param player the given player
      * @param forest the given forest
-     * @return an identical display board to the receiver, but with a new message
+     * @return an updated MessageBoard
      */
     public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) {
         Set<PlayerColor> scorers = forest.majorityOccupants();
@@ -82,12 +83,12 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical display table to the receiver, unless the given river is occupied,
+     * Returns an identical message board to the receiver, unless the given river is occupied,
      * in which case the table contains a new message indicating that its majority occupants have
      * won the points associated with its closure.
      *
      * @param river the scored river area
-     * @return an identical display table or a new message
+     * @return an identical or updated MessageBoard
      */
     public MessageBoard withScoredRiver(Area<Zone.River> river) {
         if (river.isOccupied()) {
@@ -96,20 +97,23 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
             int fishCount = Area.riverFishCount(river);
             int tileCount = river.tileIds().size();
 
-            messages.add(new Message(textMaker.playersScoredRiver(scorers, points, fishCount, tileCount),
-                    points, scorers, river.tileIds()));
+            Message newMessage = new Message(textMaker.playersScoredRiver(scorers, points, fishCount, tileCount),
+                    points, scorers, river.tileIds());
+
+            List<Message> updatedMessages = new ArrayList<>(this.messages);
+            updatedMessages.add(newMessage);
+            return new MessageBoard(this.textMaker, updatedMessages);
         }
         return this;
     }
 
     /**
-     * Returns an identical display board to the receiver, unless placing the stake pit earned
+     * Returns an identical message board to the receiver, unless placing the stake pit earned
      * points for the given player who placed it.
      *
      * @param scorer the given player
      * @param adjacentMeadow the given meadow
-     * @return the given meadow comprising the same occupants as the meadow containing the pit,
-     * but only the areas within its reach
+     * @return an identical or updated MessageBoard
      */
     public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
         int points = meadowPoints(adjacentMeadow, Set.of());
@@ -125,13 +129,13 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical display board to the receiver, but with a new message indicating that
+     * Returns an identical message board to the receiver, but with a new message indicating that
      * the given player has obtained the points corresponding to the installation of the canoe in
      * the given hydrographic network.
      *
      * @param scorer the player who scored with the logboat
      * @param riverSystem the river system area where the logboat is placed
-     * @return an identical display board to the receiver, but with a new message
+     * @return an updated MessageBoard
      */
     public MessageBoard withScoredLogboat(PlayerColor scorer, Area<Zone.Water> riverSystem) {
         int points = forLogboat(Area.lakeCount(riverSystem));
@@ -144,12 +148,12 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical display table to the receiver, unless the given meadow is occupied and
+     * Returns an identical message board to the receiver, unless the given meadow is occupied and
      * the points it brings to its majority occupants.
      *
      * @param meadow the given meadow
      * @param cancelledAnimals the given canceled animals
-     * @return an identical display table or a new message
+     * @return an identical or updated MessageBoard
      */
     public MessageBoard withScoredMeadow(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
         int points = meadowPoints(meadow, cancelledAnimals);
@@ -157,18 +161,22 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         if (meadow.isOccupied() && points > 0) {
             Set<PlayerColor> scorers = meadow.majorityOccupants();
 
-            messages.add(new Message(textMaker.playersScoredMeadow(scorers, points, meadowAnimals(meadow, cancelledAnimals)),
-            points, scorers, meadow.tileIds()));
+            Message newMessage = new Message(textMaker.playersScoredMeadow(scorers, points, meadowAnimals(meadow, cancelledAnimals)),
+            points, scorers, meadow.tileIds());
+
+            List<Message> updatedMessages = new ArrayList<>(this.messages);
+            updatedMessages.add(newMessage);
+            return new MessageBoard(this.textMaker, updatedMessages);
         }
         return this;
     }
 
     /**
-     * Returns an identical display table to the receiver, unless the given hydrographic network is
+     * Returns an message board to the receiver, unless the given hydrographic network is
      * occupied and the points it brings to its majority occupants are greater than 0.
      *
      * @param riverSystem the given riverSystem
-     * @return an identical display table or a new message
+     * @return an identical or updated MessageBoard //TODo from here
      */
     public MessageBoard withScoredRiverSystem(Area<Zone.Water> riverSystem) {
         int fishCount = Area.riverSystemFishCount(riverSystem);
@@ -183,7 +191,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical display board to the receiver, unless the given meadow, which contains
+     * Returns an identical message board to the receiver, unless the given meadow, which contains
      * the large pile pit, is occupied and the points are greater than 0.
      *
      * @param adjacentMeadow the given meadow
@@ -203,7 +211,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
 
 
     /**
-     * Returns an identical display table to the receiver, unless the given hydrographic network is
+     * Returns an identical message board to the receiver, unless the given hydrographic network is
      * occupied.
      *
      * @param riverSystem the given river system
@@ -221,7 +229,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns an identical scoreboard to the receiver, but with a new message indicating that the
+     * Returns an identical message board to the receiver, but with a new message indicating that the
      * given player(s) won the game with the given number of points.
      *
      * @param winners the given player(s)

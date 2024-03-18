@@ -9,28 +9,24 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 /**
  * Represents the game board.
  *
- * @author Sam Lee (375535)
  * @author Gehna Yadav (379155)
+ * @author Sam Lee (375535)
  */
-
 public final class Board {
     /**
      * Array of placed tiles, containing 625 elements mostly equal to null.
      */
     private final PlacedTile[] placedTiles;
     /**
-     * Array of integers, containing the indexes, in the first array, of the placed tiles, in the
-     * order in which they were placed.
+     * Tile indexes in the order in which they were placed.
      */
     private final int[] tileIndexes;
     /**
      * Contains the partitions on the board (those of the zones of the placed tiles).
      */
     private final ZonePartitions zonePartitions;
-    /**
-     * Set of cancelled animals on the board.
-     */
     private final Set<Animal> canceledAnimals;
+    
     /**
      * Represents the range of the board.
      */
@@ -39,13 +35,14 @@ public final class Board {
      * Empty board instance.
      */
     public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
+
     /**
      * Constructs a new Board instance.
      *
-     * @param placedTiles      Array of placed tiles
-     * @param tileIndexes      Array of tile indexes
-     * @param zonePartitions   Zone partitions
-     * @param canceledAnimals  Set of cancelled animals
+     * @param placedTiles Array of placed tiles
+     * @param tileIndexes Array of tile indexes
+     * @param zonePartitions Zone partitions
+     * @param canceledAnimals Set of cancelled animals
      */
     private Board(PlacedTile[] placedTiles, int[] tileIndexes, ZonePartitions zonePartitions, Set<Animal> canceledAnimals) {
         this.placedTiles = placedTiles;
@@ -428,11 +425,6 @@ public final class Board {
         return new Board(placedTiles, tileIndexes, zonePartitions, canceledAnimals);
     }
 
-    /**
-     *
-     * @param
-     * @return
-     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -443,10 +435,6 @@ public final class Board {
                 Objects.equals(canceledAnimals, board.canceledAnimals);
     }
 
-    /**
-     *
-     * @return
-     */
     @Override
     public int hashCode() {
         return 0;
