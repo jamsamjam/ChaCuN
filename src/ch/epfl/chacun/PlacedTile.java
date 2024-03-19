@@ -187,8 +187,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
      * @return a placed tile identical to the receiver, but without occupant
      */
     public PlacedTile withNoOccupant() {
-        return new PlacedTile(tile, placer, rotation, pos,
-                null);
+        return new PlacedTile(tile, placer, rotation, pos, null);
     }
 
     /**

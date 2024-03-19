@@ -15,10 +15,10 @@ public record Occupant(Kind kind, int zoneId) {
     /**
      * Constructor of Occupant.
      *
-     * @param kind kind of occupant
-     * @param zoneId zone ID
-     * @throws NullPointerException If kind is null
-     * @throws IllegalArgumentException If zone ID is strictly negative
+     * @param kind the type of occupant
+     * @param zoneId the identifier of the zone in which the occupant is located
+     * @throws NullPointerException if kind is null
+     * @throws IllegalArgumentException if zoneId is strictly negative
      */
     public Occupant {
         Objects.requireNonNull(kind);

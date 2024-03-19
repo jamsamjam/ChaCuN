@@ -134,7 +134,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
          * Adds an initial occupant (both a pawn and a hut), of the given kind and belonging to the
          * given player, to the area containing the given zone.
          *
-         * @param player       the given player
+         * @param player the given player
          * @param occupantKind the given kind
          * @param occupiedZone the given zone
          * @throws IllegalArgumentException if the given sort of occupant cannot occupy an area of

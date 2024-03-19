@@ -69,7 +69,7 @@ public final class Board {
      * @throws IllegalArgumentException if no tile with the given ID is found
      */
     public PlacedTile tileWithId(int tileId) {
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i : tileIndexes) {
             if (tileIndexes[i] == tileId) {
                 return placedTiles[i];
             }
@@ -93,12 +93,11 @@ public final class Board {
      */
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i : tileIndexes) {
             if (placedTiles[i] != null){
                 allOccupants.add(placedTiles[i].occupant());
             }
         }
-
         return allOccupants;
     }
 
@@ -177,7 +176,7 @@ public final class Board {
         // Get all the meadow zones in the adjacent area
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i : tileIndexes) {
             Pos pos1 = placedTiles[i].pos();
 
             if (pos1.equals(pos.translated(1, 1)) || pos1.equals(pos.translated(-1, 1)) ||
@@ -211,7 +210,7 @@ public final class Board {
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i : tileIndexes) {
             if(placedTiles[i] != null && placedTiles[i].occupant() != null
                     && placedTiles[i].occupant().kind() == occupantKind && placedTiles[i].placer() == player){
                 count++;
@@ -226,13 +225,9 @@ public final class Board {
      * @return the set of insertion positions on the board
      */
     public Set<Pos> insertionPositions() {
-        /*if (tileIndexes.length == 0) {
-            return Set.of(new Pos(0, 0));
-        } */// TODO empty board that is why i think this method needs to be called after the board has been initialized  withnewtile
-
         Set<Pos> positions = new HashSet<>();
 
-        for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i : tileIndexes) {
             for (Direction d : Direction.ALL) {
                 Pos pos = placedTiles[i].pos();
 
@@ -276,7 +271,6 @@ public final class Board {
                 }
             }
         }
-
         return forests;
     }
 
@@ -320,7 +314,6 @@ public final class Board {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -332,19 +325,14 @@ public final class Board {
      * @return true iff the given tile could be placed on one of the insertion positions of the
      * board, possibly after rotation
      */
-    boolean couldPlaceTile(Tile tile) { // TODo why Tile here ?
+    boolean couldPlaceTile(Tile tile) {
         for (var pos : insertionPositions()) {
             for (var rotation : Rotation.ALL) {
-                if (tile.sides() : )
-                //canAddTile(tileAt(pos).side());
-                tile.sides(rotation.negated());
-                //rotated tile
-                        /*tileAt(pos).rotation()
-                        rotated(rotation.negated()))
-                tile.sides().side(rotation.negated());*/
+                PlacedTile placedTile = new PlacedTile(tile, null, rotation, pos);
+                return canAddTile(placedTile);
             }
         }
-        // TODO ite on pos(placedtile create), 4 possible rotations
+        return false;
     }
 
     /**
@@ -368,7 +356,7 @@ public final class Board {
 
         if (canAddTile(tile)) {
             for (var direction : Direction.ALL) {
-                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
+                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO use addTile
             }
             for (var zone : tile.meadowZones()) {
                 myCanceledAnimals.addAll(zone.animals());
@@ -387,21 +375,23 @@ public final class Board {
      * @throws IllegalArgumentException if the tile on which the occupant would be located is
      * already occupied
      */
-    Board withOccupant(Occupant occupant) {
+    Board withOccupant(Occupant occupant) { // TODO why occupant has zoneId before it's placed
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
+        PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        if (lastPlacedTile() != null && lastPlacedTile().potentialOccupants().contains(occupant)
-                && lastPlacedTile().idOfZoneOccupiedBy(occupant.kind()) == -1) {
+        if (myTile != null && myTile.potentialOccupants().contains(occupant)
+                && myTile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
 
-            myPlacedTiles[tileIndexes.length - 1].withOccupant(occupant);
-
-            // builder. add(occupant)
+            myTile.withOccupant(occupant);
+            builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
+            // TODO occupant.zoneId() vs. idOfZoneOccupiedBy(occupant.kind())
 
             return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
         }
 
         throw new IllegalArgumentException();
+        // We can raise an exception when the given tile isn't on the board (prof forgot)
     }
 
     /**
@@ -413,14 +403,16 @@ public final class Board {
     Board withoutOccupant(Occupant occupant) { // you can only remove the pawns (shouldn't be implemented for now)
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
+        PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        for (int i = 0; i < tileIndexes.length; i++) {
+        // https://edstem.org/eu/courses/1101/discussion/97108
+
+        for (int i : tileIndexes) {
             if (placedTiles[i].occupant().equals(occupant)) {
                 myPlacedTiles[i]= placedTiles[i].withNoOccupant();
+                builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId())); // TODO
             }
         }
-
-        //builder.removePawn(occupant.);
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
@@ -433,13 +425,31 @@ public final class Board {
      * @return a board identical to the receiver but without any occupant in the given forests and rivers
      */
     Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
-        for (var area : forests) {
-            area.withoutOccupants();
+        PlacedTile[] myPlacedTiles = placedTiles.clone();
+        ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
+
+        for (var forest : forests) {
+            //  sortir celles dont l'occupant est sur une zone qui appartient à l'ensemble des aires passées en argument
+            for (int i : tileIndexes) {
+                if (forest.isOccupied() && forest.occupants().contains()) {
+                    // TODO only if their occupant is a pawn and not a hut
+                    placedTiles[i].withNoOccupant(); // TODO forestArea
+                }
+            }
+            builder.clearGatherers(forest);
         }
-        for (var area : rivers) {
-            area.withoutOccupants();
+
+        for (var river : rivers) {
+            for (int i : tileIndexes) {
+                if (river.isOccupied() && river.occupants().contains()) {
+                    // TODO only if their occupant is a pawn and not a hut
+                    placedTiles[i].withNoOccupant();
+                }
+            }
+            builder.clearFishers(river);
         }
-        return this; // how to update?
+
+        return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
 
     /**
@@ -451,13 +461,13 @@ public final class Board {
      * of cancelled animals
      */
     Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
-        Set<Animal> myCanceledAnimals = Set.copyOf(canceledAnimals);
-        // myCanceledAnimals.addAll(newlyCancelledAnimals);
-        return new Board(placedTiles, tileIndexes, zonePartitions, canceledAnimals);
+        Set<Animal> myCanceledAnimals = cancelledAnimals();
+        myCanceledAnimals.addAll(newlyCancelledAnimals); // TODO
+        return new Board(placedTiles, tileIndexes, zonePartitions, myCanceledAnimals);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o) { // TODO prob not correct
         if (o == null || getClass() != o.getClass()) return false;
         Board board = (Board) o;
         return Arrays.equals(placedTiles, board.placedTiles) &&
