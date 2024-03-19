@@ -122,10 +122,10 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.River(Zone.Meadow mm1, Zone.River r2,
                                                           Zone.Meadow mm2) -> {
                         riverBuilder.union(r1, r2);
-                        riverSystemBuilder.union(r1, r2); // TODO
+                        riverSystemBuilder.union(r1, r2);
                         meadowBuilder.union(m1, mm2);
                         meadowBuilder.union(m2, mm1);
-                        } //TODO
+                        }
                 default -> throw new IllegalArgumentException();
             }
         }
@@ -151,7 +151,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         meadowBuilder.addInitialOccupant(m1, player);
                 case Zone.River r1
                         when occupantKind.equals(Occupant.Kind.PAWN) || !r1.hasLake() ->
-                        riverBuilder.addInitialOccupant(r1, player);
+                        riverBuilder.addInitialOccupant(r1, player); // TODO
                 case Zone.Lake l1
                         when occupantKind.equals(Occupant.Kind.HUT) ->
                         riverSystemBuilder.addInitialOccupant(l1, player);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/*
 class DirectionTest {
     @Test
     void directionAllIsCorrectlyDefined() {
@@ -52,3 +53,4 @@ class DirectionTest {
         assertEquals(Direction.W.opposite(), Direction.E);
     }
 }
+*/

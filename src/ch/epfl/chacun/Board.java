@@ -29,10 +29,12 @@ public final class Board {
      * Represents the range of the board.
      */
     public static final int REACH = 12;
+    private static final int LENGTH = REACH * 2 + 1;
+
     /**
      * Empty board instance.
      */
-    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of()); // TODO
+    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
 
     /**
      * Constructs a new Board instance.
@@ -56,7 +58,7 @@ public final class Board {
      * @return the placed tile at the specified position, or null if no tile is present
      */
     public PlacedTile tileAt(Pos pos) {
-        return placedTiles[25 * (pos.y() + REACH) + (pos.x() + REACH)]; // TODO 25 or REACH*2+1 ? placedTiles.size() sqrt
+        return placedTiles[LENGTH * (pos.y() + REACH) + (pos.x() + REACH)];
     }
 
     /**
@@ -67,16 +69,11 @@ public final class Board {
      * @throws IllegalArgumentException if no tile with the given ID is found
      */
     public PlacedTile tileWithId(int tileId) {
-        for (PlacedTile tile : placedTiles) { // TODO iterating over placedTiles
-            if (tile.id() == tileId) {
-                return tile;
-            }
-        }
-        /*for (int i = 0; i < tileIndexes.length; i++) {
+        for (int i = 0; i < tileIndexes.length; i++) {
             if (tileIndexes[i] == tileId) {
                 return placedTiles[i];
             }
-        }*/
+        }
         throw new IllegalArgumentException();
     }
 
@@ -222,7 +219,6 @@ public final class Board {
                     }
                 }
             }
-        }
         return positions;
     }
 
@@ -289,8 +285,20 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     boolean canAddTile(PlacedTile tile) {
-        // TODO rotation?
-        return insertionPositions().contains(tile.pos());
+        if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null) {
+            return false;
+        }
+
+        for (var pos : insertionPositions()) {
+            for (var direction : Direction.values()) {
+                if (tileAt(pos.neighbor(direction)) != null
+                        && !tileAt(pos).side(direction).isSameKindAs(tileAt(pos.neighbor(direction)).side(direction.opposite()))) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -302,7 +310,17 @@ public final class Board {
      * board, possibly after rotation
      */
     boolean couldPlaceTile(Tile tile) {
-        // TODO
+        for (var pos : insertionPositions()) {
+            for (var rotation : Rotation.values()) {
+                canAddTile(tileAt(pos).side();
+                rotation.negated();
+                //rotated tile
+                        tileAt(pos).rotation()
+                        rotated(rotation.negated()))
+                tile.sides().side(rotation.negated());
+            }
+        }
+        // TODO ite on pos(placedtile create), 4 possible rotations
     }
 
     /**
@@ -319,8 +337,11 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
 
-        // myPlacedTiles[] = tile; TODO position?
-        myTileIndexes[myTileIndexes.length] = tile.id(); // why outOfBound ?
+        //placedTiles[myTileIndexes.length] == tileAt(tile.pos());
+
+        myTileIndexes[tileIndexes.length + 1] = tile pos
+
+        // why outOfBound ?
 
         return new Board(myPlacedTiles, myTileIndexes, zonePartitions, canceledAnimals);
     }
@@ -336,26 +357,14 @@ public final class Board {
     Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
 
-        PlacedTile lastPlaced = lastPlacedTile();
-        if (lastPlaced != null) {
-            for (int i = 0; i < myPlacedTiles.length; i++) {
-                if (myPlacedTiles[i].equals(lastPlaced)) {
-                    myPlacedTiles[i] = lastPlaced.withOccupant(occupant);
+        if (lastPlacedTile() != null && lastPlacedTile().potentialOccupants().contains(occupant)
+                && lastPlacedTile().idOfZoneOccupiedBy(occupant.kind()) == -1) {
 
-                    return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
-                }
-            }
+            myPlacedTiles[tileIndexes.length - 1].withOccupant(occupant);
+
+            return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
         }
 
-        for (PlacedTile tile : myPlacedTiles) {
-            if (tile.potentialOccupants().contains(occupant)
-                    && tile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-
-                //myPlacedTiles lastPlacedTile().withOccupant(occupant)
-
-                return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
-            }
-        }
         throw new IllegalArgumentException();
     }
 
@@ -365,7 +374,7 @@ public final class Board {
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant less
      */
-    Board withoutOccupant(Occupant occupant) {
+    Board withoutOccupant(Occupant occupant) { // TODO
         PlacedTile[] myPlacedTiles = placedTiles.clone();
 
         for (PlacedTile tile : myPlacedTiles) {
@@ -375,6 +384,7 @@ public final class Board {
                 return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
             }
         }
+        return null;
     }
 
     /**
@@ -420,5 +430,6 @@ public final class Board {
 
     @Override
     public int hashCode() {
+        return 0;
     }
 }

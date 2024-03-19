@@ -4,7 +4,7 @@ import java.util.*;
 
 import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;
-// TODO double check
+
 /**
  * Represents the contents of a bulletin board.
 
@@ -18,7 +18,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     /**
      * Constructs a new MessageBoard with the specified text maker and messages.
      */
-    public MessageBoard { //TODO
+    public MessageBoard {
         messages = List.copyOf(messages);
     }
 
@@ -56,7 +56,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
             Message newMessage = new Message(textMaker.playersScoredForest(scorers, points, mushroomGroupCount, tileCount),
                     points, scorers, forest.tileIds());
 
-            return update(newMessage); // TODO returned correctly?
+            return update(newMessage);
         }
         return this;
     }
@@ -70,9 +70,8 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param forest the given forest
      * @return an updated MessageBoard
      */
-    public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) {
+    public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) { // TODO should be called with withScoredForest
         Message newMessage = new Message(textMaker.playerClosedForestWithMenhir(player), 0, Set.of(), forest.tileIds());
-        // TODO empty sets + no point?
 
         return update(newMessage);
     }
