@@ -172,22 +172,34 @@ public final class Board {
      * @param meadowZone the meadow zone to which the adjacent meadow belongs
      * @return the area representing the adjacent meadow
      */
-    public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) { // TODO
-        Set<Zone.Meadow> zones = new HashSet<>();
-        List<PlayerColor> occupants = new ArrayList<>();
+    public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
 
-        for(Direction direction: Direction.values()) {
-            occupants.addAll(meadowArea(meadowZone).occupants());
-            PlacedTile tile = tileAt(pos.neighbor(direction));
+        // Get all the meadow zones in the adjacent area
+        Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
-            /*for (var zone : tile.meadowZones()) {
-                if (zone)
+        for (int i = 0; i < tileIndexes.length; i++) {
+            Pos pos1 = placedTiles[i].pos();
+
+            if (pos1.equals(pos.translated(1, 1)) || pos1.equals(pos.translated(-1, 1)) ||
+                    pos1.equals(pos.translated(1, -1)) || pos1.equals(pos.translated(-1, -1))) {
+                adjacentMeadows.addAll(tileAt(pos1).meadowZones());
             }
-            if (tile.meadowZones())
-            zones.addAll(tileAt(pos.neighbor(direction)).meadowZones());*/
+
+            for(var direction : Direction.values()) {
+                adjacentMeadows.addAll(tileAt(pos.neighbor(direction)).meadowZones());
+            }
         }
 
-        return new Area<>(zones, occupants,0);
+        // Check if it's in the same area as meadowZone
+        Set<Zone.Meadow> myMeadows = new HashSet<>();
+
+        for (var zone : adjacentMeadows) {
+            if (zonePartitions.meadows().areaContaining(meadowZone).zones().contains(zone)) {
+                myMeadows.add(zone);
+            }
+        }
+
+        return new Area<>(myMeadows, meadowArea(meadowZone).occupants(), 0); // TODO immu
     }
 
     /**
@@ -214,17 +226,24 @@ public final class Board {
      * @return the set of insertion positions on the board
      */
     public Set<Pos> insertionPositions() {
+        if (tileIndexes.length == 0) {
+            return Set.of(new Pos(0, 0));
+        } // TODO empty board
+
         Set<Pos> positions = new HashSet<>();
 
-        for (int i = 0; i < tileIndexes.length; i++) // TODO
-            for (Direction d : Direction.values()){
-                if (placedTiles[i] != null) {
-                    Pos pos = placedTiles[i].pos();
-                    if (tileAt(pos.neighbor(d)) == null) {
-                        positions.add(pos.neighbor(d));
-                    }
+        for (int i = 0; i < tileIndexes.length; i++) {
+            for (Direction d : Direction.ALL) {
+                Pos pos = placedTiles[i].pos();
+
+                // the position is not on the edge
+                if (tileAt(pos.neighbor(d)) == null
+                        && pos.neighbor(d).x() >= -12 && pos.neighbor(d).x() <= 12
+                        && pos.neighbor(d).y() >= -12 && pos.neighbor(d).y() <= 12) {
+                    positions.add(pos.neighbor(d));
                 }
             }
+        }
         return positions;
     }
 
@@ -295,12 +314,10 @@ public final class Board {
             return false;
         }
 
-        for (var pos : insertionPositions()) {
-            for (var direction : Direction.values()) {
-                if (tileAt(pos.neighbor(direction)) != null
-                        && !tileAt(pos).side(direction).isSameKindAs(tileAt(pos.neighbor(direction)).side(direction.opposite()))) {
-                    return false;
-                }
+        for (var direction : Direction.ALL) {
+            if (tileAt(tile.pos().neighbor(direction)) != null
+                       && !tileAt(tile.pos()).side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite()))) {
+                return false;
             }
         }
 
@@ -337,8 +354,8 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    Board withNewTile(PlacedTile tile) {
-        checkArgument(tileIndexes.length != 0 && canAddTile(tile));
+    Board withNewTile(PlacedTile tile) { // TODO only used once at the beg ??
+        checkArgument(tileIndexes.length == 0 && canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
@@ -347,7 +364,7 @@ public final class Board {
 
         placedTiles[myTileIndexes.length - 1] = tile;
         myTileIndexes[myTileIndexes.length - 1] = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH); // TODO
-        myZonePartitions = new ZonePartitions()
+        //myZonePartitions = new ZonePartitions()
 
         return new Board(myPlacedTiles, myTileIndexes, myZonePartitions, myCanceledAnimals);
     }
