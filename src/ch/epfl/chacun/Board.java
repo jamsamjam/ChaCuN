@@ -312,12 +312,12 @@ public final class Board {
     boolean couldPlaceTile(Tile tile) {
         for (var pos : insertionPositions()) {
             for (var rotation : Rotation.values()) {
-                canAddTile(tileAt(pos).side();
+                //canAddTile(tileAt(pos).side());
                 rotation.negated();
                 //rotated tile
-                        tileAt(pos).rotation()
+                        /*tileAt(pos).rotation()
                         rotated(rotation.negated()))
-                tile.sides().side(rotation.negated());
+                tile.sides().side(rotation.negated());*/
             }
         }
         // TODO ite on pos(placedtile create), 4 possible rotations
@@ -337,9 +337,8 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
 
-        //placedTiles[myTileIndexes.length] == tileAt(tile.pos());
-
-        myTileIndexes[tileIndexes.length + 1] = tile pos
+        placedTiles[tileIndexes.length + 1] = tileAt(tile.pos());
+        myTileIndexes[tileIndexes.length + 1] = tile
 
         // why outOfBound ?
 

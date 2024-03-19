@@ -118,13 +118,13 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
 
-                case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m2)
-                        when s2 instanceof TileSide.River(Zone.Meadow mm1, Zone.River r2,
-                                                          Zone.Meadow mm2) -> {
+                case TileSide.River(Zone.Meadow z1, Zone.River r1, Zone.Meadow z2)
+                        when s2 instanceof TileSide.River(Zone.Meadow m1, Zone.River r2,
+                                                          Zone.Meadow m2) -> {
                         riverBuilder.union(r1, r2);
                         riverSystemBuilder.union(r1, r2);
-                        meadowBuilder.union(m1, mm2);
-                        meadowBuilder.union(m2, mm1);
+                        meadowBuilder.union(z1, m2);
+                        meadowBuilder.union(z2, m1);
                         }
                 default -> throw new IllegalArgumentException();
             }
