@@ -94,10 +94,11 @@ public final class Board {
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
         for (int i = 0; i < tileIndexes.length; i++) {
-            if(placedTiles[i] != null){
+            if (placedTiles[i] != null){
                 allOccupants.add(placedTiles[i].occupant());
             }
         }
+
         return allOccupants;
     }
 
@@ -171,7 +172,7 @@ public final class Board {
      * @param meadowZone the meadow zone to which the adjacent meadow belongs
      * @return the area representing the adjacent meadow
      */
-    public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
+    public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) { // TODO
         Set<Zone.Meadow> zones = new HashSet<>();
         List<PlayerColor> occupants = new ArrayList<>();
 
@@ -326,7 +327,6 @@ public final class Board {
             }
         }
         // TODO ite on pos(placedtile create), 4 possible rotations
-        return false;
     }
 
     /**
@@ -341,12 +341,15 @@ public final class Board {
         checkArgument(tileIndexes.length != 0 && canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1); // TODO
+        int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
+        ZonePartitions myZonePartitions = zonePartitions;
+        Set<Animal> myCanceledAnimals = Set.copyOf(canceledAnimals);
 
-        placedTiles[myTileIndexes.length] = tile;
-        myTileIndexes[myTileIndexes.length] = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH); // TODO outOfBounds?
+        placedTiles[myTileIndexes.length - 1] = tile;
+        myTileIndexes[myTileIndexes.length - 1] = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH); // TODO
+        myZonePartitions = new ZonePartitions()
 
-        return new Board(myPlacedTiles, myTileIndexes, zonePartitions, canceledAnimals);
+        return new Board(myPlacedTiles, myTileIndexes, myZonePartitions, myCanceledAnimals);
     }
 
     /**
@@ -377,17 +380,16 @@ public final class Board {
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant less
      */
-    Board withoutOccupant(Occupant occupant) { // TODO
+    Board withoutOccupant(Occupant occupant) { // you can only remove the pawns (x cared for now)
         PlacedTile[] myPlacedTiles = placedTiles.clone();
 
-        for (PlacedTile tile : myPlacedTiles) {
-            if (tile.occupant().equals(occupant)) {
-                tile.withNoOccupant();
-
-                return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
+        for (int i = 0; i < tileIndexes.length; i++) {
+            if (placedTiles[i].occupant().equals(occupant)) {
+                myPlacedTiles[i]= placedTiles[i].withNoOccupant();
             }
         }
-        return null;
+
+        return new Board(myPlacedTiles, tileIndexes, zonePartitions, canceledAnimals);
     }
 
     /**
