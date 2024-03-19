@@ -4,7 +4,7 @@ import ch.epfl.chacun.Rotation;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-/*
+
 class RotationTest {
     @Test
     void rotationAllIsCorrectlyDefined() {
@@ -67,5 +67,3 @@ class RotationTest {
         assertEquals(270, Rotation.LEFT.degreesCW());
     }
 }
-
- */
