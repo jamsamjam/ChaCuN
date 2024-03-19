@@ -179,11 +179,11 @@ public final class Board {
             occupants.addAll(meadowArea(meadowZone).occupants());
             PlacedTile tile = tileAt(pos.neighbor(direction));
 
-            for (var zone : tile.meadowZones()) {
+            /*for (var zone : tile.meadowZones()) {
                 if (zone)
             }
             if (tile.meadowZones())
-            zones.addAll(tileAt(pos.neighbor(direction)).meadowZones());
+            zones.addAll(tileAt(pos.neighbor(direction)).meadowZones());*/
         }
 
         return new Area<>(zones, occupants,0);
@@ -326,6 +326,7 @@ public final class Board {
             }
         }
         // TODO ite on pos(placedtile create), 4 possible rotations
+        return false;
     }
 
     /**
@@ -340,12 +341,10 @@ public final class Board {
         checkArgument(tileIndexes.length != 0 && canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
+        int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1); // TODO
 
-        placedTiles[tileIndexes.length + 1] = tileAt(tile.pos());
-        myTileIndexes[tileIndexes.length + 1] = tile
-
-        // why outOfBound ?
+        placedTiles[myTileIndexes.length] = tile;
+        myTileIndexes[myTileIndexes.length] = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH); // TODO outOfBounds?
 
         return new Board(myPlacedTiles, myTileIndexes, zonePartitions, canceledAnimals);
     }
