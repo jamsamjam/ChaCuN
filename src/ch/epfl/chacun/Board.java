@@ -93,9 +93,9 @@ public final class Board {
      */
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null) {
-                allOccupants.add(tile.occupant());
+        for (int i = 0; i < tileIndexes.length; i++) {
+            if(placedTiles[i] != null){
+                allOccupants.add(placedTiles[i].occupant());
             }
         }
         return allOccupants;
@@ -174,14 +174,19 @@ public final class Board {
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> zones = new HashSet<>();
         List<PlayerColor> occupants = new ArrayList<>();
-        //TODO
-        /*for (PlacedTile tile : placedTiles) {
-            if(tile.pos().equals(neiboringpos)) {
-                zones.add(tile.meadowZones());
+
+        for(Direction direction: Direction.values()) {
+            occupants.addAll(meadowArea(meadowZone).occupants());
+            PlacedTile tile = tileAt(pos.neighbor(direction));
+
+            for (var zone : tile.meadowZones()) {
+                if (zone)
             }
-        }*/
-        Area<Zone.Meadow> adjacentMeadow = new Area<>(zones, occupants, 0);
-        return null;
+            if (tile.meadowZones())
+            zones.addAll(tileAt(pos.neighbor(direction)).meadowZones());
+        }
+
+        return new Area<>(zones, occupants,0);
     }
 
     /**
@@ -193,12 +198,12 @@ public final class Board {
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
-        for (PlacedTile tile : placedTiles) {
-            if (tile != null && tile.occupant() != null
-                    && tile.occupant().kind() == occupantKind && tile.placer() == player) {
+        for (int i = 0; i < tileIndexes.length; i++) {
+            if(placedTiles[i] != null && placedTiles[i].occupant() != null
+                    && placedTiles[i].occupant().kind() == occupantKind && placedTiles[i].placer() == player){
                 count++;
-                }
             }
+        }
         return count;
     }
 
@@ -210,10 +215,10 @@ public final class Board {
     public Set<Pos> insertionPositions() {
         Set<Pos> positions = new HashSet<>();
 
-        for (PlacedTile tile : placedTiles) {
+        for (int i = 0; i < tileIndexes.length; i++) // TODO
             for (Direction d : Direction.values()){
-                if (tile != null) {
-                    Pos pos = tile.pos();
+                if (placedTiles[i] != null) {
+                    Pos pos = placedTiles[i].pos();
                     if (tileAt(pos.neighbor(d)) == null) {
                         positions.add(pos.neighbor(d));
                     }
