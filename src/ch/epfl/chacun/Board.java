@@ -1,7 +1,5 @@
 package ch.epfl.chacun;
 
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
-
 import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -26,17 +24,6 @@ public final class Board {
      */
     private final ZonePartitions zonePartitions;
     private final Set<Animal> canceledAnimals;
-    
-    /**
-     * Represents the range of the board.
-     */
-    public static final int REACH = 12;
-    private static final int LENGTH = REACH * 2 + 1;
-
-    /**
-     * Empty board instance.
-     */
-    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
 
     /**
      * Constructs a new Board instance.
@@ -52,6 +39,17 @@ public final class Board {
         this.zonePartitions = zonePartitions;
         this.canceledAnimals = canceledAnimals;
     }
+
+    /**
+     * Represents the range of the board.
+     */
+    public static final int REACH = 12;
+    private static final int LENGTH = REACH * 2 + 1;
+
+    /**
+     * Empty board instance.
+     */
+    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
 
     /**
      * Returns the placed tile at the specified position on the board.
@@ -196,7 +194,7 @@ public final class Board {
         Set<Zone.Meadow> myMeadows = new HashSet<>();
 
         for (var zone : adjacentMeadows) {
-            if (zonePartitions.meadows().areaContaining(meadowZone).zones().contains(zone)) {
+            if (meadowArea(meadowZone).zones().contains(zone)) {
                 myMeadows.add(zone);
             }
         }
@@ -281,7 +279,7 @@ public final class Board {
      *
      * @return the set of river areas closed by the last tile, or an empty set if the board is empty
      */
-    Set<Area<Zone.River>> riversClosedByLastTile() {
+    public Set<Area<Zone.River>> riversClosedByLastTile() {
         Set<Area<Zone.River>> rivers = new HashSet<>();
 
         for (var area : zonePartitions.rivers().areas()) {
@@ -304,7 +302,7 @@ public final class Board {
      * @param tile the given placed tile
      * @return true iff the given placed tile could be added to the board
      */
-    boolean canAddTile(PlacedTile tile) {
+    public boolean canAddTile(PlacedTile tile) {
         if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null) {
             return false;
         }
@@ -326,7 +324,7 @@ public final class Board {
      * @return true iff the given tile could be placed on one of the insertion positions of the
      * board, possibly after rotation
      */
-    boolean couldPlaceTile(Tile tile) {
+    public boolean couldPlaceTile(Tile tile) {
         for (var pos : insertionPositions()) {
             for (var rotation : Rotation.ALL) {
                 PlacedTile placedTile = new PlacedTile(tile, null, rotation, pos);
@@ -344,10 +342,8 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */ // TODO canceledAnimals shouldn't be changed (in the whole class)
-    Board withNewTile(PlacedTile tile) {
-        if (!canAddTile(tile)) {
-            checkArgument(this.equals(EMPTY));
-        }
+    public Board withNewTile(PlacedTile tile) {
+        checkArgument(this.equals(EMPTY)||canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
@@ -357,9 +353,12 @@ public final class Board {
 
         placedTiles[index] = tile;
         myTileIndexes[myTileIndexes.length - 1] = index;
+        builder.addTile(tile.tile());
 
         for (var direction : Direction.ALL) {
-            builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO use addTile
+            if (tileAt(tile.pos().neighbor(direction)) != null) {
+                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO
+            }
         }
 
         return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
@@ -373,7 +372,7 @@ public final class Board {
      * @throws IllegalArgumentException if the tile on which the occupant would be located is
      * already occupied
      */
-    Board withOccupant(Occupant occupant) {
+    public Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
@@ -397,7 +396,7 @@ public final class Board {
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant less
      */
-    Board withoutOccupant(Occupant occupant) { // occupant is assumed to be a pawn
+    public Board withoutOccupant(Occupant occupant) { // occupant is assumed to be a pawn
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
@@ -419,7 +418,7 @@ public final class Board {
      * @param rivers the given rivers
      * @return a board identical to the receiver but without any occupant in the given forests and rivers
      */
-    Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
+    public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
@@ -452,23 +451,25 @@ public final class Board {
      * @return an identical board to the receiver but with the given set of animals added to the set
      * of cancelled animals
      */
-    Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
+    public Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
         Set<Animal> myCanceledAnimals = new HashSet<>(canceledAnimals);
         myCanceledAnimals.addAll(newlyCancelledAnimals);
         return new Board(placedTiles, tileIndexes, zonePartitions, myCanceledAnimals);
     }
 
     @Override
-    public boolean equals(Object object) { // TODO
+    public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
         Board board = (Board) object;
         return Arrays.equals(placedTiles, board.placedTiles) &&
                 Arrays.equals(tileIndexes, board.tileIndexes) &&
-                Objects.equals(zonePartitions, board.zonePartitions) &&
-                Objects.equals(canceledAnimals, board.canceledAnimals);
+                zonePartitions.equals(board.zonePartitions) &&
+                canceledAnimals.equals(board.canceledAnimals);
     }
+
+    // TODO https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)
 
     @Override
     public int hashCode() {

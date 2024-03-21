@@ -49,7 +49,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
         }
 
         /**
-         * Adds to the four partitions the areas corresponding to the zones of the given tile.
+         * Adds the zones of the given tile to the four partitions the areas corresponding.
          *
          * @param tile the given tile
          */
