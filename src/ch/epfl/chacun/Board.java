@@ -165,14 +165,15 @@ public final class Board {
     }
 
     /**
-     * Returns the area representing the meadow adjacent to the given position.
+     * Returns the area representing the meadow adjacent to the given zone, in the form of an area
+     * which contains only the zones of this meadow but all the occupants of the complete meadow,
+     * and which, for simplicity, has no open connection.
      *
      * @param pos the position to check for adjacent meadow
      * @param meadowZone the meadow zone to which the adjacent meadow belongs
      * @return the area representing the adjacent meadow
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
-
         // Get all the meadow zones in the adjacent area
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
@@ -184,12 +185,12 @@ public final class Board {
                 adjacentMeadows.addAll(tileAt(pos1).meadowZones());
             }
 
-            for(var direction : Direction.values()) {
-                adjacentMeadows.addAll(tileAt(pos.neighbor(direction)).meadowZones());
+            for(var d : Direction.ALL) {
+                adjacentMeadows.addAll(tileAt(pos.neighbor(d)).meadowZones());
             }
         }
 
-        // Check if it's in the same area as meadowZone
+        // Check if it's in the same area as the given meadow zone
         Set<Zone.Meadow> myMeadows = new HashSet<>();
 
         for (var zone : adjacentMeadows) {
@@ -198,7 +199,7 @@ public final class Board {
             }
         }
 
-        return new Area<>(myMeadows, meadowArea(meadowZone).occupants(), 0); // TODO immu
+        return new Area<>(myMeadows, meadowArea(meadowZone).occupants(), 0);
     }
 
     /**
@@ -211,8 +212,8 @@ public final class Board {
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
         for (int i : tileIndexes) {
-            if(placedTiles[i] != null && placedTiles[i].occupant() != null
-                    && placedTiles[i].occupant().kind() == occupantKind && placedTiles[i].placer() == player){
+            if (placedTiles[i] != null && placedTiles[i].occupant() != null
+                    && placedTiles[i].placer() == player && placedTiles[i].occupant().kind() == occupantKind) {
                 count++;
             }
         }
@@ -231,7 +232,6 @@ public final class Board {
             for (Direction d : Direction.ALL) {
                 Pos pos = placedTiles[i].pos();
 
-                // the position is not on the edge
                 if (tileAt(pos.neighbor(d)) == null
                         && pos.neighbor(d).x() >= -12 && pos.neighbor(d).x() <= 12
                         && pos.neighbor(d).y() >= -12 && pos.neighbor(d).y() <= 12) {
