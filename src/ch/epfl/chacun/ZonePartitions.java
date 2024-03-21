@@ -118,13 +118,13 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
 
-                case TileSide.River(Zone.Meadow z1, Zone.River r1, Zone.Meadow z2)
-                        when s2 instanceof TileSide.River(Zone.Meadow m1, Zone.River r2,
-                                                          Zone.Meadow m2) -> {
+                case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m2)
+                        when s2 instanceof TileSide.River(Zone.Meadow z1, Zone.River r2,
+                                                          Zone.Meadow z2) -> {
                         riverBuilder.union(r1, r2);
                         riverSystemBuilder.union(r1, r2);
+                        meadowBuilder.union(m1, z2);
                         meadowBuilder.union(z1, m2);
-                        meadowBuilder.union(z2, m1);
                         }
                 default -> throw new IllegalArgumentException();
             }
@@ -142,30 +142,32 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
          */
         public void addInitialOccupant(PlayerColor player, Occupant.Kind occupantKind,
                                        Zone occupiedZone) {
+            // assumes that adding the given occupant is valid (we don't try to add a hut to a river connected to a lake)
             switch (occupiedZone) {
-                case Zone.Forest f1
+                case Zone.Forest forest
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
-                        forestBuilder.addInitialOccupant(f1, player);
-                case Zone.Meadow m1
+                        forestBuilder.addInitialOccupant(forest, player);
+                case Zone.Meadow meadow
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
-                        meadowBuilder.addInitialOccupant(m1, player);
-                case Zone.River r1
-                        when occupantKind.equals(Occupant.Kind.PAWN) || !r1.hasLake() ->
-                        riverBuilder.addInitialOccupant(r1, player); // TODO
-                case Zone.Lake l1
+                        meadowBuilder.addInitialOccupant(meadow, player);
+                case Zone.River river
+                        when occupantKind.equals(Occupant.Kind.PAWN) ->
+                        riverBuilder.addInitialOccupant(river, player);
+                        // TODO not up to this method to check whether the river has a lake or not
+                case Zone.Water water
                         when occupantKind.equals(Occupant.Kind.HUT) ->
-                        riverSystemBuilder.addInitialOccupant(l1, player);
+                        riverSystemBuilder.addInitialOccupant(water, player);
                 default -> throw new IllegalArgumentException();
             }
         }
 
         /**
-         * Removes an occupant — a pawn — belonging to the given player from the area containing
+         * Removes an occupant (pawn) belonging to the given player from the area containing
          * the given zone.
          * Intended to be used to implement the shaman's special power (to recover one of the
          * player's pawns).
          *
-         * @param player       the given player
+         * @param player the given player
          * @param occupiedZone the given zone
          * @throws IllegalArgumentException if the zone is a lake
          */

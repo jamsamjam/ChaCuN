@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Copy;
+
 import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -248,7 +250,7 @@ public final class Board {
      * @return the last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
-        if (tileIndexes.length != 0) {
+        if (this.equals(EMPTY)) {
             return placedTiles[tileIndexes[tileIndexes.length - 1]];
         }
         return null;
@@ -292,7 +294,6 @@ public final class Board {
             }
         }
         return rivers;
-
     }
 
     /**
@@ -342,29 +343,26 @@ public final class Board {
      * @return an identical board to the receiver, but with the given tile added
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
-     */
-    Board withNewTile(PlacedTile tile) { // TODO only used once at the beg ?? + todos in the method
-        checkArgument(tileIndexes.length == 0);
+     */ // TODO canceledAnimals shouldn't be changed (in the whole class)
+    Board withNewTile(PlacedTile tile) {
+        if (!canAddTile(tile)) {
+            checkArgument(this.equals(EMPTY));
+        }
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
-        ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions); ////////////
-        Set<Animal> myCanceledAnimals = new HashSet<>(Set.copyOf(canceledAnimals)); // TODO why ?
+        ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        placedTiles[myTileIndexes.length - 1] = tile;
-        myTileIndexes[myTileIndexes.length - 1] = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH); ////////////
+        int index = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH);
 
-        if (canAddTile(tile)) {
-            for (var direction : Direction.ALL) {
-                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO use addTile
-            }
-            for (var zone : tile.meadowZones()) {
-                myCanceledAnimals.addAll(zone.animals());
-            }
+        placedTiles[index] = tile;
+        myTileIndexes[myTileIndexes.length - 1] = index;
 
-            return new Board(myPlacedTiles, myTileIndexes, builder.build(), myCanceledAnimals);
+        for (var direction : Direction.ALL) {
+            builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO use addTile
         }
-        throw new IllegalArgumentException();
+
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
     }
 
     /**
@@ -375,14 +373,13 @@ public final class Board {
      * @throws IllegalArgumentException if the tile on which the occupant would be located is
      * already occupied
      */
-    Board withOccupant(Occupant occupant) { // TODO why occupant has zoneId before it's placed
+    Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
         if (myTile != null && myTile.potentialOccupants().contains(occupant)
                 && myTile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-
             myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
             // TODO occupant.zoneId() vs. idOfZoneOccupiedBy(occupant.kind())
@@ -400,17 +397,15 @@ public final class Board {
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant less
      */
-    Board withoutOccupant(Occupant occupant) { // you can only remove the pawns (shouldn't be implemented for now)
+    Board withoutOccupant(Occupant occupant) { // occupant is assumed to be a pawn
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        // https://edstem.org/eu/courses/1101/discussion/97108
-
         for (int i : tileIndexes) {
             if (placedTiles[i].occupant().equals(occupant)) {
                 myPlacedTiles[i]= placedTiles[i].withNoOccupant();
-                builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId())); // TODO
+                builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
             }
         }
 
@@ -428,21 +423,18 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        for (var forest : forests) {
-            //  sortir celles dont l'occupant est sur une zone qui appartient à l'ensemble des aires passées en argument
+        forests.forEach(forest -> { // TODO
             for (int i : tileIndexes) {
-                if (forest.isOccupied() && forest.occupants().contains()) {
-                    // TODO only if their occupant is a pawn and not a hut
-                    placedTiles[i].withNoOccupant(); // TODO forestArea
+                if (forest.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    placedTiles[i].withNoOccupant();
                 }
             }
             builder.clearGatherers(forest);
-        }
+        });
 
         for (var river : rivers) {
             for (int i : tileIndexes) {
-                if (river.isOccupied() && river.occupants().contains()) {
-                    // TODO only if their occupant is a pawn and not a hut
+                if (river.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
                     placedTiles[i].withNoOccupant();
                 }
             }
@@ -461,15 +453,17 @@ public final class Board {
      * of cancelled animals
      */
     Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
-        Set<Animal> myCanceledAnimals = cancelledAnimals();
-        myCanceledAnimals.addAll(newlyCancelledAnimals); // TODO
+        Set<Animal> myCanceledAnimals = new HashSet<>(canceledAnimals);
+        myCanceledAnimals.addAll(newlyCancelledAnimals);
         return new Board(placedTiles, tileIndexes, zonePartitions, myCanceledAnimals);
     }
 
     @Override
-    public boolean equals(Object o) { // TODO prob not correct
-        if (o == null || getClass() != o.getClass()) return false;
-        Board board = (Board) o;
+    public boolean equals(Object object) { // TODO
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Board board = (Board) object;
         return Arrays.equals(placedTiles, board.placedTiles) &&
                 Arrays.equals(tileIndexes, board.tileIndexes) &&
                 Objects.equals(zonePartitions, board.zonePartitions) &&
@@ -478,6 +472,7 @@ public final class Board {
 
     @Override
     public int hashCode() {
-        return 0;
+        // TODO ed forum not return value
+        return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
     }
 }
