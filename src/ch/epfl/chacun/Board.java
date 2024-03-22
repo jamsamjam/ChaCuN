@@ -311,8 +311,9 @@ public final class Board {
                     }
                 }
             }
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class MyBoardTest {
 
@@ -541,32 +542,108 @@ class MyBoardTest {
 
     @Test
     public void testCanAddTile() {
-        var forestZone = new Zone.Forest(32_0, Zone.Forest.Kind.PLAIN);
-        var forestZone2 = new Zone.Forest(37_0, Zone.Forest.Kind.PLAIN);
-        var forestZone3 = new Zone.Forest(35_0, Zone.Forest.Kind.PLAIN);
+        var meadowZone1 = new Zone.Meadow(32_0, List.of() ,null);
+        var meadowZone2 = new Zone.Meadow(35_0, List.of() ,null);
+        var meadowZone3 = new Zone.Meadow(37_0, List.of(), null);
+        var forestZone1 = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
 
-        var forestSide = new TileSide.Forest(forestZone);
-        var forestSide2 = new TileSide.Forest(forestZone2);
-        var forestSide3 = new TileSide.Forest(forestZone3);
+        var meadowSide = new TileSide.Meadow(meadowZone1);
+        var meadowSide2 = new TileSide.Meadow(meadowZone2);
+        var meadowSide3 = new TileSide.Meadow(meadowZone3);
+        var forestSide = new TileSide.Forest(forestZone1);
 
-        Tile tile1 = new Tile(32, Tile.Kind.START, forestSide, forestSide, forestSide, forestSide);
-        Tile tile2 = new Tile(37, Tile.Kind.NORMAL, forestSide2, forestSide2, forestSide2, forestSide2);
-        Tile tile3 = new Tile(35, Tile.Kind.NORMAL, forestSide3, forestSide3, forestSide3, forestSide3);
+        Tile tile1 = new Tile(32, Tile.Kind.START, meadowSide, meadowSide, meadowSide, meadowSide);
+        Tile tile2 = new Tile(37, Tile.Kind.NORMAL, meadowSide2, meadowSide2, meadowSide2, meadowSide2);
+        Tile tile3 = new Tile(35, Tile.Kind.NORMAL, meadowSide3, meadowSide3, meadowSide3, meadowSide3);
+        Tile tile4 = new Tile(45, Tile.Kind.NORMAL, meadowSide3, meadowSide3, meadowSide3, meadowSide3);
+        Tile tile5 = new Tile(23, Tile.Kind.NORMAL, forestSide, forestSide, forestSide, forestSide);
 
-        PlacedTile placedTile1 = new PlacedTile(tile1, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), null);
-        PlacedTile placedTile2 = new PlacedTile(tile2, PlayerColor.GREEN, Rotation.NONE, new Pos(0, 1), null);
-        PlacedTile placedTile3 = new PlacedTile(tile3, PlayerColor.RED, Rotation.NONE, new Pos(0, -1), null);
+        Occupant o1 = new Occupant(Occupant.Kind.PAWN, 32_0);
+        Occupant o2 = new Occupant(Occupant.Kind.PAWN, 37_0);
+        Occupant o3 = new Occupant(Occupant.Kind.PAWN, 35_0);
 
-        Board board = Board.EMPTY.withNewTile(placedTile1).withNewTile(placedTile2).withNewTile(placedTile3);
+        PlacedTile placedTile1 = new PlacedTile(tile1, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), o1);
+        PlacedTile placedTile2 = new PlacedTile(tile2, PlayerColor.RED, Rotation.NONE, new Pos(0, 1), o2);
+        PlacedTile placedTile3 = new PlacedTile(tile3, PlayerColor.RED, Rotation.NONE, new Pos(0, -1), o3);
 
-        var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
+        Board board = Board.EMPTY.withNewTile(placedTile1);
+        Board board2 = board.withNewTile(placedTile2);
+        Board board3 = board2.withNewTile(placedTile3);
+
+        PlacedTile trueTile1 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+        //PlacedTile trueTile2 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+        //PlacedTile trueTile3 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+
+        PlacedTile falseTile1 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), null);
+        PlacedTile falseTile2 = new PlacedTile(tile5, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+        PlacedTile falseTile3 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(4, 0), null);
+        //PlacedTile falseTile4 = new PlacedTile(tile5, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+
+        /*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
         var testForestSide = new TileSide.Forest(testForestZone);
         Tile testTile = new Tile(11, Tile.Kind.NORMAL, testForestSide, testForestSide, testForestSide, testForestSide);
         PlacedTile testPlacedTile = new PlacedTile(testTile, PlayerColor.GREEN, Rotation.NONE, new Pos(-1, 0), null);
 
-        boolean canAdd = board.canAddTile(testPlacedTile);
+        boolean canAdd = board.canAddTile(testPlacedTile);*/
 
-        assertTrue(canAdd);
+        assertTrue(board3.canAddTile(trueTile1));
+        //assertTrue(board3.canAddTile(trueTile2));
+        //assertTrue(board3.canAddTile(trueTile3));
+
+        assertFalse(board3.canAddTile(falseTile1));
+        assertFalse(board3.canAddTile(falseTile2));
+        assertFalse(board3.canAddTile(falseTile3));
+        //assertFalse(board3.canAddTile(falseTile4));
+    }
+
+    @Test
+    public void testA() {
+        var meadowZone1 = new Zone.Meadow(32_0, List.of() ,null);
+        var meadowZone2 = new Zone.Meadow(35_0, List.of() ,null);
+        var meadowZone3 = new Zone.Meadow(37_0, List.of(), null);
+        var forestZone1 = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
+
+        var meadowSide = new TileSide.Meadow(meadowZone1);
+        var meadowSide2 = new TileSide.Meadow(meadowZone2);
+        var meadowSide3 = new TileSide.Meadow(meadowZone3);
+        var forestSide = new TileSide.Forest(forestZone1);
+
+        Tile tile1 = new Tile(32, Tile.Kind.START, meadowSide, meadowSide, meadowSide, meadowSide);
+        Tile tile2 = new Tile(37, Tile.Kind.NORMAL, meadowSide2, meadowSide2, meadowSide2, meadowSide2);
+        Tile tile3 = new Tile(35, Tile.Kind.NORMAL, meadowSide3, meadowSide3, meadowSide3, meadowSide3);
+        Tile tile4 = new Tile(45, Tile.Kind.NORMAL, meadowSide3, meadowSide3, forestSide, meadowSide3);
+        Tile tile5 = new Tile(23, Tile.Kind.NORMAL, forestSide, forestSide, forestSide, forestSide);
+
+        Occupant o1 = new Occupant(Occupant.Kind.PAWN, 32_0);
+        Occupant o2 = new Occupant(Occupant.Kind.PAWN, 37_0);
+        Occupant o3 = new Occupant(Occupant.Kind.PAWN, 35_0);
+
+        PlacedTile placedTile1 = new PlacedTile(tile1, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), o1);
+        PlacedTile placedTile2 = new PlacedTile(tile2, PlayerColor.RED, Rotation.NONE, new Pos(0, 1), o2);
+        PlacedTile placedTile3 = new PlacedTile(tile3, PlayerColor.RED, Rotation.NONE, new Pos(0, -1), o3);
+
+        Board board = Board.EMPTY.withNewTile(placedTile1);
+        Board board2 = board.withNewTile(placedTile2);
+        Board board3 = board2.withNewTile(placedTile3);
+
+
+        //PlacedTile falseTile4 = new PlacedTile(tile5, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
+
+        /*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
+        var testForestSide = new TileSide.Forest(testForestZone);
+        Tile testTile = new Tile(11, Tile.Kind.NORMAL, testForestSide, testForestSide, testForestSide, testForestSide);
+        PlacedTile testPlacedTile = new PlacedTile(testTile, PlayerColor.GREEN, Rotation.NONE, new Pos(-1, 0), null);
+
+        boolean canAdd = board.canAddTile(testPlacedTile);*/
+
+        assertTrue(board3.couldPlaceTile(tile4));
+        //assertTrue(board3.canAddTile(trueTile2));
+        //assertTrue(board3.canAddTile(trueTile3));
+/*
+        assertFalse(board3.canAddTile(falseTile1));
+        assertFalse(board3.canAddTile(falseTile2));
+        assertFalse(board3.canAddTile(falseTile3));*/
+        //assertFalse(board3.canAddTile(falseTile4));
     }
 
     @Test
@@ -638,7 +715,7 @@ class MyBoardTest {
 
     @Test
     public void testWithOccupant() {
-        Board b = Board.EMPTY;
+        /*Board b = Board.EMPTY;
 
         var forestZone = new Zone.Forest(10_1, Zone.Forest.Kind.PLAIN);
         var forestSide = new TileSide.Forest(forestZone);
@@ -652,6 +729,32 @@ class MyBoardTest {
         Board actualBoard1 = b.withNewTile(placedTile1);
         Board actualBoard2 = actualBoard1.withOccupant(occupantToAdd);
         Board expectedBoard = b.withNewTile(addedTile);
+*/
+
+        var forestZone = new Zone.Forest(32_0, Zone.Forest.Kind.PLAIN);
+        var forestZone2 = new Zone.Forest(37_0, Zone.Forest.Kind.PLAIN);
+        var forestZone3 = new Zone.Forest(35_0, Zone.Forest.Kind.PLAIN);
+
+        var forestSide = new TileSide.Forest(forestZone);
+        var forestSide2 = new TileSide.Forest(forestZone2);
+        var forestSide3 = new TileSide.Forest(forestZone3);
+
+        Occupant occupantToAdd = new Occupant(Occupant.Kind.PAWN, 10_1);
+
+        Tile tile1 = new Tile(32, Tile.Kind.START, forestSide, forestSide, forestSide, forestSide);
+        Tile tile2 = new Tile(37, Tile.Kind.NORMAL, forestSide2, forestSide2, forestSide2, forestSide2);
+        Tile tile3 = new Tile(35, Tile.Kind.NORMAL, forestSide3, forestSide3, forestSide3, forestSide3);
+
+        PlacedTile placedTile1 = new PlacedTile(tile2, null, Rotation.NONE, new Pos(1, 0), null);
+        PlacedTile addedTile = new PlacedTile(tile2, null, Rotation.NONE, new Pos(1, 0), occupantToAdd);
+        PlacedTile begin = new PlacedTile(tile1, null, Rotation.NONE, new Pos(0, 0), null);
+
+        Board b = Board.EMPTY.withNewTile(begin);
+
+        Board actualBoard1 = b.withNewTile(placedTile1);
+        Board actualBoard2 = actualBoard1.withOccupant(occupantToAdd);
+        Board expectedBoard = b.withNewTile(addedTile);
+
 
 
        /* assertNotNull(newb);
