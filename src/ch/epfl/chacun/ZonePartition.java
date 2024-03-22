@@ -141,7 +141,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
          * @return the constructed zone partition
          */
         public ZonePartition<Z> build() {
-            return new ZonePartition<>(areas); // TODO watch videos
+            return new ZonePartition<>(areas);
         }
     }
 }

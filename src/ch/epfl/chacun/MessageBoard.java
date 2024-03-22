@@ -70,7 +70,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param forest the given forest
      * @return an updated MessageBoard
      */
-    public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) { // TODO should be called with withScoredForest
+    public MessageBoard withClosedForestWithMenhir(PlayerColor player, Area<Zone.Forest> forest) {
         Message newMessage = new Message(textMaker.playerClosedForestWithMenhir(player), 0, Set.of(), forest.tileIds());
 
         return update(newMessage);

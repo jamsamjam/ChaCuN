@@ -153,7 +153,6 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 case Zone.River river
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         riverBuilder.addInitialOccupant(river, player);
-                        // TODO not up to this method to check whether the river has a lake or not
                 case Zone.Water water
                         when occupantKind.equals(Occupant.Kind.HUT) ->
                         riverSystemBuilder.addInitialOccupant(water, player);

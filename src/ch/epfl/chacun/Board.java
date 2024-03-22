@@ -70,7 +70,7 @@ public final class Board {
      */
     public PlacedTile tileWithId(int tileId) {
         for (int i : tileIndexes) {
-            if (tileIndexes[i] == tileId) {
+            if (placedTiles[i].tile().id() == tileId) {
                 return placedTiles[i];
             }
         }
@@ -233,8 +233,8 @@ public final class Board {
                 Pos pos = placedTiles[i].pos();
 
                 if (tileAt(pos.neighbor(d)) == null
-                        && pos.neighbor(d).x() >= -12 && pos.neighbor(d).x() <= 12
-                        && pos.neighbor(d).y() >= -12 && pos.neighbor(d).y() <= 12) {
+                        && pos.neighbor(d).x() >= -REACH && pos.neighbor(d).x() <= REACH
+                        && pos.neighbor(d).y() >= -REACH && pos.neighbor(d).y() <= REACH) {
                     positions.add(pos.neighbor(d));
                 }
             }
@@ -248,7 +248,7 @@ public final class Board {
      * @return the last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
-        if (this.equals(EMPTY)) {
+        if (tileIndexes.length != 0) {
             return placedTiles[tileIndexes[tileIndexes.length - 1]];
         }
         return null;
@@ -303,14 +303,13 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     public boolean canAddTile(PlacedTile tile) {
-        if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null) {
-            return false;
-        }
-
-        for (var direction : Direction.ALL) {
-            if (tileAt(tile.pos().neighbor(direction)) != null
-                       && !tileAt(tile.pos()).side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite()))) {
-                return false;
+        if (insertionPositions().contains(tile.pos()) && tileAt(tile.pos()) == null) {
+            for (var direction : Direction.ALL) {
+                if (tileAt(tile.pos().neighbor(direction)) != null) {
+                    if (!tile.side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite()))) {
+                        return false;
+                    }
+                }
             }
         }
         return true;
@@ -326,9 +325,11 @@ public final class Board {
      */
     public boolean couldPlaceTile(Tile tile) {
         for (var pos : insertionPositions()) {
-            for (var rotation : Rotation.ALL) {
-                PlacedTile placedTile = new PlacedTile(tile, null, rotation, pos);
-                return canAddTile(placedTile);
+            if (canAddTile(new PlacedTile(tile, null, Rotation.NONE, pos)) ||
+                    canAddTile(new PlacedTile(tile, null, Rotation.RIGHT, pos)) ||
+                    canAddTile(new PlacedTile(tile, null, Rotation.HALF_TURN, pos)) ||
+                    canAddTile(new PlacedTile(tile, null, Rotation.LEFT, pos))) {
+                return true;
             }
         }
         return false;
@@ -341,9 +342,9 @@ public final class Board {
      * @return an identical board to the receiver, but with the given tile added
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
-     */ // TODO canceledAnimals shouldn't be changed (in the whole class)
+     */
     public Board withNewTile(PlacedTile tile) {
-        checkArgument(this.equals(EMPTY)||canAddTile(tile));
+        checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
@@ -351,13 +352,13 @@ public final class Board {
 
         int index = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH);
 
-        placedTiles[index] = tile;
+        myPlacedTiles[index] = tile;
         myTileIndexes[myTileIndexes.length - 1] = index;
         builder.addTile(tile.tile());
 
         for (var direction : Direction.ALL) {
             if (tileAt(tile.pos().neighbor(direction)) != null) {
-                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite())); // TODO
+                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
             }
         }
 
@@ -381,7 +382,6 @@ public final class Board {
                 && myTile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
             myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
-            // TODO occupant.zoneId() vs. idOfZoneOccupiedBy(occupant.kind())
 
             return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
         }
@@ -422,7 +422,7 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        forests.forEach(forest -> { // TODO
+        forests.forEach(forest -> {
             for (int i : tileIndexes) {
                 if (forest.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
                     placedTiles[i].withNoOccupant();
@@ -431,14 +431,14 @@ public final class Board {
             builder.clearGatherers(forest);
         });
 
-        for (var river : rivers) {
+        rivers.forEach(river -> {
             for (int i : tileIndexes) {
                 if (river.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
                     placedTiles[i].withNoOccupant();
                 }
             }
             builder.clearFishers(river);
-        }
+        });
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
@@ -459,21 +459,17 @@ public final class Board {
 
     @Override
     public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
-            return false;
+        if (object instanceof Board board) {
+            return  Arrays.equals(placedTiles, board.placedTiles) &&
+                    Arrays.equals(tileIndexes, board.tileIndexes) &&
+                    zonePartitions.equals(board.zonePartitions) &&
+                    canceledAnimals.equals(board.canceledAnimals);
         }
-        Board board = (Board) object;
-        return Arrays.equals(placedTiles, board.placedTiles) &&
-                Arrays.equals(tileIndexes, board.tileIndexes) &&
-                zonePartitions.equals(board.zonePartitions) &&
-                canceledAnimals.equals(board.canceledAnimals);
+        return false;
     }
-
-    // TODO https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Object.html#equals(java.lang.Object)
 
     @Override
     public int hashCode() {
-        // TODO ed forum not return value
         return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
     }
 }
