@@ -14,7 +14,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Sam Lee (375535)
  *
  * @param players the list of all players in the game, in the order in which they must play
- *                — so with the current player at the top of the list // TODO
+ *                — so with the current player at the top of the list
  * @param tileDecks the three piles of the remaining tiles
  * @param tileToPlace the possible tile to be placed, which was taken from the top of the pile of
  *                    normal tiles or menhir tiles (null if no tile is currently to be placed)
@@ -77,13 +77,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return the number of free occupants of the given type and of the given player
      */
     public int freeOccupantsCount(PlayerColor player, Occupant.Kind kind) {
-        int count = 0;
-        for (var p : players) {
-            if (p.equals(player) && ) {
-                count++;
-            }
-        }
-        return count - board.occupantCount(player, kind);
+        int total = kind == Occupant.Kind.PAWN ? 6 : 3; // TODO
+        return total - board.occupantCount(player, kind);
     }
 
     /**
@@ -103,20 +98,105 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * of the board and drawing the first tile from the pile of normal tiles, which becomes the tile
      * to play.
      *
-     * @return
+     * @return an updated GameState
      * @throws IllegalArgumentException if the next action is not START_GAME
      */
     public GameState withStartingTilePlaced() { // TODO public?
+        checkArgument(nextAction() == Action.START_GAME);
+
+        Board myBoard = board().withNewTile(new PlacedTile(tileToPlace(), currentPlayer(),
+                Rotation.NONE, Pos.ORIGIN, null)); // TODO board? ()? / pos(0,0)?
+
+        return new GameState(players().subList(1, players.size()),
+                tileDecks().withTopTileDrawn(Tile.Kind.START), tileDecks().topTile(Tile.Kind.NORMAL),
+                myBoard, Action.PLACE_TILE, messageBoard());
+    }
+
+    /**
+     * Manages all transitions from by PLACE_TILE adding the given tile to the board, assigning any
+     * points obtained following the placement of the canoe or the stake pit, and determining the
+     * following action — which can be RETAKE_PAWN if the placed tile contains the shaman.
+     *
+     * @param tile the given tile
+     * @return an updated GameState
+     * @throws IllegalArgumentException if the next action is not PLACE_TILE, or if the given tile
+     * is already occupied
+     */
+    public GameState withPlacedTile(PlacedTile tile) {
+        checkArgument(nextAction() == Action.PLACE_TILE && tile.occupant() == null);
+
+        List<PlayerColor> myPlayers = players().subList(1, players.size());
+        TileDecks myTileDecks = tileDecks().withTopTileDrawn(tile.kind());
+        Tile myTileToPlace = tileDecks().topTile(Tile.Kind.NORMAL);
+        Board myBoard = board().withNewTile(tile); // TODO board? ()? / pos(0,0)?
+        Action myNextAction = Action.OCCUPY_TILE;
+        MessageBoard myMessageBoard = messageBoard();
+
+        if (tile.kind() == Tile.Kind.NORMAL) {
+            for (var forest : board().forestsClosedByLastTile()) {
+                if (Area.hasMenhir(forest)) {
+                    myPlayers = players();
+                    myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
+                }
+            }
+        } else if (tile.kind() == Tile.Kind.MENHIR) {
+            if (tile.specialPowerZone().specialPower() == Zone.SpecialPower.SHAMAN) {
+                myNextAction = Action.RETAKE_PAWN;
+            }
+        }
+
+        // assigning any points obtained following the placement of the canoe or the stake pit
+        // withScoredHuntingTrap - to be fixed (after intermediate rendering), to take cenceledAnimals as an argu
+
+        // board.adjacentMeadow(tile.pos(), board.meadowArea(tile.specialPowerZone()));
+
+        withTurnFinishedIfOccupationImpossible();
+
+        return new GameState(myPlayers, myTileDecks, myTileToPlace, myBoard, myNextAction, myMessageBoard);
+    }
+
+    /**
+     * Manages all transitions from RETAKE_PAWN, by removing the given occupant, unless it is null,
+     * which indicates that the player does not wish to take back a pawn.
+     *
+     * @param occupant the given occupant
+     * @throws IllegalArgumentException if the next action is not RETAKE_PAWN, or if the given
+     * occupant is neither null, nor a pawn.
+     */
+    public GameState withOccupantRemoved(Occupant occupant) {
+        checkArgument(nextAction() == Action.RETAKE_PAWN
+                && (occupant == null || occupant.kind() == Occupant.Kind.PAWN)); // TODO 끊어서?
+
+        Board myBoard = (board().occupantCount(currentPlayer(), Occupant.Kind.PAWN) > 0)
+                ? board().withoutOccupant(occupant) : board();
+
+        MessageBoard myMessageBoard = messageBoard();
+        withTurnFinishedIfOccupationImpossible();
+
+        return new GameState(players(), tileDecks().withTopTileDrawn(Tile.Kind.MENHIR), null, myBoard, Action.OCCUPY_TILE, myMessageBoard);
+    }
+
+    public GameState withNewOccupant(Occupant occupant) {
 
     }
 
-    public GameState withPlacedTile(PlacedTile tile) {}
+    // Finish the round if occupying the last tile placed is impossible
+    private GameState withTurnFinishedIfOccupationImpossible() {
+        // it may be impossible to occupy this tile, either because the areas to which its zones belong are already occupied, or because the installer no longer has the necessary occupants on hand.
+        //
+        //In this case, the action OCCUPY_TILEmust be skipped, and the action that follows OCCUPY_TILEbecomes the next action.
+    }
 
-    public GameState withOccupantRemoved(Occupant occupant) {}
+    private GameState withTurnFinished() {
 
-    public GameState withNewOccupant(Occupant occupant)
+    }
 
+    private GameState withFinalPointsCounted() {
 
+    }
+
+    // TODO in your different methods, add the messages necessary for counting points, as well
+    //  as those mentioning the closure of a forest containing a menhir and the end of the game.
 
     /**
      * Represents the next action to be performed in the part.

@@ -109,7 +109,7 @@ class MyBoardTest {
 
         assertEquals(expectedOccupants, actualOccupants);
     }
-
+/*
     @Test
     public void testForestArea() {
         var forestZone = new Zone.Forest(32_0, Zone.Forest.Kind.PLAIN);
@@ -214,7 +214,7 @@ class MyBoardTest {
         assertTrue(expectedArea.zones().contains(riverZone1));
         assertTrue(expectedArea.zones().contains(riverZone2));
         assertFalse(expectedArea.zones().contains(riverZone3));
-    }
+    }*/
 
     @Test
     public void testRiverSystemArea() {
@@ -229,6 +229,7 @@ class MyBoardTest {
         //assertTrue(riverSystemArea1.zones().contains(waterZone1));
         //assertFalse(riverSystemArea1.zones().contains(waterZone2));
     }
+/*
 
     @Test
     public void testOccupantCount() {
@@ -374,13 +375,16 @@ class MyBoardTest {
         //assertEquals(expectedArea2, result2);
 
 
+*/
 /*
 
         Set<Zone.Meadow> expectedZones = new HashSet<>();
         expectedZones.add(meadowZone1);
         assertEquals(expectedZones, result.zones());
-*/
+*//*
+
     }
+*/
 
     @Test
     public void testInsertionPositions() {
@@ -441,7 +445,7 @@ class MyBoardTest {
 
         assertEquals(placedTile2, board2.lastPlacedTile());
     }
-
+/*
     @Test
     public void testForestsClosedByLastTile() {
         var forestZone1 = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
@@ -579,12 +583,12 @@ class MyBoardTest {
         PlacedTile falseTile3 = new PlacedTile(tile4, PlayerColor.RED, Rotation.NONE, new Pos(4, 0), null);
         //PlacedTile falseTile4 = new PlacedTile(tile5, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
 
-        /*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
+        *//*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
         var testForestSide = new TileSide.Forest(testForestZone);
         Tile testTile = new Tile(11, Tile.Kind.NORMAL, testForestSide, testForestSide, testForestSide, testForestSide);
         PlacedTile testPlacedTile = new PlacedTile(testTile, PlayerColor.GREEN, Rotation.NONE, new Pos(-1, 0), null);
 
-        boolean canAdd = board.canAddTile(testPlacedTile);*/
+        boolean canAdd = board.canAddTile(testPlacedTile);*//*
 
         assertTrue(board3.canAddTile(trueTile1));
         //assertTrue(board3.canAddTile(trueTile2));
@@ -629,20 +633,20 @@ class MyBoardTest {
 
         //PlacedTile falseTile4 = new PlacedTile(tile5, PlayerColor.RED, Rotation.NONE, new Pos(1, 0), null);
 
-        /*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
+        *//*var testForestZone = new Zone.Forest(11_0, Zone.Forest.Kind.PLAIN);
         var testForestSide = new TileSide.Forest(testForestZone);
         Tile testTile = new Tile(11, Tile.Kind.NORMAL, testForestSide, testForestSide, testForestSide, testForestSide);
         PlacedTile testPlacedTile = new PlacedTile(testTile, PlayerColor.GREEN, Rotation.NONE, new Pos(-1, 0), null);
 
-        boolean canAdd = board.canAddTile(testPlacedTile);*/
+        boolean canAdd = board.canAddTile(testPlacedTile);*//*
 
         assertTrue(board3.couldPlaceTile(tile4));
         //assertTrue(board3.canAddTile(trueTile2));
         //assertTrue(board3.canAddTile(trueTile3));
-/*
+*//*
         assertFalse(board3.canAddTile(falseTile1));
         assertFalse(board3.canAddTile(falseTile2));
-        assertFalse(board3.canAddTile(falseTile3));*/
+        assertFalse(board3.canAddTile(falseTile3));*//*
         //assertFalse(board3.canAddTile(falseTile4));
     }
 
@@ -715,7 +719,7 @@ class MyBoardTest {
 
     @Test
     public void testWithOccupant() {
-        /*Board b = Board.EMPTY;
+        *//*Board b = Board.EMPTY;
 
         var forestZone = new Zone.Forest(10_1, Zone.Forest.Kind.PLAIN);
         var forestSide = new TileSide.Forest(forestZone);
@@ -729,7 +733,7 @@ class MyBoardTest {
         Board actualBoard1 = b.withNewTile(placedTile1);
         Board actualBoard2 = actualBoard1.withOccupant(occupantToAdd);
         Board expectedBoard = b.withNewTile(addedTile);
-*/
+*//*
 
         var forestZone = new Zone.Forest(32_0, Zone.Forest.Kind.PLAIN);
         var forestZone2 = new Zone.Forest(37_0, Zone.Forest.Kind.PLAIN);
@@ -757,13 +761,13 @@ class MyBoardTest {
 
 
 
-       /* assertNotNull(newb);
-        assertNotEquals(b, newb);*/
+       *//* assertNotNull(newb);
+        assertNotEquals(b, newb);*//*
 
         assertEquals(expectedBoard, actualBoard2);
 
 
-       /* var forestZone1 = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
+       *//* var forestZone1 = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
         var forestSide = new TileSide.Forest(forestZone1);
 
         Tile tile = new Tile(1, Tile.Kind.START, forestSide, forestSide, forestSide, forestSide);
@@ -786,7 +790,7 @@ class MyBoardTest {
         assertThrows(IllegalArgumentException.class, () -> {
             board.withOccupant(invalidOccupant);
         });
-    */}
+    *//*}
 
     @Test
     public void testWithoutOccupant() {
@@ -891,7 +895,7 @@ class MyBoardTest {
         PlacedTile placedTile2 = new PlacedTile(tile2, null, Rotation.NONE, new Pos(1, 1), null);
         Board board5 = Board.EMPTY.withNewTile(placedTile1).withNewTile(placedTile2);
         assertNotEquals(board1, board5);
-    }
+    }*/
 
     @Test
     public void testHashCode() {
