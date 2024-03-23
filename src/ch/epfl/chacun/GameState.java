@@ -1,8 +1,6 @@
 package ch.epfl.chacun;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -123,7 +121,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * is already occupied
      */
     public GameState withPlacedTile(PlacedTile tile) {
-        checkArgument(nextAction() == Action.PLACE_TILE && tile.occupant() == null);
+        checkArgument(nextAction() == Action.PLACE_TILE);
+        checkArgument(tile.occupant() == null); // TODO && ?
 
         List<PlayerColor> myPlayers = players().subList(1, players.size());
         TileDecks myTileDecks = tileDecks().withTopTileDrawn(tile.kind());
@@ -139,16 +138,42 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
                 }
             }
-        } else if (tile.kind() == Tile.Kind.MENHIR) {
-            if (tile.specialPowerZone().specialPower() == Zone.SpecialPower.SHAMAN) {
-                myNextAction = Action.RETAKE_PAWN;
-            }
         }
 
-        // assigning any points obtained following the placement of the canoe or the stake pit
-        // withScoredHuntingTrap - to be fixed (after intermediate rendering), to take cenceledAnimals as an argu
+        // assigning any points obtained by putting logboat or hunting trap
+        if (tile.kind() == Tile.Kind.MENHIR && tile.specialPowerZone() != null) {
+            switch (tile.specialPowerZone().specialPower()) {
+                case LOGBOAT ->
+                    myMessageBoard.withScoredLogboat(currentPlayer(), board.riverSystemArea((Zone.Water) tile.specialPowerZone()));
 
-        // board.adjacentMeadow(tile.pos(), board.meadowArea(tile.specialPowerZone()));
+                case HUNTING_TRAP -> {
+                    Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
+                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
+                    Map<Animal.Kind, Integer> animalMap = new HashMap<>();
+
+                    for (Animal animal : animalSet) {
+                        animalMap.put(animal.kind(), animalMap.getOrDefault(animal.kind(), 0) + 1);
+                    }
+
+                    int smilodon = animalMap.getOrDefault(Animal.Kind.TIGER, 0);
+                    int deer = animalMap.getOrDefault(Animal.Kind.DEER, 0);
+                    if (smilodon >= deer){
+                        animalMap.put(Animal.Kind.DEER, 0);
+                    } else {
+                        animalMap.put(Animal.Kind.DEER, deer - smilodon);
+                    }
+
+                    // TODO
+
+                    //myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
+                    //after intermediate rendering
+                    myBoard.withMoreCancelledAnimals(animalSet);
+                }
+
+                case SHAMAN ->
+                        myNextAction = Action.RETAKE_PAWN;
+            }
+        }
 
         withTurnFinishedIfOccupationImpossible();
 
@@ -180,18 +205,22 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     }
 
-    // Finish the round if occupying the last tile placed is impossible
-    private GameState withTurnFinishedIfOccupationImpossible() {
-        // it may be impossible to occupy this tile, either because the areas to which its zones belong are already occupied, or because the installer no longer has the necessary occupants on hand.
-        //
-        //In this case, the action OCCUPY_TILEmust be skipped, and the action that follows OCCUPY_TILEbecomes the next action.
+    // finish the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
+    private void withTurnFinishedIfOccupationImpossible(Area area, Occupant occupant) {
+        // either the areas of the given zone are already occupied or the player no longer has the necessary occupants on hand.
+        lastTilePotentialOccupants();
+        //https://edstem.org/eu/courses/1101/discussion/97872
+        if (area.isOccupied() && freeOccupantsCount(currentPlayer(), occupant.kind()) == 0) {
+            withTurnFinished();
+        }
     }
 
-    private GameState withTurnFinished() {
+    private void withTurnFinished() {
+        // Action.PLACE_TILE;
 
     }
 
-    private GameState withFinalPointsCounted() {
+    private void withFinalPointsCounted() {
 
     }
 

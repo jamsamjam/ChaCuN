@@ -65,7 +65,7 @@ public sealed interface Zone {
         return null;
     }
 
-    enum SpecialPower {
+    enum SpecialPower { // TODO public?
         SHAMAN,
         LOGBOAT,
         HUNTING_TRAP,
