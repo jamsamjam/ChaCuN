@@ -57,8 +57,16 @@ public final class Board {
      * @param pos the specified position
      * @return the placed tile at the specified position, or null if no tile is present
      */
-    public PlacedTile tileAt(Pos pos) {
-        return placedTiles[LENGTH * (pos.y() + REACH) + (pos.x() + REACH)];
+    public PlacedTile tileAt(Pos pos) { // TODO : pos != null
+        if (pos.x() >= -REACH && pos.x() <= REACH && pos.y() >= -REACH && pos.y() <= REACH) {
+            return placedTiles[indexOf(pos)];
+        }
+        return null;
+    }
+
+    // Returns the index of the given position (without checking if it's in the scope)
+    private int indexOf(Pos pos) {
+        return LENGTH * (pos.y() + REACH) + (pos.x() + REACH);
     }
 
     /**
@@ -69,12 +77,12 @@ public final class Board {
      * @throws IllegalArgumentException if no tile with the given ID is found
      */
     public PlacedTile tileWithId(int tileId) {
-        for (int i : tileIndexes) {
-            if (placedTiles[i].tile().id() == tileId) {
-                return placedTiles[i];
-            }
-        }
-        throw new IllegalArgumentException();
+       for (int i : tileIndexes) {
+           if (placedTiles[i] != null && placedTiles[i].tile().id() == tileId) { // TODO
+               return placedTiles[i];
+           }
+       }
+       throw new IllegalArgumentException();
     }
 
     /**
@@ -94,7 +102,7 @@ public final class Board {
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
         for (int i : tileIndexes) {
-            if (placedTiles[i] != null){
+            if (placedTiles[i] != null && placedTiles[i].occupant() != null){ // TODO
                 allOccupants.add(placedTiles[i].occupant());
             }
         }
@@ -174,19 +182,27 @@ public final class Board {
      * @return the area representing the adjacent meadow
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
+        // Get the area of the given zone
+        Area<Zone.Meadow> sameMeadow = meadowArea(meadowZone);
+        Set<Zone.Meadow> zonesInTheSameArea = sameMeadow.zones();
+
+        // Check if the zone is in the adjacent position
+        // TODO
+
         // Get all the meadow zones in the adjacent area
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
         for (int i : tileIndexes) {
-            Pos pos1 = placedTiles[i].pos();
+            Pos pos1 = placedTiles[i].pos(); // TODO iterated?
 
             if (pos1.equals(pos.translated(1, 1)) || pos1.equals(pos.translated(-1, 1)) ||
                     pos1.equals(pos.translated(1, -1)) || pos1.equals(pos.translated(-1, -1))) {
-                adjacentMeadows.addAll(tileAt(pos1).meadowZones());
+                if (tileAt(pos1) != null) adjacentMeadows.addAll(tileAt(pos1).meadowZones());
             }
 
             for(var d : Direction.ALL) {
-                adjacentMeadows.addAll(tileAt(pos.neighbor(d)).meadowZones());
+                if (tileAt(pos.neighbor(d)) != null)
+                    adjacentMeadows.addAll(tileAt(pos.neighbor(d)).meadowZones());
             }
         }
 
@@ -232,7 +248,7 @@ public final class Board {
             for (Direction d : Direction.ALL) {
                 Pos pos = placedTiles[i].pos();
 
-                if (tileAt(pos.neighbor(d)) == null
+                if (tileAt(pos.neighbor(d)) == null // TODO
                         && pos.neighbor(d).x() >= -REACH && pos.neighbor(d).x() <= REACH
                         && pos.neighbor(d).y() >= -REACH && pos.neighbor(d).y() <= REACH) {
                     positions.add(pos.neighbor(d));
@@ -344,14 +360,14 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    public Board withNewTile(PlacedTile tile) {
+    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied
         checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         int[] myTileIndexes = Arrays.copyOf(tileIndexes, tileIndexes.length + 1);
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        int index = LENGTH * (tile.pos().y() + REACH) + (tile.pos().x() + REACH);
+        int index = indexOf(tile.pos());
 
         myPlacedTiles[index] = tile;
         myTileIndexes[myTileIndexes.length - 1] = index;
@@ -381,7 +397,7 @@ public final class Board {
 
         if (myTile != null && myTile.potentialOccupants().contains(occupant)
                 && myTile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-            myTile.withOccupant(occupant);
+            myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
 
             return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
@@ -402,12 +418,9 @@ public final class Board {
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        for (int i : tileIndexes) {
-            if (placedTiles[i].occupant().equals(occupant)) {
-                myPlacedTiles[i]= placedTiles[i].withNoOccupant();
-                builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
-            }
-        }
+        // TODO : if (myTile.occupant().equals(occupant)) {
+        myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
+        builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
@@ -425,8 +438,8 @@ public final class Board {
 
         forests.forEach(forest -> {
             for (int i : tileIndexes) {
-                if (forest.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    placedTiles[i].withNoOccupant();
+                if (forest.isOccupied() && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
                 }
             }
             builder.clearGatherers(forest);
@@ -434,8 +447,8 @@ public final class Board {
 
         rivers.forEach(river -> {
             for (int i : tileIndexes) {
-                if (river.isOccupied() && placedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    placedTiles[i].withNoOccupant();
+                if (river.isOccupied() && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
                 }
             }
             builder.clearFishers(river);

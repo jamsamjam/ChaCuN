@@ -218,7 +218,6 @@ class MyBoardTest {
 
     @Test
     public void testRiverSystemArea() {
-        //TODO: how to create a water zone
         //Zone.Water waterZone1 = new Zone.Water();
         //Zone.Water waterZone2 = new Zone.Water(/* specify parameters */);
 
@@ -295,10 +294,9 @@ class MyBoardTest {
         assertEquals(board3.meadowAreas(), Set.of(meadowZone1, meadowZone2, meadowZone3));
 
     }
- // TODO check null, extreme cases
     @Test
     public void testRiverSystemAreas() {
-        //TODO: water zone: how to initialize & add areas to placed tiile
+        //water zone: how to initialize & add areas to placed tiile
         Zone.Water waterZone1 = null; //new Zone.Water(10, null);
         Zone.Water waterZone2 = null; //new Zone.Water(20, null);
 
@@ -712,7 +710,7 @@ class MyBoardTest {
 
         assertNotEquals(board, newBoard);
 
-        //todo check the assertions
+        // check the assertions
         assertTrue(newBoard.tileAt(new Pos(0, 0)) != null);
         assertEquals(tile, newBoard.tileAt(new Pos(0, 0)).tile());
     }
@@ -804,7 +802,7 @@ class MyBoardTest {
         Occupant occupant = new Occupant( Occupant.Kind.PAWN, 10);
         board = board.withOccupant(occupant);
 
-        //todo check assertion here
+        // check assertion here
         //assertTrue(board.tileWithId(Zone.tileId(occupant.zoneId())).occupant());
 
         board = board.withoutOccupant(occupant);
@@ -818,7 +816,7 @@ class MyBoardTest {
         var forestZone = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
         var riverZone = new Zone.River(20, 0, null);
 
-        //todo: need to create builder? check
+        //: need to create builder? check
 
         Board board = Board.EMPTY;
 
@@ -899,7 +897,7 @@ class MyBoardTest {
 
     @Test
     public void testHashCode() {
-        //todo only valid if hashcode needs to check that two equal board projects produce the same hashcode
+        // only valid if hashcode needs to check that two equal board projects produce the same hashcode
         Board board1 = Board.EMPTY;
         Board board2 = Board.EMPTY;
 
