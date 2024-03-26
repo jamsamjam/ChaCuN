@@ -2,6 +2,8 @@ package ch.epfl.chacun;
 
 import java.util.*;
 
+import static ch.epfl.chacun.Animal.Kind.*;
+import static ch.epfl.chacun.Area.hasMenhir;
 import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -20,7 +22,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param nextAction the next action to perform,
  * @param messageBoard the message board containing the messages generated so far in the game
  */
-
 public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile tileToPlace,
                         Board board, Action nextAction, MessageBoard messageBoard) {
     /**
@@ -33,7 +34,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState {
         players = List.copyOf(players);
         checkArgument(players.size() >= 2);
-        checkArgument(tileToPlace == null | nextAction == Action.PLACE_TILE);
+        checkArgument(tileToPlace == null ^ nextAction == Action.PLACE_TILE);
+        // TODO check XOR, tile must be null if nextAction is not place_tile
         Objects.requireNonNull(tileDecks);
         Objects.requireNonNull(board);
         Objects.requireNonNull(nextAction);
@@ -101,7 +103,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not START_GAME
      */
-    public GameState withStartingTilePlaced() { // TODO 1st player place new tile? player only changes after occupy_tile
+    public GameState withStartingTilePlaced() {
         checkArgument(nextAction() == Action.START_GAME);
 
         Board myBoard = board().withNewTile(new PlacedTile(tileToPlace(), currentPlayer(),
@@ -116,20 +118,18 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * points obtained following the placement of the canoe or the stake pit, and determining the
      * following action — which can be RETAKE_PAWN if the placed tile contains the shaman.
      *
-     * @param tile the given tile
+     * @param tile the tile that was placed by the current player
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not PLACE_TILE, or if the given tile
      * is already occupied
      */
-    public GameState withPlacedTile(PlacedTile tile) {
+    public GameState withPlacedTile(PlacedTile tile) { // TODO
         checkArgument(nextAction() == Action.PLACE_TILE);
         checkArgument(tile.occupant() == null);
 
-        Tile myTileToPlace = tileDecks().topTile(Tile.Kind.NORMAL);
         Board myBoard = board().withNewTile(tile);
         Action myNextAction = Action.OCCUPY_TILE;
         MessageBoard myMessageBoard = messageBoard();
-
 
         // PLACE_TILE (MENHIR) : assign any points obtained by putting logboat or hunting trap
         if (tile.kind() == Tile.Kind.MENHIR && tile.specialPowerZone() != null) {
@@ -140,26 +140,29 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
                     Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
-                    Map<Animal.Kind, Integer> animalMap = new HashMap<>();
+                    int tigerCount = 0;
+                    int deerCount = 0;
+                    //Map<Animal.Kind, Integer> animalMap = new HashMap<>();
+                    //animalMap.put(animal.kind(), animalMap.getOrDefault(animal.kind(), 0) + 1);
+                    //animalMap.put(DEER, 0);
+                    //animalMap.put(DEER, deer - smilodon);
 
                     for (Animal animal : animalSet) {
-                        animalMap.put(animal.kind(), animalMap.getOrDefault(animal.kind(), 0) + 1);
+                        if (animal.kind().equals(TIGER)) tigerCount++;
+                        else if (animal.kind().equals(DEER)) deerCount++;
                     }
 
-                    int smilodon = animalMap.getOrDefault(Animal.Kind.TIGER, 0);
-                    int deer = animalMap.getOrDefault(Animal.Kind.DEER, 0);
-                    if (smilodon >= deer){
-                        animalMap.put(Animal.Kind.DEER, 0);
+                    if (tigerCount >= deerCount) {
+
+
                     } else {
-                        animalMap.put(Animal.Kind.DEER, deer - smilodon);
+
                     }
 
-                    //Points.forMeadow(animalMap.getOrDefault(Animal.Kind.MAMMOTH, 0),
-                            animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
-                            animalMap.getOrDefault(Animal.Kind.DEER, 0));
+                    Set<Animal> updatedAnimalSet = Area.animals(adjacentMeadow, Set.of());
 
-
-                    myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
+                    // TODO adjacentMeadow - animalSet
+                    //myMessageBoard.withScoredHuntingTrap(currentPlayer(), animalSet);
                     myBoard.withMoreCancelledAnimals(animalSet);
                     // TODO 여기는 더 할거없고 points 는 end of turn -- should be moved
                 }
@@ -168,8 +171,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
             }
         }
-        // TODO players
-        return new GameState(players(), tileDecks().withTopTileDrawn(tile.kind()), myTileToPlace,
+        // tiledeck should be updated here
+        return new GameState(players(), tileDecks().withTopTileDrawn(tile.kind()), null,
                 myBoard, myNextAction,
                 myMessageBoard).withTurnFinishedIfOccupationImpossible();
     }
@@ -187,6 +190,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         checkArgument(nextAction() == Action.RETAKE_PAWN);
         checkArgument (occupant == null || occupant.kind() == Occupant.Kind.PAWN);
 
+
         Board myBoard = board();
 
         if (occupant != null) {
@@ -194,12 +198,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     ? myBoard.withoutOccupant(occupant) : myBoard;
         }
 
-        MessageBoard myMessageBoard = messageBoard();
-
-
-        return new GameState(players(), tileDecks().withTopTileDrawn(Tile.Kind.MENHIR),
-                null, myBoard, Action.OCCUPY_TILE, myMessageBoard)
-                .withTurnFinishedIfOccupationImpossible();
+        return new GameState(players(), tileDecks(), null, myBoard, Action.OCCUPY_TILE,
+                messageBoard()).withTurnFinishedIfOccupationImpossible();
     }
 
     /**
@@ -209,41 +209,39 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @param occupant the given occupant or null if the player does not wish to place one
      * @return an updated game state
      */
-    public GameState withNewOccupant(Occupant occupant) {
+    public GameState withNewOccupant(Occupant occupant) { // TODO
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        List<PlayerColor> myPlayers = players().subList(1, players.size()); // TODO removeFirst()
-        if (occupant != null) {
-        }
-
+        Tile myTileToPlace = tileDecks().topTile(Tile.Kind.NORMAL);
         Board myBoard = board();
 
-        if (board().lastPlacedTile() != null) {
-            myBoard = myBoard.withNewTile(board().lastPlacedTile().withOccupant(occupant));
+        if (occupant != null) {
+            myBoard = myBoard.withOccupant(occupant);
         }
 
-        return new GameState(myPlayers, tileDecks(), tileToPlace(), myBoard, Action.PLACE_TILE, messageBoard());
+        for (var area : myBoard.forestsClosedByLastTile()) {
+            if (hasMenhir(area) && tileToPlace().kind() == Tile.Kind.NORMAL) { // TODO not 2nd time
+                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
+            }
+        }
+
+        return new GameState(players(), tileDecks(), myTileToPlace, myBoard, Action.PLACE_TILE,
+                messageBoard()).withTurnFinished();
     }
 
     // Finishes the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
     private GameState withTurnFinishedIfOccupationImpossible() {
-        if (!lastTilePotentialOccupants().isEmpty()) {
-            withTurnFinished();
-        } else {
-            return this;
-        }
+        return !lastTilePotentialOccupants().isEmpty() ? withTurnFinished() : this;
     }
 
-    private GameState withTurnFinished() {
-        List<PlayerColor> myPlayers = players();
+    private GameState withTurnFinished() { // TODO withNewOccupant
         Tile myTileToPlace = tileToPlace();
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard.withScoredForest(forest);
-            /*if (Area.hasMenhir(forest) && tileToPlace().kind() == Tile.Kind.NORMAL)
-                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);*/
+
         }
 
         for (var river : myBoard.riversClosedByLastTile()) {
@@ -253,38 +251,44 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         // myMessageBoard.withScoredRiverSystem();
 
         TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(myTileToPlace.kind(), tile -> myBoard.couldPlaceTile(tileToPlace()));
-
-        if (!myBoard.couldPlaceTile(myTileDecks.topTile(Tile.Kind.MENHIR)))
-            myPlayers = players().subList(1, players().size());
-
         Action mynextAction = nextAction();
 
         // end the game if the current player has finished his turn(s) and there are no more playable normal tiles remaining
         if (true && myTileDecks.normalTiles().isEmpty())
             mynextAction = Action.END_GAME;
 
-
-        return this;
+//  the final state of the game, i.e. the state that will never change again,
+//  with all points counted, the victory message added to the board, the deer cancelled, and END_GAME
+//  as the next action.
+        return new GameState(players().subList(1, players().size()), tileDecks(), tileToPlace(),
+                board(), mynextAction, messageBoard());
     }
 
-    private GameState withFinalPointsCounted() {
+    private GameState withFinalPointsCounted() { // TODO RAFT WILDFIRE PITTRAP
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
-        for (PlacedTile tile : myBoard.placedTiles()) {
+        /*for (PlacedTile tile : myBoard.placedTiles()) {
             if (tile.specialPowerZone() != null && tile.specialPowerZone().specialPower() == Zone.SpecialPower.WILD_FIRE) {
                 //
             }
-        }
+        }*/
 
-        myMessageBoard.withScoredMeadow();
+        /*if (tileToPlace().kind() == Tile.Kind.MENHIR && tileToPlace().specialPowerZone() != null) {
+            switch (tile.specialPowerZone().specialPower()) {}}*/
+
+        //myMessageBoard.withScoredMeadow();
 
         for (var riverSystem : myBoard.riverSystemAreas()) {
             myMessageBoard.withScoredRiverSystem(riverSystem);
             // raft
         }
 
-        myMessageBoard.withWinners();
+        //myMessageBoard.withWinners();
+
+       /* Points.forMeadow(animalMap.getOrDefault(Animal.Kind.MAMMOTH, 0),
+                animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
+                animalMap.getOrDefault(DEER, 0));*/
     }
 
     /**
