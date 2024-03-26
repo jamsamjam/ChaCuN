@@ -1,11 +1,10 @@
-/*
 package ch.epfl.chacun;
 
 import java.util.*;
 
+import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
-*/
 /**
  * Represents the complete state of a part of ChaCuN,
  * that is, it contains all the information related to a current game.
@@ -21,19 +20,17 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param board the game board
  * @param nextAction the next action to perform,
  * @param messageBoard the message board containing the messages generated so far in the game
- *//*
+ */
 
 public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile tileToPlace,
                         Board board, Action nextAction, MessageBoard messageBoard) {
-
-    */
 /**
      * Compact constructor of GameState.
      *
      * @throws IllegalArgumentException if the number of players is less than 2,
      * or neither the tile to be placed is null nor the next action is PLACE_TILE
      * @throws NullPointerException if any of the tile deck, board, next Action, or message board is null
-     *//*
+     */
 
     public GameState {
         players = List.copyOf(players);
@@ -45,8 +42,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Objects.requireNonNull(messageBoard);
     }
 
-    */
-/**
+    /**
      * Returns the initial game state for the given players, piles and "text creator", whose next
      * action is START_GAME(hence the tile to be placed is null), and whose board and display board
      * are empty.
@@ -55,20 +51,18 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @param tileDecks the given tileDeck
      * @param textMaker the given textMaker
      * @return the initial game state
-     *//*
+     */
 
     public static GameState initial(List<PlayerColor> players, TileDecks tileDecks, TextMaker textMaker) {
         return new GameState(players, tileDecks, null, Board.EMPTY, Action.START_GAME,
                 new MessageBoard(textMaker, List.of()));
     }
 
-    */
-/**
+    /**
      * Returns the current player, or null if there is none.
      *
      * @return the current player, or null if there is none (if the next action is START_GAME or END_GAME)
-     *//*
-
+     */
     public PlayerColor currentPlayer() {
         if (nextAction == Action.START_GAME || nextAction == Action.END_GAME) {
             return null;
@@ -77,59 +71,51 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     }
 
-    */
-/**
+    /**
      * Returns the number of free occupants — which are not currently placed on the game board —
      * of the given type and of the given player.
      *
      * @param player the given player
      * @param kind the given type
      * @return the number of free occupants of the given type and of the given player
-     *//*
-
+     */
     public int freeOccupantsCount(PlayerColor player, Occupant.Kind kind) {
-        int total = kind == Occupant.Kind.PAWN ? 6 : 3; // TODO
-        return total - board.occupantCount(player, kind);
+        return occupantsCount(kind) - board.occupantCount(player, kind);
     }
 
-    */
-/**
+    /**
      * Returns all the potential occupants of the last tile placed, or raises
      * IllegalArgumentException if the board is empty.
      *
      * @return all the potential occupants of the last tile placed
      * @throws IllegalArgumentException if the board is empty
-     *//*
-
+     */
     public Set<Occupant> lastTilePotentialOccupants() {
         checkArgument(board.lastPlacedTile() != null);
         //looks at which areas are occupied or not, and therefore which zones of the tile can be occupied
         return board.lastPlacedTile().potentialOccupants();
     }
 
-    */
-/**
+    /**
      * Manages the transition from START_GAMEto PLACE_TILEby placing the starting tile in the center
      * of the board and drawing the first tile from the pile of normal tiles, which becomes the tile
      * to play.
      *
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not START_GAME
-     *//*
-
+     */
     public GameState withStartingTilePlaced() { // TODO public?
         checkArgument(nextAction() == Action.START_GAME);
 
         Board myBoard = board().withNewTile(new PlacedTile(tileToPlace(), currentPlayer(),
-                Rotation.NONE, Pos.ORIGIN, null)); // TODO board? ()? / pos(0,0)?
+                Rotation.NONE, Pos.ORIGIN, null));
 
         return new GameState(players().subList(1, players.size()),
                 tileDecks().withTopTileDrawn(Tile.Kind.START), tileDecks().topTile(Tile.Kind.NORMAL),
                 myBoard, Action.PLACE_TILE, messageBoard());
     }
 
-    */
-/**
+    /**
      * Manages all transitions from by PLACE_TILE adding the given tile to the board, assigning any
      * points obtained following the placement of the canoe or the stake pit, and determining the
      * following action — which can be RETAKE_PAWN if the placed tile contains the shaman.
@@ -138,16 +124,16 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not PLACE_TILE, or if the given tile
      * is already occupied
-     *//*
+     */
 
     public GameState withPlacedTile(PlacedTile tile) {
         checkArgument(nextAction() == Action.PLACE_TILE);
-        checkArgument(tile.occupant() == null); // TODO && ?
+        checkArgument(tile.occupant() == null);
 
         List<PlayerColor> myPlayers = players().subList(1, players.size());
         TileDecks myTileDecks = tileDecks().withTopTileDrawn(tile.kind());
         Tile myTileToPlace = tileDecks().topTile(Tile.Kind.NORMAL);
-        Board myBoard = board().withNewTile(tile); // TODO board? ()? / pos(0,0)?
+        Board myBoard = board().withNewTile(tile);
         Action myNextAction = Action.OCCUPY_TILE;
         MessageBoard myMessageBoard = messageBoard();
 
@@ -194,8 +180,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         return new GameState(myPlayers, myTileDecks, myTileToPlace, myBoard, myNextAction, myMessageBoard);
     }
 
-    */
-/**
+    /**
      * Manages all transitions from RETAKE_PAWN, by removing the given occupant, unless it is null,
      * which indicates that the player does not wish to take back a pawn.
      *
@@ -203,11 +188,10 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not RETAKE_PAWN, or if the given
      * occupant is neither null, nor a pawn.
-     *//*
-
+     */
     public GameState withOccupantRemoved(Occupant occupant) {
         checkArgument(nextAction() == Action.RETAKE_PAWN);
-        checkArgument (occupant == null || occupant.kind() == Occupant.Kind.PAWN); // TODO 끊어서?
+        checkArgument (occupant == null || occupant.kind() == Occupant.Kind.PAWN);
 
         Board myBoard = board();
 
@@ -222,19 +206,18 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         return new GameState(players(), tileDecks().withTopTileDrawn(Tile.Kind.MENHIR), null, myBoard, Action.OCCUPY_TILE, myMessageBoard);
     }
 
-    */
-/**
+    /**
      * Manages all transitions from by OCCUPY_TILE, adding the given occupant to the last tile placed,
      * unless it is equal to null, which indicates that the player does not wish to place an occupant.
      *
      * @param occupant the given occupant or null if the player does not wish to place one
      * @return an updated game state
-     *//*
+     */
 
     public GameState withNewOccupant(Occupant occupant) {
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        List<PlayerColor> myPlayers = players().subList(1, players.size());
+        List<PlayerColor> myPlayers = players().subList(1, players.size()); // TODO removeFirst()
         if (occupant != null) {
 
         }
@@ -249,13 +232,15 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     }
 
     // finish the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
-    private void withTurnFinishedIfOccupationImpossible(Occupant occupant) {
-        if (!lastTilePotentialOccupants().contains(occupant) || freeOccupantsCount(currentPlayer(), occupant.kind()) == 0) {
+    private GameState withTurnFinishedIfOccupationImpossible() {
+        if (!lastTilePotentialOccupants().isEmpty()) {
             withTurnFinished();
+        } else {
+            return GameState
         }
     }
 
-    private void withTurnFinished() {
+    private GameState withTurnFinished() {
         List<PlayerColor> myPlayers = players();
         Tile myTileToPlace = tileToPlace();
         Board myBoard = board();
@@ -263,13 +248,14 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard.withScoredForest(forest);
-            if (Area.hasMenhir(forest) && tileToPlace().kind() == Tile.Kind.NORMAL)
-                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
+            /*if (Area.hasMenhir(forest) && tileToPlace().kind() == Tile.Kind.NORMAL)
+                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);*/
         }
 
         for (var river : myBoard.riversClosedByLastTile()) {
             myMessageBoard.withScoredRiver(river);
         }
+
         // myMessageBoard.withScoredRiverSystem();
 
         TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(myTileToPlace.kind(), tile -> myBoard.couldPlaceTile(tileToPlace()));
@@ -286,13 +272,13 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     }
 
-    private void withFinalPointsCounted() {
+    private GameState withFinalPointsCounted() {
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
         for (PlacedTile tile : myBoard.placedTiles()) {
             if (tile.specialPowerZone() != null && tile.specialPowerZone().specialPower() == Zone.SpecialPower.WILD_FIRE) {
-                myBoard.cancelDeerDevouredBySmilodons(tile);
+                //
             }
         }
 
@@ -306,11 +292,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         myMessageBoard.withWinners();
     }
 
-    */
-/**
+    /**
      * Represents the next action to be performed in the part.
-     *//*
-
+     */
     public enum Action {
         START_GAME,
         PLACE_TILE,
@@ -319,4 +303,3 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         END_GAME;
     }
 }
-*/

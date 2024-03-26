@@ -32,7 +32,7 @@ public record Occupant(Kind kind, int zoneId) {
      * @return the number
      */
     public static int occupantsCount(Kind kind) {
-        return (kind == Kind.PAWN) ? 5 : (kind == Kind.HUT) ? 3 : 0;
+        return (kind == Kind.PAWN) ? 5 : 3;
     }
 
     /**

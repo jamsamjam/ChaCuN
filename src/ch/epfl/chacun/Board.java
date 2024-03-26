@@ -57,7 +57,7 @@ public final class Board {
      * @param pos the specified position
      * @return the placed tile at the specified position, or null if no tile is present
      */
-    public PlacedTile tileAt(Pos pos) { // TODO : pos != null
+    public PlacedTile tileAt(Pos pos) {
         if (pos.x() >= -REACH && pos.x() <= REACH && pos.y() >= -REACH && pos.y() <= REACH) {
             return placedTiles[indexOf(pos)];
         }
@@ -78,7 +78,7 @@ public final class Board {
      */
     public PlacedTile tileWithId(int tileId) {
        for (int i : tileIndexes) {
-           if (placedTiles[i] != null && placedTiles[i].tile().id() == tileId) { // TODO
+           if (placedTiles[i].tile().id() == tileId) {
                return placedTiles[i];
            }
        }
@@ -102,7 +102,7 @@ public final class Board {
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
         for (int i : tileIndexes) {
-            if (placedTiles[i] != null && placedTiles[i].occupant() != null){ // TODO
+            if (placedTiles[i].occupant() != null){
                 allOccupants.add(placedTiles[i].occupant());
             }
         }
@@ -182,27 +182,13 @@ public final class Board {
      * @return the area representing the adjacent meadow
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
-        // Get the area of the given zone
-        Area<Zone.Meadow> sameMeadow = meadowArea(meadowZone);
-        Set<Zone.Meadow> zonesInTheSameArea = sameMeadow.zones();
-
-        // Check if the zone is in the adjacent position
-        // TODO
-
         // Get all the meadow zones in the adjacent area
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
-        for (int i : tileIndexes) {
-            Pos pos1 = placedTiles[i].pos(); // TODO iterated?
-
-            if (pos1.equals(pos.translated(1, 1)) || pos1.equals(pos.translated(-1, 1)) ||
-                    pos1.equals(pos.translated(1, -1)) || pos1.equals(pos.translated(-1, -1))) {
-                if (tileAt(pos1) != null) adjacentMeadows.addAll(tileAt(pos1).meadowZones());
-            }
-
-            for(var d : Direction.ALL) {
-                if (tileAt(pos.neighbor(d)) != null)
-                    adjacentMeadows.addAll(tileAt(pos.neighbor(d)).meadowZones());
+        for (int i = -1; i <= 1; i++) {
+            for(int j = -1; j <= 1; j++) { // TODO : add null to Set ?
+                if (tileAt(pos.translated(i, j)) != null)
+                    adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones());
             }
         }
 
@@ -418,7 +404,6 @@ public final class Board {
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        // TODO : if (myTile.occupant().equals(occupant)) {
         myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
         builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
@@ -436,10 +421,13 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
+
         forests.forEach(forest -> {
             for (int i : tileIndexes) {
-                if (forest.isOccupied() && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
+                if (myPlacedTiles[i].occupant() != null && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    for (var zone : myPlacedTiles[i].tile().sideZones()) {
+                        if (forests.contains(zone)) myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant(); // TODO
+                    }
                 }
             }
             builder.clearGatherers(forest);
@@ -447,8 +435,10 @@ public final class Board {
 
         rivers.forEach(river -> {
             for (int i : tileIndexes) {
-                if (river.isOccupied() && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
+                if (myPlacedTiles[i].occupant() != null && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    for (var zone : myPlacedTiles[i].tile().sideZones()) {
+                        if (rivers.contains(zone)) myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
+                    }
                 }
             }
             builder.clearFishers(river);
@@ -456,6 +446,9 @@ public final class Board {
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
+
+    // TODO
+    //private void forEachAreas(Set<Area<Z>> areas, ZonePartition.Builder builder)
 
     /**
      * Returns an identical board to the receiver but with the given set of animals added to the set
