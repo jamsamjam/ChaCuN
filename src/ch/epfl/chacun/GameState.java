@@ -139,7 +139,10 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
                     Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
+                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
                     // TODO need to get cancelled deer set
+
+
 
                     myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
                     myBoard.withMoreCancelledAnimals(animalSet);
@@ -167,7 +170,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         checkArgument(nextAction() == Action.RETAKE_PAWN);
         checkArgument (occupant == null || occupant.kind() == Occupant.Kind.PAWN);
 
-
         Board myBoard = board();
 
         if (occupant != null) {
@@ -189,17 +191,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withNewOccupant(Occupant occupant) { // TODO
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        Tile myTileToPlace = tileDecks().topTile(Tile.Kind.NORMAL);
+        Tile myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
         Board myBoard = board();
 
         if (occupant != null) {
             myBoard = myBoard.withOccupant(occupant);
-        }
-
-        for (var area : myBoard.forestsClosedByLastTile()) {
-            if (hasMenhir(area) && tileToPlace().kind() == Tile.Kind.NORMAL) { // TODO not 2nd time
-                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
-            }
         }
 
         return new GameState(players(), tileDecks(), myTileToPlace, myBoard, Action.PLACE_TILE,
@@ -211,12 +207,21 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         return !lastTilePotentialOccupants().isEmpty() ? withTurnFinished() : this;
     }
 
-    private GameState withTurnFinished() { // TODO withNewOccupant
-        Tile myTileToPlace = tileToPlace();
+    private GameState withTurnFinished() {
         Board myBoard = board();
+        TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(Tile.Kind.NORMAL, tile -> myBoard.couldPlaceTile(tileToPlace()));
+        Action myNextAction = nextAction();
+        Tile myTileToPlace = tileToPlace();
         MessageBoard myMessageBoard = messageBoard();
+        List<PlayerColor> myPlayers = players();
 
+        // 2nd turn
         for (var forest : myBoard.forestsClosedByLastTile()) {
+            if (hasMenhir(forest) && tileToPlace().kind() == Tile.Kind.NORMAL) { // TODO not 2nd time
+                myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
+                myNextAction = Action.PLACE_TILE;
+                myPlayers = myPlayers.subList(1, players().size());
+            }
             myMessageBoard.withScoredForest(forest);
         }
 
@@ -224,49 +229,26 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             myMessageBoard.withScoredRiver(river);
         }
 
-        // myMessageBoard.withScoredRiverSystem();
+        // TODO myMessageBoard.withScoredRiverSystem();
 
-        TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(myTileToPlace.kind(), tile -> myBoard.couldPlaceTile(tileToPlace()));
-        Action mynextAction = nextAction();
-
-        // end the game if the current player has finished his turn(s) and there are no more playable normal tiles remaining
-        if (true && myTileDecks.normalTiles().isEmpty()) {
-            mynextAction = Action.END_GAME;
-            myMessageBoard = myMessageBoard.withWinners();
-            return new GameState(myMessageBoard).withFinalPointsCounted();
+        // TODO end the game if the current player has finished his turn(s)
+        if (myTileDecks.normalTiles().isEmpty()) {
+            //  the final state of the game, i.e. the state that will never change again,
+            //  with all points counted, the victory message added to the board, the deer cancelled, and END_GAME
+            //  as the next action.
+            return withFinalPointsCounted();
         }
 
-//  the final state of the game, i.e. the state that will never change again,
-//  with all points counted, the victory message added to the board, the deer cancelled, and END_GAME
-//  as the next action.
-        return new GameState(players().subList(1, players().size()), tileDecks(), tileToPlace(),
-                board(), mynextAction, myMessageBoard);
+        return new GameState(myPlayers, tileDecks(), myTileToPlace, board(), myNextAction, myMessageBoard);
     }
 
     private GameState withFinalPointsCounted() { // TODO RAFT WILDFIRE PITTRAP
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
-        for (tileToPlace)
-        /*for (PlacedTile tile : myBoard.placedTiles()) {
-            if (tile.specialPowerZone() != null && tile.specialPowerZone().specialPower() == Zone.SpecialPower.WILD_FIRE) {
-                //
-            }
-        }*/
 
-        /*if (tileToPlace().kind() == Tile.Kind.MENHIR && tileToPlace().specialPowerZone() != null) {
-            switch (tile.specialPowerZone().specialPower()) {}}*/
 
-        //myMessageBoard.withScoredMeadow();
-
-        for (var riverSystem : myBoard.riverSystemAreas()) {
-            myMessageBoard.withScoredRiverSystem(riverSystem);
-            // raft
-        }
-
-       /* Points.forMeadow(animalMap.getOrDefault(Animal.Kind.MAMMOTH, 0),
-                animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
-                animalMap.getOrDefault(DEER, 0));*/
+        return new GameState(null, null, null, Action.END_GAME, myBoard, myMessageBoard.withWinners()).
     }
 
     /**
