@@ -186,9 +186,9 @@ public final class Board {
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
         for (int i = -1; i <= 1; i++) {
-            for(int j = -1; j <= 1; j++) { // TODO : add null to Set ?
+            for(int j = -1; j <= 1; j++) {
                 if (tileAt(pos.translated(i, j)) != null)
-                    adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones());
+                    adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones()); // TODO
             }
         }
 

@@ -1,6 +1,7 @@
 package ch.epfl.chacun;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Animal.Kind.*;
 import static ch.epfl.chacun.Area.hasMenhir;
@@ -67,7 +68,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             return null;
         }
         return players().getFirst();
-
     }
 
     /**
@@ -96,7 +96,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     }
 
     /**
-     * Manages the transition from START_GAME to PLACE_TILEby placing the starting tile in the center
+     * Manages the transition from START_GAME to PLACE_TILE by placing the starting tile in the center
      * of the board and drawing the first tile from the pile of normal tiles, which becomes the tile
      * to play.
      *
@@ -106,7 +106,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withStartingTilePlaced() {
         checkArgument(nextAction() == Action.START_GAME);
 
-        Board myBoard = board().withNewTile(new PlacedTile(tileToPlace(), currentPlayer(),
+        Board myBoard = board().withNewTile(new PlacedTile(tileDecks().topTile(Tile.Kind.START), null,
                 Rotation.NONE, Pos.ORIGIN, null));
 
         return new GameState(players(), tileDecks().withTopTileDrawn(Tile.Kind.START),
@@ -138,10 +138,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
-                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
-                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of());
+                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of()).stream().filter(a -> a.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
                     // TODO need to get cancelled deer set
-
+                    System.out.println(animalSet);
 
 
                     myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
@@ -208,7 +207,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     }
 
     private GameState withTurnFinished() {
-        Board myBoard = board();
+        return this;
+        /*Board myBoard = board();
         TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(Tile.Kind.NORMAL, tile -> myBoard.couldPlaceTile(tileToPlace()));
         Action myNextAction = nextAction();
         Tile myTileToPlace = tileToPlace();
@@ -220,7 +220,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             if (hasMenhir(forest) && tileToPlace().kind() == Tile.Kind.NORMAL) { // TODO not 2nd time
                 myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
                 myNextAction = Action.PLACE_TILE;
-                myPlayers = myPlayers.subList(1, players().size());
+                myPlayers = myPlayers.subList(1, players().size()); // TODO should be added at the end
             }
             myMessageBoard.withScoredForest(forest);
         }
@@ -239,16 +239,19 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             return withFinalPointsCounted();
         }
 
-        return new GameState(myPlayers, tileDecks(), myTileToPlace, board(), myNextAction, myMessageBoard);
+        return new GameState(myPlayers, tileDecks(), myTileToPlace, board(), myNextAction, myMessageBoard);*/
     }
 
     private GameState withFinalPointsCounted() { // TODO RAFT WILDFIRE PITTRAP
+        int points= 0;
+        Set<PlayerColor> winners = Set.of();
+
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
 
 
-        return new GameState(null, null, null, Action.END_GAME, myBoard, myMessageBoard.withWinners()).
+        return new GameState(null, null, null, myBoard, Action.END_GAME, myMessageBoard.withWinners(winners, points));
     }
 
     /**
