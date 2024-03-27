@@ -156,8 +156,10 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     Set<Animal> deerSet = Area.animals(adjacentMeadow, Set.of()).stream().
                             filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount).collect(Collectors.toSet());
 
+                    // calculate the points with the remaining animals, a mammoth earning 3 points, an auroch 2 and a deer 1
+
                     myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
-                    myBoard.withMoreCancelledAnimals(deerSet);
+                    myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
                 }
 
                 case SHAMAN -> myNextAction = Action.RETAKE_PAWN;
@@ -208,8 +210,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     private GameState withTurnFinished() {
         List<PlayerColor> myPlayers = players();
-        myPlayers.removeFirst();
-        myPlayers.add(players().getFirst());
+        myPlayers.add(myPlayers.removeFirst());
 
         TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(Tile.Kind.NORMAL, tile -> board().couldPlaceTile(tile)); // TODO
         Tile myTileToPlace = myTileDecks.topTile(Tile.Kind.NORMAL);
