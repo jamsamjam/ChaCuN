@@ -479,4 +479,10 @@ public final class Board {
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
     }
+
+    // TODO temporary
+    @Override
+    public String toString() {
+        return getClass().getName() + "@" + Arrays.toString(placedTiles) + Arrays.toString(tileIndexes);
+    }
 }

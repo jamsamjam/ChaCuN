@@ -138,13 +138,13 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
-                    Set<Animal> animalSet = Area.animals(adjacentMeadow, Set.of()).stream().filter(a -> a.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
-                    // TODO need to get cancelled deer set
-                    System.out.println(animalSet);
-
+                    int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream().
+                            filter(a -> a.kind() == Animal.Kind.TIGER).count();
+                    Set<Animal> deerSet = Area.animals(adjacentMeadow, Set.of()).stream().
+                            filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount).collect(Collectors.toSet());
 
                     myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
-                    myBoard.withMoreCancelledAnimals(animalSet);
+                    myBoard.withMoreCancelledAnimals(deerSet);
                 }
 
                 case SHAMAN -> myNextAction = Action.RETAKE_PAWN;

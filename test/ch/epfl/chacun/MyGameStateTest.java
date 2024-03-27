@@ -43,7 +43,6 @@ class MyGameStateTest {
         //var meadow56 = (Zone.Meadow) t56.zoneWithId(56_0);
 
         var b = Board.EMPTY;
-                //.withNewTile(t56);
 
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
@@ -54,7 +53,6 @@ class MyGameStateTest {
 
         assertEquals(expectedState, testState.withStartingTilePlaced());
     }
-
 
     @Test
     void withPlacedTileWorks() {
@@ -81,7 +79,6 @@ class MyGameStateTest {
         //var meadow56 = (Zone.Meadow) t56.zoneWithId(56_0);
 
         var b = Board.EMPTY.withNewTile(t56);
-        //.withNewTile(t56);
 
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
