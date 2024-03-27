@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static ch.epfl.chacun.PlayerColor.RED;
+import static ch.epfl.chacun.Zone.SpecialPower.LOGBOAT;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MyGameStateTest {
@@ -55,7 +57,7 @@ class MyGameStateTest {
     }
 
     @Test
-    void withPlacedTileWorks() {
+    void withPlacedTileWorksWithNormalTile() {
         var allTiles = allTiles();
 
         var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
@@ -86,11 +88,64 @@ class MyGameStateTest {
         var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
                 null, b.withNewTile(t42), GameState.Action.OCCUPY_TILE,  mb);
         var testState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(49), b, GameState.Action.PLACE_TILE,  mb);
+                allTiles.get(42), b, GameState.Action.PLACE_TILE,  mb);
 
-        assertEquals(expectedState, testState.withPlacedTile(t49));
+        assertEquals(expectedState, testState.withPlacedTile(t42));
     }
 
+
+    @Test
+    void withPlacedTileWorksWith93Logboat() {
+        var allTiles = allTiles();
+
+        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+
+        // tiledecks
+        List<Tile> dS = List.of();
+        var dN = List.of(allTiles.get(33), allTiles.get(22), allTiles.get(37), allTiles.get(38));
+        var dM = List.of(allTiles.get(93));
+
+        var dN1 = List.of(allTiles.get(38));
+        List<Tile> dM1 = List.of();
+        var decks = new TileDecks(dS, dN, dM);
+        var decks1 = new TileDecks(dS, dN1, dM1);
+
+        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0)); //start
+        var t33 = new PlacedTile(allTiles.get(33), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
+        var t22 = new PlacedTile(allTiles.get(22), PlayerColor.PURPLE, Rotation.HALF_TURN, new Pos(1, 1));
+        var t37 = new PlacedTile(allTiles.get(37), PlayerColor.BLUE, Rotation.NONE, new Pos(0, -1)); // closed
+        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 0)); // logboat
+        //var t94 = new PlacedTile(allTiles.get(94), PlayerColor.PURPLE, Rotation.NONE, new Pos(0, -1)); //hunting_trap
+
+        //var meadow56 = (Zone.Meadow) t56.zoneWithId(56_0);
+
+        var b = Board.EMPTY.withNewTile(t56).withNewTile(t33).withNewTile(t22).withNewTile(t37);
+
+        var tm = new BasicTextMaker();
+        var mb = new MessageBoard(tm, List.of());
+
+        var l1 = new Zone.Lake(56, 1, null);
+        var r11 = new Zone.River(57, 0, l1);
+
+        var l2 = new Zone.Lake(93, 1, LOGBOAT);
+        var r1 = new Zone.River(28, 0, l2);
+        var r2 = new Zone.River(20, 0, l2);
+        var r3 = new Zone.River(21, 0, l2);
+
+        var riverSystem = new Area<Zone.Water>(Set.of(l1, r11, l2, r1, r2, r3), List.of(), 2);
+        var partitions = new ZonePartitions(
+                new ZonePartition<>(),
+                new ZonePartition<>(),
+                new ZonePartition<>(),
+                new ZonePartition<>(Set.of(riverSystem)));
+
+        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
+                null, b.withNewTile(t93), GameState.Action.OCCUPY_TILE,  mb.withScoredLogboat(PlayerColor.BLUE, riverSystem));
+        var testState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
+                allTiles.get(93), b, GameState.Action.PLACE_TILE,  mb);
+
+        assertEquals(expectedState, testState.withPlacedTile(t93));
+    }
 
     private static List<Tile> allTiles() {
         ArrayList<Tile> tiles = new ArrayList<>();
@@ -1212,7 +1267,7 @@ class MyGameStateTest {
             tiles.add(new Tile(92, Tile.Kind.MENHIR, sN, sE, sS, sW));
         }
         {   // Tile 93
-            var l1 = new Zone.Lake(93_8, 1, Zone.SpecialPower.LOGBOAT);
+            var l1 = new Zone.Lake(93_8, 1, LOGBOAT);
             var z0 = new Zone.Meadow(93_0, List.of(), null);
             var z1 = new Zone.River(93_1, 0, l1);
             var z2 = new Zone.Meadow(93_2, List.of(), null);

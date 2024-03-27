@@ -1,6 +1,8 @@
 package ch.epfl.chacun;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
@@ -346,7 +348,7 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied
+    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied TODO
         checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
@@ -421,7 +423,6 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-
         forests.forEach(forest -> {
             for (int i : tileIndexes) {
                 if (myPlacedTiles[i].occupant() != null && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
@@ -448,7 +449,18 @@ public final class Board {
     }
 
     // TODO
-    //private void forEachAreas(Set<Area<Z>> areas, ZonePartition.Builder builder)
+    /*private <Z extends Zone> void forEachAreas (PlacedTile[] tiles, ZonePartitions.Builder builder, Set<Area<Z>> areas) {
+        areas.forEach(area -> {
+            for (int i : tileIndexes) {
+                if (tiles[i].occupant() != null && tiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+                    for (var zone : tiles[i].tile().sideZones()) {
+                        if (areas.contains(zone)) tiles[i] = tiles[i].withNoOccupant(); // TODO
+                    }
+                }
+            }
+            Z instanceof Zone.Forest ? builder.clearGatherers(area) : builder.clearFishers(area);
+        });
+    }*/
 
     /**
      * Returns an identical board to the receiver but with the given set of animals added to the set
@@ -480,7 +492,7 @@ public final class Board {
         return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
     }
 
-    // TODO temporary
+    // TODO temporary (should be removed)
     @Override
     public String toString() {
         return getClass().getName() + "@" + Arrays.toString(placedTiles) + Arrays.toString(tileIndexes);
