@@ -21,7 +21,7 @@ class MyGameStateTest {
     }
 
     @Test
-    void withStartingTilePlacedWorks() {
+    void currentPlayerWorks() {
         var allTiles = allTiles();
 
         var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
@@ -49,28 +49,29 @@ class MyGameStateTest {
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
 
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                allTiles.get(49), b.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
+        var expectedPlayer = PlayerColor.BLUE;
         var testState = GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm);
 
-        assertEquals(expectedState, testState.withStartingTilePlaced());
+        assertNull(GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm).currentPlayer());
+        assertEquals(expectedPlayer, testState.withStartingTilePlaced().currentPlayer());
+        //TODO more
     }
 
-    @Test
-    void withPlacedTileWorksWithNormalTile() {
+    /*@Test
+    void withStartingTilePlacedWorks() {
         var allTiles = allTiles();
 
         var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
 
         // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(49), allTiles.get(27), allTiles.get(94));
-        var dM = List.of(allTiles.get(42));
+        var dS = List.of(allTiles.get(56));
+        var dN = List.of(allTiles.get(42), allTiles.get(49), allTiles.get(94));
+        var dM = List.of(allTiles.get(93));
 
         var decks = new TileDecks(dS, dN, dM);
 
-        var dN1 = List.of(allTiles.get(27), allTiles.get(94));
-        var decks1 = new TileDecks(dS, dN1, dM);
+        List<Tile> dS1 = List.of();
+        var decks1 = new TileDecks(dS1, dN, dM);
 
         var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0)); //start
         var t42 = new PlacedTile(allTiles.get(42), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0)); //menhir
@@ -80,17 +81,83 @@ class MyGameStateTest {
 
         //var meadow56 = (Zone.Meadow) t56.zoneWithId(56_0);
 
+        var b = Board.EMPTY;
+
+        var tm = new BasicTextMaker();
+        var mb = new MessageBoard(tm, List.of());
+
+        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
+                allTiles.get(42), b.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
+        var testState = GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm);
+
+        assertEquals(expectedState, testState.withStartingTilePlaced());
+    }*/
+
+    @Test
+    void withStartingTilePlacedWorks() {
+        var allTiles = allTiles();
+
+        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+
+        // tiledecks
+        var dS = List.of(allTiles.get(56));
+        var dN = List.of(allTiles.get(90), allTiles.get(73));
+        var dM = List.of(allTiles.get(93));
+
+        List<Tile> dS1 = List.of();
+
+        var decks = new TileDecks(dS, dN, dM);
+        var decks1 = new TileDecks(dS1, dN, dM);
+
+        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
+        var t90 = new PlacedTile(allTiles.get(90), PlayerColor.BLUE, Rotation.RIGHT, new Pos(1, 0));
+        var t73 = new PlacedTile(allTiles.get(73), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
+        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1));
+
         var b = Board.EMPTY.withNewTile(t56);
 
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
 
         var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                null, b.withNewTile(t42), GameState.Action.OCCUPY_TILE,  mb);
-        var testState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(42), b, GameState.Action.PLACE_TILE,  mb);
+                allTiles.get(90), Board.EMPTY.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
 
-        assertEquals(expectedState, testState.withPlacedTile(t42));
+        assertEquals(expectedState, GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm).withStartingTilePlaced());
+    }
+
+    @Test
+    void withPlacedTileWorksWithNormalTile() {
+        var allTiles = allTiles();
+
+        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+
+        // tiledecks
+        var dS = List.of(allTiles.get(56));
+        var dN = List.of(allTiles.get(90), allTiles.get(73));
+        var dM = List.of(allTiles.get(93));
+
+        List<Tile> dS1 = List.of();
+        var dN1 = List.of(allTiles.get(73));
+
+        var decks = new TileDecks(dS, dN, dM);
+        var decks1 = new TileDecks(dS1, dN1, dM);
+
+        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
+        var t90 = new PlacedTile(allTiles.get(90), PlayerColor.BLUE, Rotation.RIGHT, new Pos(1, 0));
+        var t73 = new PlacedTile(allTiles.get(73), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
+        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1));
+
+        var b = Board.EMPTY.withNewTile(t56).withNewTile(t73);
+
+        var tm = new BasicTextMaker();
+        var mb = new MessageBoard(tm, List.of());
+
+        var expectedState = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
+                allTiles.get(73), Board.EMPTY.withNewTile(t56).withNewTile(t90), GameState.Action.PLACE_TILE,  mb);
+        var beforeState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
+                allTiles.get(90), Board.EMPTY.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
+
+        assertEquals(expectedState, beforeState.withPlacedTile(t90));
     }
 
 

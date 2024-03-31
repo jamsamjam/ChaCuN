@@ -156,15 +156,15 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
             return potentialOccupants;
         }
         for (Zone zone : tile.zones()) {
-                if (zone instanceof Zone.Lake) {
-                    potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
-                } else if (zone instanceof Zone.River && !((Zone.River) zone).hasLake()) {
-                    potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
-                    potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
-                } else {
-                    potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
-                }
+            if (zone instanceof Zone.Lake) {
+                potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
+            } else if (zone instanceof Zone.River r && !r.hasLake()) {
+                potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
+                potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
+            } else {
+                potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
             }
+        }
         return potentialOccupants;
     }
 

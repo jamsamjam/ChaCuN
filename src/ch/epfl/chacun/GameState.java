@@ -55,7 +55,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return the initial game state
      */
     public static GameState initial(List<PlayerColor> players, TileDecks tileDecks, TextMaker textMaker) {
-        // the first tile in the normal tile pile can always be placed
         return new GameState(players, tileDecks, null, Board.EMPTY, Action.START_GAME,
                 new MessageBoard(textMaker, List.of()));
     }
@@ -86,8 +85,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     /**
      * Returns all the potential occupants of the last placed tile that the current player could
-     * actually place — he has at least one occupant of the right type in hand, and the area to which
-     * belongs the zone that this occupant would occupy is not already occupied — or raises
+     * actually place — he has at least one occupant of the right type in hand, and the area of the
+     * zone that this occupant would occupy is not already occupied — or raises
      * IllegalArgumentException if the board is empty.
      *
      * @return all the potential occupants of the last tile placed
@@ -95,17 +94,20 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      */
     public Set<Occupant> lastTilePotentialOccupants() {
         checkArgument(board.lastPlacedTile() != null);
-
         Set<Occupant> occupants = new HashSet<>();
+
         for (var o : board.lastPlacedTile().potentialOccupants()) {
-            if (freeOccupantsCount(currentPlayer(), o.kind()) > 0 && board.lastPlacedTile().zoneWithId(o.zoneId()).isOccupied) {
-                occupants.add(o);
+            if (freeOccupantsCount(currentPlayer(), o.kind()) >= 1) {
+                switch (board.lastPlacedTile().zoneWithId(o.zoneId())) {
+                    case Zone.Forest f -> { if (!board.forestArea(f).isOccupied()) occupants.add(o); }
+                    case Zone.Meadow m -> { if (!board.meadowArea(m).isOccupied()) occupants.add(o); }
+                    case Zone.River r -> { if (!board.riverArea(r).isOccupied()) occupants.add(o); }
+                    case Zone.Water l -> { if (!board.riverSystemArea(l).isOccupied()) occupants.add(o); }
+                }
             }
         }
 
-        //looks at which areas are occupied or not, and therefore which zones of the tile can be occupied
         return occupants;
-                //board.lastPlacedTile().potentialOccupants();
     }
 
     /**
@@ -289,8 +291,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
         myBoard.cancelledAnimals();
 
-        myMessageBoard = myMessageBoard.withScoredMeadow();
-        myMessageBoard = myMessageBoard.withScoredRiverSystem();
+        //myMessageBoard = myMessageBoard.withScoredMeadow();
+        //myMessageBoard = myMessageBoard.withScoredRiverSystem();
 
         myMessageBoard.points();
 
