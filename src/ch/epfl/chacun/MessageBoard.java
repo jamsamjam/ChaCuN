@@ -23,10 +23,10 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     }
 
     /**
-     * Returns a table associating to all the players appearing in the winners (scorers) of at least
-     * one message, the total number of points obtained.
+     * Returns a table associating to all the players appearing in the scorers of at least one
+     * message, the total number of points obtained.
      *
-     * @return MessageBoard associating to all the players appearing in the winners and their total points
+     * @return MessageBoard associating to all the players appearing in the scorers and their total points
      */
     public Map<PlayerColor, Integer> points() {
         Map<PlayerColor, Integer> pointsMap = new HashMap<>();

@@ -4,10 +4,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Area.hasMenhir;
-import static ch.epfl.chacun.Board.REACH;
 import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 import static ch.epfl.chacun.Tile.Kind.*;
+import static ch.epfl.chacun.Zone.SpecialPower.*;
 
 /**
  * Represents the complete state of a part of ChaCuN, with all the information related to a current game.
@@ -253,53 +253,45 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             return this;
         }
 
-        int points= 0;
-        Set<PlayerColor> winners = Set.of();
-
-        Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
-        for (int i = - REACH; i <= REACH; i++) { // !tileDecks.contains()
-            for (int j = - REACH; j <= REACH; j++) {
-                Pos pos = new Pos(i, j);
-                PlacedTile tile = myBoard.tileAt(pos);
-                Set<Animal> a = myBoard.cancelledAnimals();
+        Set<Animal> a = new HashSet<>(board().cancelledAnimals());
 
-                if (tile != null && tile.specialPowerZone() != null) {
-                    switch (tile.specialPowerZone().specialPower()) {
-                        case WILD_FIRE -> {
-                            Area.animals(myBoard.meadowArea((Zone.Meadow) tile.specialPowerZone()), a)
-                                    .stream().filter(m -> m.kind() == Animal.Kind.TIGER).collect(Collectors.toSet());
-                            // must begin by adding to the canceled animals all the deer devoured by smilodons, taking into account the possible presence of fire in a meadow
-                        }
+        for (var meadow : board().meadowAreas()) {
+            if (meadow.zoneWithSpecialPower(WILD_FIRE) != null) {
+                a.addAll(Area.animals(meadow, Set.of()).stream()
+                        .filter(m -> m.kind() == Animal.Kind.TIGER).collect(Collectors.toSet()));
+            }
+            if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
+                //deer that are not within its range must be canceled as a priority, in order to maximize the points earned by the pit.
+                myMessageBoard = myMessageBoard.withScoredPitTrap(m, a).withScoredMeadow();
+                // TODO double points for each animal ?
+            }
 
-                        case PIT_TRAP -> {
-                            //deer that are not within its range must be canceled as a priority, in order to maximize the points earned by the pit.
-                            Area<Zone.Meadow> m = myBoard.adjacentMeadow(pos, (Zone.Meadow) tile.specialPowerZone());
-                            myMessageBoard = myMessageBoard.withScoredPitTrap(m, a).withScoredMeadow();
-                            // TODO double points for each animal ?
-                        }
 
-                        case RAFT -> {
-                            myMessageBoard = myMessageBoard.withScoredRaft(myBoard.riverSystemArea((Zone.Water) tile.specialPowerZone()))
-                                    .withScoredRiverSystem();
+            // and all the deer cancelled by tiger should be added
 
-                        }
-                    }
-                }
+            myMessageBoard.withScoredMeadow(meadow, cancelledAnimal)
+        }
 
+        for (var rSystem : board().riverSystemAreas()) {
+            if (rSystem.zoneWithSpecialPower(RAFT) != null) {
+                myMessageBoard = myMessageBoard.withScoredRaft(rSystem).withScoredRiverSystem(rSystem);
             }
         }
 
-        myBoard.cancelledAnimals();
+        int point = 0;
 
-        //myMessageBoard = myMessageBoard.withScoredMeadow();
-        //myMessageBoard = myMessageBoard.withScoredRiverSystem();
+        Map.Entry<PlayerColor, Integer> maxEntry = myMessageBoard.points().entrySet().stream()
+                        .max(Map.Entry<PlayerColor, Integer> e1, Map.Entry<PlayerColor, Integer> e2 -> e1.getValue().compareTo(e2.getValue()));
+        Collections.max(myMessageBoard.points().entrySet(),
+                Map.Entry.comparingByValue()).getValue()
 
-        myMessageBoard.points();
-
-        return new GameState(null, null, null, myBoard, Action.END_GAME, myMessageBoard.withWinners(winners, points));
+        return new GameState(null, null, null, board(), Action.END_GAME,
+                myMessageBoard.withWinners();
     }
+
+    //Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey()
 
     /**
      * Represents the next action to be performed in the part.
