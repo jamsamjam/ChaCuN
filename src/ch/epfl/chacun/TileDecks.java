@@ -70,7 +70,8 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     }
 
     /**
-     * Returns a new tile decks with tiles removed from the top of the pile based on the predicate.
+     * Returns a new tile decks with all tiles removed from the top of a pile that do not satisfy
+     * a given condition.
      *
      * @param kind the kind of tiles
      * @param predicate the predicate to test the tiles

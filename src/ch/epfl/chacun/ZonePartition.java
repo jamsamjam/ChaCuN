@@ -46,7 +46,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
                 return area;
             }
         }
-        throw new IllegalArgumentException(); // TODO explanation ?
+        throw new IllegalArgumentException();
     }
 
     /**
