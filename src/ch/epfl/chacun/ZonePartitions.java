@@ -126,6 +126,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         meadowBuilder.union(m1, z2);
                         meadowBuilder.union(z1, m2);
                         }
+
                 default -> throw new IllegalArgumentException();
             }
         }
@@ -147,15 +148,19 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 case Zone.Forest forest
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         forestBuilder.addInitialOccupant(forest, player);
+
                 case Zone.Meadow meadow
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         meadowBuilder.addInitialOccupant(meadow, player);
+
                 case Zone.River river
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         riverBuilder.addInitialOccupant(river, player);
+
                 case Zone.Water water
                         when occupantKind.equals(Occupant.Kind.HUT) ->
                         riverSystemBuilder.addInitialOccupant(water, player);
+
                 default -> throw new IllegalArgumentException();
             }
         }
@@ -173,8 +178,11 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
         public void removePawn(PlayerColor player, Zone occupiedZone) {
             switch (occupiedZone) {
                 case Zone.Forest f1 -> forestBuilder.removeOccupant(f1, player);
+
                 case Zone.Meadow m1 -> meadowBuilder.removeOccupant(m1, player);
+
                 case Zone.River r1 -> riverBuilder.removeOccupant(r1, player);
+
                 default -> throw new IllegalArgumentException();
             }
         }

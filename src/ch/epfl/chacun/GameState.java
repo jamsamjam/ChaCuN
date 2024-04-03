@@ -1,13 +1,13 @@
 package ch.epfl.chacun;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Area.hasMenhir;
 import static ch.epfl.chacun.Board.REACH;
 import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.Preconditions.checkArgument;
+import static ch.epfl.chacun.Tile.Kind.*;
 
 /**
  * Represents the complete state of a part of ChaCuN, with all the information related to a current game.
@@ -121,11 +121,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withStartingTilePlaced() {
         checkArgument(nextAction() == Action.START_GAME);
 
-        Board myBoard = board().withNewTile(new PlacedTile(tileDecks().topTile(Tile.Kind.START), null,
-                Rotation.NONE, Pos.ORIGIN, null));
-
-        return new GameState(players(), tileDecks().withTopTileDrawn(Tile.Kind.START),
-                tileDecks().topTile(Tile.Kind.NORMAL), myBoard, Action.PLACE_TILE, messageBoard());
+        return new GameState(players(), tileDecks().withTopTileDrawn(START),
+                tileDecks().topTile(NORMAL),
+                board().withNewTile(new PlacedTile(tileDecks().topTile(START), null,
+                        Rotation.NONE, Pos.ORIGIN, null)),
+                Action.PLACE_TILE, messageBoard());
     }
 
     /**
@@ -149,22 +149,25 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         if (tile.kind() == Tile.Kind.MENHIR && tile.specialPowerZone() != null) {
             switch (tile.specialPowerZone().specialPower()) {
                 case LOGBOAT ->
-                    myMessageBoard.withScoredLogboat(currentPlayer(), board.riverSystemArea((Zone.Water) tile.specialPowerZone()));
+                        myMessageBoard.withScoredLogboat(currentPlayer(), board.riverSystemArea((Zone.Water) tile.specialPowerZone()));
 
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) tile.specialPowerZone());
-                    int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream().
-                            filter(a -> a.kind() == Animal.Kind.TIGER).count();
-                    Set<Animal> deerSet = Area.animals(adjacentMeadow, Set.of()).stream().
-                            filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount).collect(Collectors.toSet());
 
-                    // calculate the points with the remaining animals, a mammoth earning 3 points, an auroch 2 and a deer 1
+                    int tiger = (int) Area.animals(adjacentMeadow, Set.of()).stream()
+                            .filter(a -> a.kind() == Animal.Kind.TIGER).count();
+                    Set<Animal> deadDear = Area.animals(adjacentMeadow, Set.of()).stream()
+                            .filter(a -> a.kind() == Animal.Kind.DEER).limit(tiger)
+                            .collect(Collectors.toSet());
 
                     myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
+                    // later deadDear should be passed to withScoredHuntingTrap
                     myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
                 }
 
                 case SHAMAN -> myNextAction = Action.RETAKE_PAWN;
+
+                case null, default -> {} // TODO null needed ?
             }
         }
         return new GameState(players(), tileDecks().withTopTileDrawn(tile.kind()), null,
@@ -200,9 +203,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withNewOccupant(Occupant occupant) {
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        return new GameState(players(), tileDecks(), tileToPlace(),
+        return new GameState(players(), tileDecks(), null,
                 occupant != null ? board().withOccupant(occupant) : board(), Action.PLACE_TILE,
-                messageBoard()).withTurnFinished(); // TODO : tileToPlace
+                messageBoard()).withTurnFinished();
     }
 
     // Finishes the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
@@ -214,22 +217,22 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         List<PlayerColor> myPlayers = players();
         myPlayers.add(myPlayers.removeFirst());
 
-        TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(Tile.Kind.NORMAL, tile -> board().couldPlaceTile(tile)); // TODO
-        Tile myTileToPlace = myTileDecks.topTile(Tile.Kind.NORMAL);
+        TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(NORMAL, tile -> board().couldPlaceTile(tile));
+        Tile myTileToPlace = myTileDecks.topTile(NORMAL);
         Board myBoard = board();
         MessageBoard myMessageBoard = messageBoard();
 
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
-            // TODO lastPlacedTile can be null here?
-            if (hasMenhir(forest) && board().lastPlacedTile().tile().kind() == Tile.Kind.NORMAL) {
+
+            if (hasMenhir(forest) && board().lastPlacedTile().tile().kind() == NORMAL) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
+
                 if (myTileDecks.topTile(Tile.Kind.MENHIR) != null) {
                     myPlayers = players();
                     myTileToPlace = tileDecks().topTile(Tile.Kind.MENHIR);
                 }
-                // TODO menhir tile x left -> next player?
             }
         }
 
@@ -240,14 +243,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         // all the occupants of these areas are returned to their owners
         myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
 
-        // TODO myMessageBoard.withScoredRiverSystem();
-
         return new GameState(myPlayers, tileDecks(), myTileToPlace, myBoard, Action.PLACE_TILE, myMessageBoard).withFinalPointsCounted();
     }
 
     // End the game if the current player has finished his turn(s)
-    //  with all points counted, the victory message added to the board, the deer cancelled, and END_GAME
-    //  as the next action.
+    // All points counted, the win message added to the board, the cancelledDeer added
     private GameState withFinalPointsCounted() {
         if (tileToPlace() != null) {
             return this;
@@ -276,12 +276,14 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                         case PIT_TRAP -> {
                             //deer that are not within its range must be canceled as a priority, in order to maximize the points earned by the pit.
                             Area<Zone.Meadow> m = myBoard.adjacentMeadow(pos, (Zone.Meadow) tile.specialPowerZone());
-                            myMessageBoard = myMessageBoard.withScoredPitTrap(m, a);
+                            myMessageBoard = myMessageBoard.withScoredPitTrap(m, a).withScoredMeadow();
                             // TODO double points for each animal ?
                         }
 
                         case RAFT -> {
-                            myMessageBoard = myMessageBoard.withScoredRaft(myBoard.riverSystemArea((Zone.Water) tile.specialPowerZone()));
+                            myMessageBoard = myMessageBoard.withScoredRaft(myBoard.riverSystemArea((Zone.Water) tile.specialPowerZone()))
+                                    .withScoredRiverSystem();
+
                         }
                     }
                 }
