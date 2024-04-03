@@ -255,7 +255,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      *
      * @return an updated game state with all points counted, winning message added, deer cancelled
      */
-    private GameState withFinalPointsCounted() {
+    private GameState withFinalPointsCounted() { // TODO
         if (tileToPlace() != null) {
             return this;
         }
@@ -263,6 +263,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         MessageBoard myMessageBoard = messageBoard();
 
         Set<Animal> cancelledAnimal = new HashSet<>(board().cancelledAnimals());
+        Set<Animal> goodDeer = new HashSet<>();
+        Set<Animal> farDeer = new HashSet<>();
+
 
         for (var meadow : board().meadowAreas()) {
             if (meadow.zoneWithSpecialPower(WILD_FIRE) != null) {
@@ -270,17 +273,23 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                         .filter(m -> m.kind() == Animal.Kind.TIGER).collect(Collectors.toSet()));
             }
 
-            int tiger = (int) Area.animals(meadow, Set.of()).stream()
-                    .filter(a -> a.kind() == Animal.Kind.TIGER).count();
-            cancelledAnimal.addAll(Area.animals(meadow, Set.of()).stream()
-                    .filter(a -> a.kind() == Animal.Kind.DEER).limit(tiger)
-                    .collect(Collectors.toSet()));
-
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
-                // TODO deer that are not within its range must be canceled first
+                goodDeer = Area.animals(meadow, Set.of()).stream()
+                        .filter(m -> m.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
 
                 myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, cancelledAnimal);
                 // TODO double points for each animal ?
+            } else {
+                farDeer = Area.animals(meadow, Set.of()).stream()
+                        .filter(m -> m.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
+            }
+
+            int tiger = (int) Area.animals(meadow, Set.of()).stream()
+                    .filter(a -> a.kind() == Animal.Kind.TIGER).count();
+            // deer that are not within its range must be canceled first
+            cancelledAnimal.addAll(farDeer.stream().limit(tiger).collect(Collectors.toSet()));
+            if (tiger > goodDeer.size()) {
+                cancelledAnimal.addAll(goodDeer.stream().limit(tiger - goodDeer.size()).collect(Collectors.toSet()));
             }
 
             myMessageBoard.withScoredMeadow(meadow, cancelledAnimal);
