@@ -208,7 +208,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 messageBoard()).withTurnFinished();
     }
 
-    // Finishes the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
+    /**
+     * Finishes the round if occupying the last tile placed is impossible, making OCCUPY_TILE action skipped.
+     *
+     * @return an updated game state
+     */
     private GameState withTurnFinishedIfOccupationImpossible() {
         return !lastTilePotentialOccupants().isEmpty() ? withTurnFinished() : this;
     }
@@ -246,8 +250,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         return new GameState(myPlayers, tileDecks(), myTileToPlace, myBoard, Action.PLACE_TILE, myMessageBoard).withFinalPointsCounted();
     }
 
-    // End the game if the current player has finished his turn(s)
-    // All points counted, the win message added to the board, the cancelledDeer added
+    /**
+     * Ends the game if the current player has finished his turn(s).
+     *
+     * @return an updated game state with all points counted, winning message added, deer cancelled
+     */
     private GameState withFinalPointsCounted() {
         if (tileToPlace() != null) {
             return this;
@@ -255,23 +262,28 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
         MessageBoard myMessageBoard = messageBoard();
 
-        Set<Animal> a = new HashSet<>(board().cancelledAnimals());
+        Set<Animal> cancelledAnimal = new HashSet<>(board().cancelledAnimals());
 
         for (var meadow : board().meadowAreas()) {
             if (meadow.zoneWithSpecialPower(WILD_FIRE) != null) {
-                a.addAll(Area.animals(meadow, Set.of()).stream()
+                cancelledAnimal.addAll(Area.animals(meadow, Set.of()).stream()
                         .filter(m -> m.kind() == Animal.Kind.TIGER).collect(Collectors.toSet()));
             }
+
+            int tiger = (int) Area.animals(meadow, Set.of()).stream()
+                    .filter(a -> a.kind() == Animal.Kind.TIGER).count();
+            cancelledAnimal.addAll(Area.animals(meadow, Set.of()).stream()
+                    .filter(a -> a.kind() == Animal.Kind.DEER).limit(tiger)
+                    .collect(Collectors.toSet()));
+
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
-                //deer that are not within its range must be canceled as a priority, in order to maximize the points earned by the pit.
-                myMessageBoard = myMessageBoard.withScoredPitTrap(m, a).withScoredMeadow();
+                // TODO deer that are not within its range must be canceled first
+
+                myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, cancelledAnimal);
                 // TODO double points for each animal ?
             }
 
-
-            // and all the deer cancelled by tiger should be added
-
-            myMessageBoard.withScoredMeadow(meadow, cancelledAnimal)
+            myMessageBoard.withScoredMeadow(meadow, cancelledAnimal);
         }
 
         for (var rSystem : board().riverSystemAreas()) {
@@ -280,18 +292,19 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             }
         }
 
-        int point = 0;
+        Map.Entry<PlayerColor, Integer> maxEntry = Collections.max(myMessageBoard.points().entrySet(),
+                (e1, e2) -> e1.getValue().compareTo(e2.getValue()));
+        Integer point = maxEntry.getValue();
 
-        Map.Entry<PlayerColor, Integer> maxEntry = myMessageBoard.points().entrySet().stream()
-                        .max(Map.Entry<PlayerColor, Integer> e1, Map.Entry<PlayerColor, Integer> e2 -> e1.getValue().compareTo(e2.getValue()));
-        Collections.max(myMessageBoard.points().entrySet(),
-                Map.Entry.comparingByValue()).getValue()
+        Set<PlayerColor> winners = myMessageBoard.points().entrySet()
+                    .stream()
+                    .filter(entry -> Objects.equals(entry.getValue(), point))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
 
         return new GameState(null, null, null, board(), Action.END_GAME,
-                myMessageBoard.withWinners();
+                myMessageBoard.withWinners(winners, point));
     }
-
-    //Collections.max(map.entrySet(), Map.Entry.comparingByValue()).getKey()
 
     /**
      * Represents the next action to be performed in the part.

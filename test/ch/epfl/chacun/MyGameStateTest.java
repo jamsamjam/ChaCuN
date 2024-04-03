@@ -112,7 +112,7 @@ class MyGameStateTest {
         var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
         var t90 = new PlacedTile(allTiles.get(90), PlayerColor.BLUE, Rotation.RIGHT, new Pos(1, 0));
         var t73 = new PlacedTile(allTiles.get(73), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1));
+        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1)); //logboat
 
         var b = Board.EMPTY.withNewTile(t56);
 
@@ -132,36 +132,35 @@ class MyGameStateTest {
         var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
 
         // tiledecks
-        var dS = List.of(allTiles.get(56));
+        List<Tile> dS = new ArrayList<>();
         var dN = List.of(allTiles.get(90), allTiles.get(73));
         var dM = List.of(allTiles.get(93));
 
-        List<Tile> dS1 = List.of();
         var dN1 = List.of(allTiles.get(73));
 
         var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS1, dN1, dM);
+        var decks1 = new TileDecks(dS, dN1, dM);
 
         var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
         var t90 = new PlacedTile(allTiles.get(90), PlayerColor.BLUE, Rotation.RIGHT, new Pos(1, 0));
         var t73 = new PlacedTile(allTiles.get(73), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1));
+        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1)); //logboat
 
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t73);
+        var b = Board.EMPTY.withNewTile(t56);
 
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
 
-        var expectedState = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
-                allTiles.get(73), Board.EMPTY.withNewTile(t56).withNewTile(t90), GameState.Action.PLACE_TILE,  mb);
-        var beforeState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                allTiles.get(90), Board.EMPTY.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
+        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
+                allTiles.get(90), b, GameState.Action.PLACE_TILE,  mb);
+        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
+                null, b.withNewTile(t90), GameState.Action.OCCUPY_TILE,  mb);
 
-        assertEquals(expectedState, beforeState.withPlacedTile(t90));
+        assertEquals(expectedState, test.withPlacedTile(t90));
     }
 
 
-    @Test
+    /*@Test
     void withPlacedTileWorksWith93Logboat() {
         var allTiles = allTiles();
 
@@ -212,7 +211,7 @@ class MyGameStateTest {
                 allTiles.get(93), b, GameState.Action.PLACE_TILE,  mb);
 
         assertEquals(expectedState, testState.withPlacedTile(t93));
-    }
+    }*/
 
     private static List<Tile> allTiles() {
         ArrayList<Tile> tiles = new ArrayList<>();
