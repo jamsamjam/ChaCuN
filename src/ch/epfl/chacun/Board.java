@@ -454,7 +454,7 @@ public final class Board {
             for (int i : tileIndexes) {
                 if (tiles[i].occupant() != null && tiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
                     for (var zone : tiles[i].tile().sideZones()) {
-                        if (areas.contains(zone)) tiles[i] = tiles[i].withNoOccupant(); // TODO
+                        if (areas.contains(zone)) tiles[i] = tiles[i].withNoOccupant(); //
                     }
                 }
             }
