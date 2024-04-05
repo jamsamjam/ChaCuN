@@ -231,9 +231,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 if (board().lastPlacedTile().tile().kind() == NORMAL) {
                     myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
-                    // remove invalid tiles and then see he can place a menhir tile
                     if (myTileDecks.topTile(MENHIR) != null) {
-                        // only here play 2nd turn
                         myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
 
                         return new GameState(myPlayers, myTileDecks.withTopTileDrawn(MENHIR),
@@ -262,7 +260,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      *
      * @return an updated game state with all points counted, winning message added, deer cancelled
      */
-    private GameState withFinalPointsCounted() { // TODO
+    public GameState withFinalPointsCounted() { // TODO private
         if (tileToPlace() != null) {
             return this;
         }
