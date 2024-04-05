@@ -418,14 +418,14 @@ class MyGameStateTest {
         assertEquals(expected, test.withNewOccupant(occ));
     }
 
-    @Test
+    /*@Test
     void getWinner() {
         var allTiles = allTiles();
 
         var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
 
         // tiledecks
-        List<Tile> dS = List.of();
+        List<Tile> dS = List.of(allTiles.get(56));
         var dN = List.of( allTiles.get(75), allTiles.get(23));
         var dM = List.of(allTiles.get(88));
 
@@ -449,13 +449,16 @@ class MyGameStateTest {
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
 
-        GameState gameState = GameState.initial(players, decks, tm).withStartingTilePlaced().withPlacedTile(t67)
-                .withPlacedTile(t75).withNewOccupant(occ);
+        GameState gameState = GameState.initial(players, decks, tm).withStartingTilePlaced()
+                .withPlacedTile(t67)
+                .withNewOccupant(null)
+                .withPlacedTile(t75)
+                .withNewOccupant(occ);
         GameState expected = new GameState(null, null, null, b, GameState.Action.END_GAME,
                 mb.withWinners(Set.of(PlayerColor.PURPLE), 6));
         assertEquals(expected, gameState.withFinalPointsCounted());
 
-        /*var test = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
+        var test = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
                 allTiles.get(75), b, GameState.Action.PLACE_TILE, mb);
         var expected1 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
                 null, b.withNewTile(t75), GameState.Action.OCCUPY_TILE, mb);
@@ -481,9 +484,9 @@ class MyGameStateTest {
 
         //assertEquals(Set.of(forest1), newBoard.forestsClosedByLastTile());
         System.out.println(newBoard.forestsClosedByLastTile().size());
-        assertEquals(expected2, expected1.withNewOccupant(occ));*/
+        assertEquals(expected2, expected1.withNewOccupant(occ));
     }
-
+*/
     @Test
     void checkWithPlacedTileCanPlaceOccupant(){
         var z01 = new Zone.Forest(94_0, Zone.Forest.Kind.PLAIN);
