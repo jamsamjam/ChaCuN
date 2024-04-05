@@ -172,7 +172,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         }
         return new GameState(players(), tileDecks(), null,
                 myBoard, myNextAction, myMessageBoard).withTurnFinishedIfOccupationImpossible();
-        //.withTopTileDrawn(tile.kind())
     }
 
     /**
@@ -203,8 +202,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withNewOccupant(Occupant occupant) {
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        return new GameState(players(), tileDecks(), tileDecks().topTile(NORMAL),
-                occupant != null ? board().withOccupant(occupant) : board(), Action.PLACE_TILE,
+        return new GameState(players(), tileDecks(), null,
+                occupant != null ? board().withOccupant(occupant) : board(), nextAction(),
                 messageBoard()).withTurnFinished(); // TODO
     }
 
@@ -219,27 +218,28 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
     private GameState withTurnFinished() {
         List<PlayerColor> myPlayers = new ArrayList<>(players());
-        myPlayers.add(myPlayers.removeFirst());
         Board myBoard = board();
-
-        TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(NORMAL, myBoard::couldPlaceTile);
-        Tile myTileToPlace = myTileDecks.topTile(NORMAL);
-        myTileDecks = myTileDecks.withTopTileDrawn(NORMAL);
+        TileDecks myTileDecks = tileDecks();
         MessageBoard myMessageBoard = messageBoard();
-
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
 
-            if (hasMenhir(forest) && board().lastPlacedTile().tile().kind() == NORMAL) {
+            if (hasMenhir(forest)) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
 
-                myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
+                if (board().lastPlacedTile().tile().kind() == NORMAL) {
+                    myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
-                if (myTileDecks.topTile(MENHIR) != null) {
-                    myTileToPlace = myTileDecks.topTile(MENHIR);
-                    myTileDecks = myTileDecks.withTopTileDrawn(MENHIR);
-                    myPlayers = players();
+                    // remove invalid tiles and then see he can place a menhir tile
+                    if (myTileDecks.topTile(MENHIR) != null) {
+                        // only here play 2nd turn
+                        myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
+
+                        return new GameState(myPlayers, myTileDecks.withTopTileDrawn(MENHIR),
+                                tileDecks().topTile(MENHIR), myBoard, Action.PLACE_TILE, myMessageBoard)
+                                .withFinalPointsCounted();
+                    }
                 }
             }
         }
@@ -248,10 +248,13 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             myMessageBoard = myMessageBoard.withScoredRiver(river);
         }
 
-        // all the occupants of these areas are returned to their owners
+        Collections.rotate(myPlayers, -1);
         myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
+        myTileDecks = myTileDecks.withTopTileDrawnUntil(NORMAL, myBoard::couldPlaceTile);
 
-        return new GameState(myPlayers, myTileDecks, myTileToPlace, myBoard, Action.PLACE_TILE, myMessageBoard).withFinalPointsCounted();
+        return new GameState(myPlayers, myTileDecks.withTopTileDrawn(NORMAL),
+                myTileDecks.topTile(NORMAL), myBoard, Action.PLACE_TILE, myMessageBoard)
+                .withFinalPointsCounted();
     }
 
     /**
