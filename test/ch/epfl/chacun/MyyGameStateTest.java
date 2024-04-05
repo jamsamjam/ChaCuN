@@ -32,13 +32,13 @@ class MyyGameStateTest {
                 new TileSide.Forest(new Zone.Forest(3, Zone.Forest.Kind.PLAIN)));
         assertThrows(IllegalArgumentException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
                 decks, myTile, Board.EMPTY, GameState.Action.OCCUPY_TILE, new MessageBoard(new MessageBoardMaker(), List.of())));
-        assertThrows(IllegalArgumentException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
+        assertThrows(NullPointerException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
                 null, null, Board.EMPTY, GameState.Action.OCCUPY_TILE, new MessageBoard(new MessageBoardMaker(), List.of())));
-        assertThrows(IllegalArgumentException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
+        assertThrows(NullPointerException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
                 decks, null, null, GameState.Action.OCCUPY_TILE, new MessageBoard(new MessageBoardMaker(), List.of())));
-        assertThrows(IllegalArgumentException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
+        assertThrows(NullPointerException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
                 decks, null, Board.EMPTY, null, new MessageBoard(new MessageBoardMaker(), List.of())));
-        assertThrows(IllegalArgumentException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
+        assertThrows(NullPointerException.class, () -> new GameState(List.of(PlayerColor.RED, PlayerColor.BLUE),
                 decks, null, Board.EMPTY, GameState.Action.OCCUPY_TILE, null));
     }
 

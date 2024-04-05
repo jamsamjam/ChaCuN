@@ -144,7 +144,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Action myNextAction = Action.OCCUPY_TILE;
         MessageBoard myMessageBoard = messageBoard();
 
-        if (tile.kind() == Tile.Kind.MENHIR && tile.specialPowerZone() != null) {
+        if (tile.kind() == MENHIR && tile.specialPowerZone() != null) {
             Zone myZone = tile.specialPowerZone();
 
             switch (myZone.specialPower()) {
@@ -223,8 +223,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Board myBoard = board();
 
         TileDecks myTileDecks = tileDecks().withTopTileDrawnUntil(NORMAL, myBoard::couldPlaceTile);
-        Tile myTileToPlace = myTileDecks.topTile(Tile.Kind.NORMAL);
-        myTileDecks = myTileDecks.withTopTileDrawn(Tile.Kind.NORMAL);
+        Tile myTileToPlace = myTileDecks.topTile(NORMAL);
+        myTileDecks = myTileDecks.withTopTileDrawn(NORMAL);
         MessageBoard myMessageBoard = messageBoard();
 
 
@@ -234,11 +234,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             if (hasMenhir(forest) && board().lastPlacedTile().tile().kind() == NORMAL) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
 
-                if (myTileDecks.topTile(Tile.Kind.MENHIR) != null) {
+                if (myTileDecks.topTile(MENHIR) != null) {
                     myPlayers = players();
                     myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
-                    myTileToPlace = myTileDecks.topTile(Tile.Kind.MENHIR);
-                    myTileDecks = myTileDecks.withTopTileDrawn(Tile.Kind.MENHIR);
+                    myTileToPlace = myTileDecks.topTile(MENHIR);
+                    myTileDecks = myTileDecks.withTopTileDrawn(MENHIR);
                 }
             }
         }

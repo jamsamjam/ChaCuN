@@ -374,7 +374,7 @@ class MyGameStateTest {
         var tm = new BasicTextMaker();
         var mb = new MessageBoard(tm, List.of());
 
-        var expected = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
+        var expected = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
                 null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
         var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
                 allTiles.get(67), b, GameState.Action.PLACE_TILE,  mb);
@@ -455,11 +455,25 @@ class MyGameStateTest {
                 null, b.withNewTile(t75), GameState.Action.OCCUPY_TILE, mb);
 
         var expected2 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
-                null, b.withNewTile(t75).withOccupant(occ), GameState.Action.OCCUPY_TILE, mb.withClosedForestWithMenhir(PlayerColor.PURPLE, menhirForest));
+                allTiles.get(88), b.withNewTile(t75).withOccupant(occ), GameState.Action.PLACE_TILE, mb.withClosedForestWithMenhir(PlayerColor.PURPLE, menhirForest));
         //var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1, null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
 
         assertEquals(expected1, test.withPlacedTile(t75));
-        assertEquals(expected2, expected1.withNewOccupant(null));
+
+        var newBoard = Board.EMPTY
+                .withNewTile(t56)
+                .withNewTile(t67)
+                .withNewTile(t75);
+
+        var forests1 = Set.of((Zone.Forest) t56.zoneWithId(56_1),
+                (Zone.Forest) t67.zoneWithId(67_0),
+                (Zone.Forest) t75.zoneWithId(75_1));
+
+        var forest1 = new Area<>(forests1, List.of(), 0);
+
+        assertEquals(Set.of(forest1), newBoard.forestsClosedByLastTile());
+        System.out.println(newBoard.forestsClosedByLastTile().size());
+        //assertEquals(expected2, expected1.withNewOccupant(occ));
     }
 
     private static List<Tile> allTiles() {

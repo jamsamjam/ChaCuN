@@ -348,7 +348,7 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied TODO
+    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied TODO immu
         checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
