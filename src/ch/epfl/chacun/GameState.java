@@ -204,7 +204,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
         return new GameState(players(), tileDecks(), null,
                 occupant != null ? board().withOccupant(occupant) : board(), nextAction(),
-                messageBoard()).withTurnFinished(); // TODO
+                messageBoard()).withTurnFinished();
     }
 
     /**

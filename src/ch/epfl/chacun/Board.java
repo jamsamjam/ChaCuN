@@ -493,8 +493,8 @@ public final class Board {
     }
 
     // TODO temporary (should be removed)
-    @Override
+    /*@Override
     public String toString() {
         return getClass().getName() + "@" + Arrays.toString(placedTiles) + Arrays.toString(tileIndexes);
-    }
+    }*/
 }

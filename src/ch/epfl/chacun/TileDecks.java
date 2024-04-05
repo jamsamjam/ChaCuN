@@ -60,7 +60,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the new tile decks
      * @throws IllegalArgumentException if the pile is empty
      */
-    public TileDecks withTopTileDrawn(Tile.Kind kind) { // TODO
+    public TileDecks withTopTileDrawn(Tile.Kind kind) {
         checkArgument(deckSize(kind) != 0);
 
         return switch (kind) {
