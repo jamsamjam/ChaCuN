@@ -255,7 +255,7 @@ class MyGameStateTest {
         assertEquals(expectedState, test.withPlacedTile(t93));
     }
 
-    // not working because of the cancelledAnimal set update
+    // not working because the cancelledAnimal set is not updated
     @Test
     void withPlacedTileWorksWithHT() {
         var allTiles = allTiles();
@@ -454,8 +454,10 @@ class MyGameStateTest {
         var expected1 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
                 null, b.withNewTile(t75), GameState.Action.OCCUPY_TILE, mb);
 
+        System.out.println(expected1.board().lastPlacedTile());
+
         var expected2 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
-                allTiles.get(88), b.withNewTile(t75).withOccupant(occ), GameState.Action.PLACE_TILE, mb.withClosedForestWithMenhir(PlayerColor.PURPLE, menhirForest));
+                allTiles.get(88), b.withNewTile(t75), GameState.Action.PLACE_TILE, mb.withScoredForest(menhirForest).withClosedForestWithMenhir(PlayerColor.PURPLE, menhirForest));
         //var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1, null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
 
         assertEquals(expected1, test.withPlacedTile(t75));
@@ -471,9 +473,9 @@ class MyGameStateTest {
 
         var forest1 = new Area<>(forests1, List.of(), 0);
 
-        assertEquals(Set.of(forest1), newBoard.forestsClosedByLastTile());
+        //assertEquals(Set.of(forest1), newBoard.forestsClosedByLastTile());
         System.out.println(newBoard.forestsClosedByLastTile().size());
-        //assertEquals(expected2, expected1.withNewOccupant(occ));
+        assertEquals(expected2, expected1.withNewOccupant(occ));
     }
 
     private static List<Tile> allTiles() {

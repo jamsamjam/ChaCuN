@@ -234,11 +234,12 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             if (hasMenhir(forest) && board().lastPlacedTile().tile().kind() == NORMAL) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
 
+                myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
+
                 if (myTileDecks.topTile(MENHIR) != null) {
-                    myPlayers = players();
-                    myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
                     myTileToPlace = myTileDecks.topTile(MENHIR);
                     myTileDecks = myTileDecks.withTopTileDrawn(MENHIR);
+                    myPlayers = players();
                 }
             }
         }

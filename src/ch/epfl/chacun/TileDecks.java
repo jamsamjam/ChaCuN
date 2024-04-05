@@ -2,6 +2,8 @@ package ch.epfl.chacun;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Represents the piles of the three types of tile that exist — start, normal, menhir.
  *
@@ -58,7 +60,9 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the new tile decks
      * @throws IllegalArgumentException if the pile is empty
      */
-    public TileDecks withTopTileDrawn(Tile.Kind kind) {
+    public TileDecks withTopTileDrawn(Tile.Kind kind) { // TODO
+        checkArgument(deckSize(kind) != 0);
+
         return switch (kind) {
             case START ->  new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles,
                     menhirTiles);
@@ -89,13 +93,8 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     }
 
     /**
-     * Helper method which finds the index of the first element in the list that does not satisfy
-     * the given predicate.
-     *
-     * @param tiles the list of tiles to search
-     * @param predicate the predicate to test elements against
-     * @return the index of the first element in the list that does not satisfy the predicate,
-     *         or the size of the list if all elements satisfy the predicate
+     * Finds the index of the first element in the list that does not satisfy the given predicate,
+     * otherwise returns the size of the list.
      */
     private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
         for (int i = 0; i < tiles.size(); i++) {
