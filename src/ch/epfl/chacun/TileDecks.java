@@ -61,7 +61,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @throws IllegalArgumentException if the pile is empty
      */
     public TileDecks withTopTileDrawn(Tile.Kind kind) {
-        checkArgument(deckSize(kind) != 0); // TODO
+        checkArgument(deckSize(kind) != 0);
 
         return switch (kind) {
             case START ->  new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles,
@@ -95,7 +95,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     /**
      * Finds the index of the first element in the list that does not satisfy the given predicate,
      * otherwise returns the size of the list.
-     */
+     */ // TODO javadoc
     private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
         for (int i = 0; i < tiles.size(); i++) {
             if (predicate.test(tiles.get(i))) {

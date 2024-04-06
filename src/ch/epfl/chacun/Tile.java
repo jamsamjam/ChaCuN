@@ -3,6 +3,7 @@ package ch.epfl.chacun;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents a tile that has not yet been placed.
@@ -35,11 +36,15 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of border zones of the tile (except lakes)
      */
     public Set<Zone> sideZones() {
-        Set<Zone> sideZones = new HashSet<>();
+        /*Set<Zone> sideZones = new HashSet<>();
         for (TileSide side : sides()) {
             sideZones.addAll(side.zones());
         }
-        return sideZones;
+        return sideZones;*/
+
+        return sides().stream()
+                .flatMap(side -> side.zones().stream())
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -48,21 +53,24 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of all zones of the tile (including lakes)
      */
     public Set<Zone> zones() {
-        Set<Zone> sideZones = new HashSet<>();
-        for (TileSide side : sides()) {
-            sideZones.addAll(side.zones());
-        }
-
+        Set<Zone> zones = new HashSet<>(sideZones());
         Set<Zone> zonesToAdd = new HashSet<>();
-        for (Zone zone : sideZones) {
+
+        for (Zone zone : zones) {
             if (zone instanceof Zone.River river && river.hasLake()) {
                 zonesToAdd.add(river.lake());
             }
         }
 
-        sideZones.addAll(zonesToAdd);
+        zones.addAll(zonesToAdd);
 
-        return sideZones;
+        return zones;
+        // TODO
+        /*return sideZones().addAll(sides().stream()
+                .flatMap(side -> side.zones().stream())
+                .filter(zone -> zone instanceof Zone.River river && river.hasLake())
+                .map(zone -> ((Zone.River) zone).lake())
+                .collect(Collectors.toSet()));*/
     }
 
     /**

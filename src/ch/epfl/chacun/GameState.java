@@ -79,7 +79,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return the number of free occupants of the given type and of the given player
      */
     public int freeOccupantsCount(PlayerColor player, Occupant.Kind kind) {
-        return occupantsCount(kind) - board().occupantCount(player, kind);
+        return occupantsCount(kind) - board.occupantCount(player, kind);
     }
 
     /**
@@ -92,10 +92,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @throws IllegalArgumentException if the board is empty
      */
     public Set<Occupant> lastTilePotentialOccupants() {
-        checkArgument(board().lastPlacedTile() != null);
+        // TODO board vs. board() vs. myBoard = ..
+        checkArgument(board.lastPlacedTile() != null);
         Set<Occupant> occupants = new HashSet<>();
 
-        for (var o : board().lastPlacedTile().potentialOccupants()) {
+        for (var o : board.lastPlacedTile().potentialOccupants()) {
             if (freeOccupantsCount(currentPlayer(), o.kind()) >= 1) {
                 switch (board().lastPlacedTile().zoneWithId(o.zoneId())) {
                     case Zone.Forest f -> { if (!board().forestArea(f).isOccupied()) occupants.add(o); }
@@ -344,5 +345,4 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         OCCUPY_TILE,
         END_GAME
     }
-    // TODO board(), board
 }

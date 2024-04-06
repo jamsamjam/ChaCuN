@@ -1,10 +1,11 @@
 package ch.epfl.chacun;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
+
+// TODO consistency
 
 /**
  * Represents the game board.
@@ -60,7 +61,7 @@ public final class Board {
      * @return the placed tile at the specified position, or null if no tile is present
      */
     public PlacedTile tileAt(Pos pos) {
-        if (pos.x() >= -REACH && pos.x() <= REACH && pos.y() >= -REACH && pos.y() <= REACH) {
+        if (Math.abs(pos.x()) <= REACH && Math.abs(pos.y()) <= REACH) {
             return placedTiles[indexOf(pos)];
         }
         return null;
@@ -184,7 +185,6 @@ public final class Board {
      * @return the area representing the adjacent meadow
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
-        // Get all the meadow zones in the adjacent area
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
 
         for (int i = -1; i <= 1; i++) {
@@ -194,7 +194,6 @@ public final class Board {
             }
         }
 
-        // Check if it's in the same area as the given meadow zone
         Set<Zone.Meadow> myMeadows = new HashSet<>();
 
         for (var zone : adjacentMeadows) {
@@ -237,8 +236,8 @@ public final class Board {
                 Pos pos = placedTiles[i].pos();
 
                 if (tileAt(pos.neighbor(d)) == null // TODO
-                        && pos.neighbor(d).x() >= -REACH && pos.neighbor(d).x() <= REACH
-                        && pos.neighbor(d).y() >= -REACH && pos.neighbor(d).y() <= REACH) {
+                        && Math.abs(pos.neighbor(d).x()) <= REACH
+                        && Math.abs(pos.neighbor(d).y()) <= REACH) {
                     positions.add(pos.neighbor(d));
                 }
             }
@@ -264,18 +263,10 @@ public final class Board {
      * @return the set of forest areas closed by the last tile, or an empty set if the board is empty
      */
     public Set<Area<Zone.Forest>> forestsClosedByLastTile() {
-        Set<Area<Zone.Forest>> forests = new HashSet<>();
-
-        for (var area : zonePartitions.forests().areas()) {
-            if (area.isClosed() && lastPlacedTile() != null) {
-                for (var zone : lastPlacedTile().forestZones()) {
-                    if (area.zones().contains(zone)) {
-                        forests.add(area);
-                    }
-                }
-            }
-        }
-        return forests;
+        return zonePartitions.forests().areas().stream()
+                .filter(area -> area.isClosed() && lastPlacedTile() != null
+                        && lastPlacedTile().forestZones().stream().anyMatch(area.zones()::contains))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -284,18 +275,10 @@ public final class Board {
      * @return the set of river areas closed by the last tile, or an empty set if the board is empty
      */
     public Set<Area<Zone.River>> riversClosedByLastTile() {
-        Set<Area<Zone.River>> rivers = new HashSet<>();
-
-        for (var area : zonePartitions.rivers().areas()) {
-            if (area.isClosed() && lastPlacedTile() != null) {
-                for (var zone : lastPlacedTile().riverZones()) {
-                    if (area.zones().contains(zone)) {
-                        rivers.add(area);
-                    }
-                }
-            }
-        }
-        return rivers;
+        return zonePartitions.rivers().areas().stream()
+                .filter(area -> area.isClosed() && lastPlacedTile() != null
+                        && lastPlacedTile().riverZones().stream().anyMatch(area.zones()::contains))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -307,17 +290,23 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     public boolean canAddTile(PlacedTile tile) {
-        if (insertionPositions().contains(tile.pos()) && tileAt(tile.pos()) == null) {
-            for (var direction : Direction.ALL) {
-                if (tileAt(tile.pos().neighbor(direction)) != null) {
-                    if (!tile.side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite()))) {
-                        return false;
-                    }
-                }
-            }
-            return true;
+        if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null) {
+            return false;
         }
-        return false;
+
+        return Direction.ALL.stream()
+                .allMatch(direction -> {
+                    PlacedTile neighborTile = tileAt(tile.pos().neighbor(direction));
+                    return neighborTile == null || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
+                });
+
+
+        /*for (var direction : Direction.ALL) {
+            if (tileAt(tile.pos().neighbor(direction)) != null)
+                if (!tile.side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite())))
+                    return false;
+        }
+        return true;*/
     }
 
     /**
@@ -330,12 +319,9 @@ public final class Board {
      */
     public boolean couldPlaceTile(Tile tile) {
         for (var pos : insertionPositions()) {
-            if (canAddTile(new PlacedTile(tile, null, Rotation.NONE, pos)) ||
-                    canAddTile(new PlacedTile(tile, null, Rotation.RIGHT, pos)) ||
-                    canAddTile(new PlacedTile(tile, null, Rotation.HALF_TURN, pos)) ||
-                    canAddTile(new PlacedTile(tile, null, Rotation.LEFT, pos))) {
-                return true;
-            }
+            for (var rotation : Rotation.ALL)
+                if (canAddTile(new PlacedTile(tile, null, rotation, pos)))
+                    return true;
         }
         return false;
     }
@@ -367,7 +353,7 @@ public final class Board {
             }
         }
 
-        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals); // TODO
     }
 
     /**
@@ -419,48 +405,27 @@ public final class Board {
      * @param rivers the given rivers
      * @return a board identical to the receiver but without any occupant in the given forests and rivers
      */
-    public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
+    public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) { // TODO
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        forests.forEach(forest -> {
-            for (int i : tileIndexes) {
-                if (myPlacedTiles[i].occupant() != null && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    for (var zone : myPlacedTiles[i].tile().sideZones()) {
-                        if (forests.contains(zone)) myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant(); // TODO
-                    }
-                }
-            }
-            builder.clearGatherers(forest);
-        });
+        for (int i : tileIndexes) {
+            if (myPlacedTiles[i].occupant() != null
+                    && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
 
-        rivers.forEach(river -> {
-            for (int i : tileIndexes) {
-                if (myPlacedTiles[i].occupant() != null && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    for (var zone : myPlacedTiles[i].tile().sideZones()) {
-                        if (rivers.contains(zone)) myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
-                    }
+                for (Zone zone : myPlacedTiles[i].tile().sideZones()) {
+
+                    if (forests.contains(zone) || rivers.contains(zone))
+                        myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
                 }
             }
-            builder.clearFishers(river);
-        });
+        }
+
+        forests.forEach(builder::clearGatherers);
+        rivers.forEach(builder::clearFishers);
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
     }
-
-    // TODO
-    /*private <Z extends Zone> void forEachAreas (PlacedTile[] tiles, ZonePartitions.Builder builder, Set<Area<Z>> areas) {
-        areas.forEach(area -> {
-            for (int i : tileIndexes) {
-                if (tiles[i].occupant() != null && tiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-                    for (var zone : tiles[i].tile().sideZones()) {
-                        if (areas.contains(zone)) tiles[i] = tiles[i].withNoOccupant(); //
-                    }
-                }
-            }
-            Z instanceof Zone.Forest ? builder.clearGatherers(area) : builder.clearFishers(area);
-        });
-    }*/
 
     /**
      * Returns an identical board to the receiver but with the given set of animals added to the set
