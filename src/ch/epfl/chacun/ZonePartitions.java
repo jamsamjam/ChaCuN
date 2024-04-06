@@ -119,7 +119,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         meadowBuilder.union(m1, z2);
                         meadowBuilder.union(z1, m2);
                         }
-                default -> throw new IllegalArgumentException();
+                default -> throw new IllegalArgumentException(); // TODO TileSide::isSameKindAs
             }
         }
 

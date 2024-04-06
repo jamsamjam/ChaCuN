@@ -52,7 +52,6 @@ class MyGameStateTest {
 
         assertNull(GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm).currentPlayer());
         assertEquals(expectedPlayer, testState.withStartingTilePlaced().currentPlayer());
-        //TODO more
     }
 
     @Test
