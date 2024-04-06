@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
 // TODO consistency
+// TODO 그대로 return 해도 immu 해치지 않는거 맞는지 ?
 
 /**
  * Represents the game board.
@@ -235,7 +236,7 @@ public final class Board {
             for (Direction d : Direction.ALL) {
                 Pos pos = placedTiles[i].pos();
 
-                if (tileAt(pos.neighbor(d)) == null // TODO
+                if (tileAt(pos.neighbor(d)) == null
                         && Math.abs(pos.neighbor(d).x()) <= REACH
                         && Math.abs(pos.neighbor(d).y()) <= REACH) {
                     positions.add(pos.neighbor(d));
@@ -264,7 +265,8 @@ public final class Board {
      */
     public Set<Area<Zone.Forest>> forestsClosedByLastTile() {
         return zonePartitions.forests().areas().stream()
-                .filter(area -> area.isClosed() && lastPlacedTile() != null
+                .filter(area -> area.isClosed()
+                        && lastPlacedTile() != null
                         && lastPlacedTile().forestZones().stream().anyMatch(area.zones()::contains))
                 .collect(Collectors.toSet());
     }
@@ -276,7 +278,8 @@ public final class Board {
      */
     public Set<Area<Zone.River>> riversClosedByLastTile() {
         return zonePartitions.rivers().areas().stream()
-                .filter(area -> area.isClosed() && lastPlacedTile() != null
+                .filter(area -> area.isClosed()
+                        && lastPlacedTile() != null
                         && lastPlacedTile().riverZones().stream().anyMatch(area.zones()::contains))
                 .collect(Collectors.toSet());
     }
@@ -299,14 +302,6 @@ public final class Board {
                     PlacedTile neighborTile = tileAt(tile.pos().neighbor(direction));
                     return neighborTile == null || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
                 });
-
-
-        /*for (var direction : Direction.ALL) {
-            if (tileAt(tile.pos().neighbor(direction)) != null)
-                if (!tile.side(direction).isSameKindAs(tileAt(tile.pos().neighbor(direction)).side(direction.opposite())))
-                    return false;
-        }
-        return true;*/
     }
 
     /**
@@ -318,23 +313,21 @@ public final class Board {
      * board, possibly after rotation
      */
     public boolean couldPlaceTile(Tile tile) {
-        for (var pos : insertionPositions()) {
-            for (var rotation : Rotation.ALL)
-                if (canAddTile(new PlacedTile(tile, null, rotation, pos)))
-                    return true;
-        }
-        return false;
+        return insertionPositions().stream()
+                .flatMap(pos -> Rotation.ALL.stream()
+                        .map(rotation -> new PlacedTile(tile, null, rotation, pos)))
+                .anyMatch(this::canAddTile);
     }
 
     /**
      * Returns an identical board to the receiver, but with the given tile added.
      *
-     * @param tile the given tile
+     * @param tile the given tile (assumed to be not occupied)
      * @return an identical board to the receiver, but with the given tile added
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    public Board withNewTile(PlacedTile tile) { // assumed to be not occupied TODO immu
+    public Board withNewTile(PlacedTile tile) { // TODO immutability
         checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
@@ -347,13 +340,14 @@ public final class Board {
         myTileIndexes[myTileIndexes.length - 1] = index;
         builder.addTile(tile.tile());
 
-        for (var direction : Direction.ALL) {
-            if (tileAt(tile.pos().neighbor(direction)) != null) {
-                builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
-            }
-        }
+        Direction.ALL.stream()
+                .filter(direction -> tileAt(tile.pos().neighbor(direction)) != null)
+                .forEach(direction -> {
+                    builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
+                });
 
-        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals); // TODO
+
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
     }
 
     /**
@@ -378,7 +372,7 @@ public final class Board {
         }
 
         throw new IllegalArgumentException();
-        // We can raise an exception when the given tile isn't on the board (prof forgot)
+        // It can raise an exception when the given tile isn't on the board (prof forgot)
     }
 
     /**
@@ -405,7 +399,7 @@ public final class Board {
      * @param rivers the given rivers
      * @return a board identical to the receiver but without any occupant in the given forests and rivers
      */
-    public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) { // TODO
+    public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
@@ -414,10 +408,9 @@ public final class Board {
                     && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
 
                 for (Zone zone : myPlacedTiles[i].tile().sideZones()) {
-
                     if (forests.contains(zone) || rivers.contains(zone))
                         myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
-                }
+                } // TODO
             }
         }
 
@@ -456,10 +449,4 @@ public final class Board {
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
     }
-
-    // TODO temporary (should be removed)
-    /*@Override
-    public String toString() {
-        return getClass().getName() + "@" + Arrays.toString(placedTiles) + Arrays.toString(tileIndexes);
-    }*/
 }

@@ -53,24 +53,22 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of all zones of the tile (including lakes)
      */
     public Set<Zone> zones() {
-        Set<Zone> zones = new HashSet<>(sideZones());
-        Set<Zone> zonesToAdd = new HashSet<>();
-
+        /*Set<Zone> lakes = new HashSet<>();
         for (Zone zone : zones) {
             if (zone instanceof Zone.River river && river.hasLake()) {
-                zonesToAdd.add(river.lake());
+                lakes.add(river.lake());
             }
-        }
+        }*/
 
-        zones.addAll(zonesToAdd);
+        Set<Zone> zones = new HashSet<>(sideZones());
+        Set<Zone> lakes = zones.stream()
+                .filter(zone -> zone instanceof Zone.River && ((Zone.River) zone).hasLake()) // TODO
+                .map(zone -> ((Zone.River) zone).lake())
+                .collect(Collectors.toSet());
+
+        zones.addAll(lakes);
 
         return zones;
-        // TODO
-        /*return sideZones().addAll(sides().stream()
-                .flatMap(side -> side.zones().stream())
-                .filter(zone -> zone instanceof Zone.River river && river.hasLake())
-                .map(zone -> ((Zone.River) zone).lake())
-                .collect(Collectors.toSet()));*/
     }
 
     /**

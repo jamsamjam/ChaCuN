@@ -75,25 +75,20 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 switch (zone) {
                     case Zone.Forest forest ->
                             forestBuilder.addSingleton(forest, openConnectionCount);
-
                     case Zone.Meadow meadow ->
                             meadowBuilder.addSingleton(meadow, openConnectionCount);
-
                     case Zone.River river -> {
                         riverSystemBuilder.addSingleton(river, openConnectionCount);
-
-                        // Adjust open connection count if river is connected to a lake
                         riverBuilder.addSingleton(river, river.hasLake() ? openConnectionCount -1 :
                                 openConnectionCount);
+                        // adjust open connection count if river is connected to a lake
                     }
-
                     case Zone.Lake lake ->
                             riverSystemBuilder.addSingleton(lake, openConnectionCount);
                 }
             }
 
-            // Go through the rivers attached to a lake and, in the aquatic areas partition,
-            // connect their area with that of the lake
+            // go through the rivers with lake and connect them with lakes
             for (Zone zone : tile.zones()) {
                 if (zone instanceof Zone.River river && river.hasLake()) {
                     riverSystemBuilder.union(river, river.lake());
@@ -113,11 +108,9 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 case TileSide.Forest(Zone.Forest f1)
                         when s2 instanceof TileSide.Forest(Zone.Forest f2) ->
                         forestBuilder.union(f1, f2);
-
                 case TileSide.Meadow(Zone.Meadow m1)
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
-
                 case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m2)
                         when s2 instanceof TileSide.River(Zone.Meadow z1, Zone.River r2,
                                                           Zone.Meadow z2) -> {
@@ -126,7 +119,6 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         meadowBuilder.union(m1, z2);
                         meadowBuilder.union(z1, m2);
                         }
-
                 default -> throw new IllegalArgumentException();
             }
         }
@@ -148,19 +140,15 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                 case Zone.Forest forest
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         forestBuilder.addInitialOccupant(forest, player);
-
                 case Zone.Meadow meadow
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         meadowBuilder.addInitialOccupant(meadow, player);
-
                 case Zone.River river
                         when occupantKind.equals(Occupant.Kind.PAWN) ->
                         riverBuilder.addInitialOccupant(river, player);
-
                 case Zone.Water water
                         when occupantKind.equals(Occupant.Kind.HUT) ->
                         riverSystemBuilder.addInitialOccupant(water, player);
-
                 default -> throw new IllegalArgumentException();
             }
         }
@@ -178,11 +166,8 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
         public void removePawn(PlayerColor player, Zone occupiedZone) {
             switch (occupiedZone) {
                 case Zone.Forest f1 -> forestBuilder.removeOccupant(f1, player);
-
                 case Zone.Meadow m1 -> meadowBuilder.removeOccupant(m1, player);
-
                 case Zone.River r1 -> riverBuilder.removeOccupant(r1, player);
-
                 default -> throw new IllegalArgumentException();
             }
         }
