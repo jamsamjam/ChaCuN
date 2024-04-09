@@ -16,10 +16,12 @@ public final class Board {
      * Array of placed tiles, containing 625 elements mostly equal to null.
      */
     private final PlacedTile[] placedTiles;
+
     /**
      * Tile indexes in the order in which they were placed.
      */
     private final int[] tileIndexes;
+
     /**
      * Contains the partitions on the board (those of the zones of the placed tiles).
      */
@@ -207,16 +209,15 @@ public final class Board {
      * Returns the count of occupants of the specified kind belonging to the given player on the board.
      *
      * @param player the given player
-     * @param occupantKind the specified kin
+     * @param occupantKind the specified kind
      * @return the count of occupants of the specified kind belonging to the given player
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
         for (int i : tileIndexes) {
             if (placedTiles[i] != null && placedTiles[i].occupant() != null
-                    && placedTiles[i].placer() == player && placedTiles[i].occupant().kind() == occupantKind) {
+                    && placedTiles[i].placer() == player && placedTiles[i].occupant().kind() == occupantKind)
                 count++;
-            }
         }
         return count;
     }
@@ -343,7 +344,6 @@ public final class Board {
                     builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
                 });
 
-
         return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
     }
 
@@ -410,17 +410,16 @@ public final class Board {
     }
 
     private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {
+        Set<Integer> zoneIds = areas.stream()
+                .flatMap(area -> area.zones().stream())
+                .map(Zone::id)
+                .collect(Collectors.toSet());
+
         for (int i : tileIndexes) {
             if (myPlacedTiles[i].occupant() != null
-                    && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-
-                for (Zone zone : myPlacedTiles[i].tile().sideZones()) {
-                    if (areas.stream().anyMatch(area -> area.zones().contains(zone))) {
-                        myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
-                        //break;
-                    }
-                }
-            }
+                    && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)
+                    && zoneIds.contains(myPlacedTiles[i].occupant().zoneId()))
+                myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
         }
     }
 

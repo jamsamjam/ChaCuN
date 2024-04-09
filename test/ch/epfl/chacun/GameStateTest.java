@@ -267,6 +267,8 @@ class GameStateTest {
                 Set.of(PlayerColor.RED, PlayerColor.GREEN, PlayerColor.YELLOW),
                 Set.of(42, 56, 58, 47, 1, 28));
 
+        System.out.println(25 * (t42.pos().y() + 12) + (t42.pos().x() + 12)  );
+
         assertTrue(state.messageBoard().messages().contains(expectedForestMessage));
         for (PlayerColor playerColor : PlayerColor.values()) {
             var expectedFreePawns = playerColor == PlayerColor.BLUE ? 4 : 5;

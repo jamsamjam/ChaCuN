@@ -8,14 +8,33 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static ch.epfl.chacun.Tile.Kind.NORMAL;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlacedTileTest {
     @Test
+    void meadowAddedCorrectly_NEW() {
+        var z0 = new Zone.Forest(42_0, Zone.Forest.Kind.WITH_MENHIR);
+        var z1 = new Zone.Meadow(42_1, List.of(), null);
+        var z2 = new Zone.Meadow(42_2, List.of(), null);
+        var sN = new TileSide.Forest(z0);
+        var sE = new TileSide.Forest(z0);
+        var sS = new TileSide.Meadow(z1);
+        var sW = new TileSide.Meadow(z2);
+        //tiles.add(new Tile(42, Tile.Kind.NORMAL, sN, sE, sS, sW));
+
+        Tile tile1 = new Tile(42, NORMAL, sN, sE, sS, sW);
+
+        var t42 = new PlacedTile(tile1, PlayerColor.BLUE, Rotation.NONE, new Pos(-1,1));
+
+        System.out.println(t42.potentialOccupants());
+        //assertEquals(Set.of(Occupant.Kind.PAWN), );
+    }
+    @Test
     void placedTileConstructorThrowsWhenTileOrRotationOrPosIsNull() {
         var forestZone = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
         var forestSide = new TileSide.Forest(forestZone);
-        var tile = new Tile(1, Tile.Kind.NORMAL, forestSide, forestSide, forestSide, forestSide);
+        var tile = new Tile(1, NORMAL, forestSide, forestSide, forestSide, forestSide);
         var occupant = new Occupant(Occupant.Kind.PAWN, 10);
 
         assertThrows(NullPointerException.class, () -> {
@@ -33,7 +52,7 @@ class PlacedTileTest {
     void placedTileConstructorDoesNotThrowWhenPlacerOrOccupantIsNull() {
         var forestZone = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);
         var forestSide = new TileSide.Forest(forestZone);
-        var tile = new Tile(1, Tile.Kind.NORMAL, forestSide, forestSide, forestSide, forestSide);
+        var tile = new Tile(1, NORMAL, forestSide, forestSide, forestSide, forestSide);
         var occupant = new Occupant(Occupant.Kind.PAWN, 10);
 
         assertDoesNotThrow(() -> {
@@ -68,7 +87,7 @@ class PlacedTileTest {
 
         var expectedSides = new ArrayList<>(List.of(sideN, sideE, sideS, sideW));
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         for (var r : List.of(Rotation.NONE, Rotation.RIGHT, Rotation.HALF_TURN, Rotation.LEFT)) {
             var placedTile = new PlacedTile(tile, PlayerColor.RED, r, new Pos(0, 0));
             var actualSides = new ArrayList<TileSide>();
@@ -91,7 +110,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneS);
         var sideW = new TileSide.Forest(zoneW);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
 
         assertEquals(zoneN, placedTile.zoneWithId(10));
@@ -112,7 +131,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneS);
         var sideW = new TileSide.Forest(zoneW);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -134,7 +153,7 @@ class PlacedTileTest {
             new TileSide.Forest(zoneForest3)
         ));
         for (int i = 0; i < 4; i += 1) {
-            var tile = new Tile(1, Tile.Kind.NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
+            var tile = new Tile(1, NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
             var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
             assertEquals(zoneSpecialPower, placedTile.specialPowerZone());
             Collections.rotate(sides, 1);
@@ -152,7 +171,7 @@ class PlacedTileTest {
 
         var sides = new ArrayList<>(List.of(sideRiver, sideMeadow, sideMeadow, sideMeadow));
         for (int i = 0; i < 4; i += 1) {
-            var tile = new Tile(1, Tile.Kind.NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
+            var tile = new Tile(1, NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
             var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
             assertEquals(zoneSpecialPower, placedTile.specialPowerZone());
             Collections.rotate(sides, 1);
@@ -173,7 +192,7 @@ class PlacedTileTest {
             new TileSide.Forest(zoneForest3)
         ));
         for (int i = 0; i < 4; i += 1) {
-            var tile = new Tile(1, Tile.Kind.NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
+            var tile = new Tile(1, NORMAL, sides.get(0), sides.get(1), sides.get(2), sides.get(3));
             var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
             assertNull(placedTile.specialPowerZone());
             Collections.rotate(sides, 1);
@@ -192,7 +211,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest3);
         var sideW = new TileSide.Meadow(zoneMeadow);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         assertEquals(Set.of(zoneForest1, zoneForest2, zoneForest3), placedTile.forestZones());
     }
@@ -208,7 +227,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Meadow(zoneMeadow3);
         var sideW = new TileSide.Meadow(zoneMeadow1);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         assertEquals(Set.of(zoneMeadow1, zoneMeadow2, zoneMeadow3), placedTile.meadowZones());
     }
@@ -231,7 +250,7 @@ class PlacedTileTest {
         var sideS = new TileSide.River(zoneMeadow3, zoneRiver3, zoneMeadow4);
         var sideW = new TileSide.River(zoneMeadow4, zoneRiver4, zoneMeadow1);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         assertEquals(Set.of(zoneRiver1, zoneRiver2, zoneRiver3, zoneRiver4), placedTile.riverZones());
     }
@@ -249,7 +268,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         var expectedOccupants = Set.of(
             new Occupant(Occupant.Kind.PAWN, 10),
@@ -271,7 +290,7 @@ class PlacedTileTest {
         var sideS = new TileSide.River(zoneMeadow2, zoneRiver, zoneMeadow1);
         var sideW = new TileSide.Meadow(zoneMeadow1);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         var expectedPotentialOccupants = Set.of(
                 new Occupant(Occupant.Kind.PAWN, 10),
@@ -299,7 +318,7 @@ class PlacedTileTest {
         var sideS = new TileSide.River(zoneMeadow3, zoneRiver3, zoneMeadow4);
         var sideW = new TileSide.River(zoneMeadow4, zoneRiver4, zoneMeadow1);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         var expectedPotentialOccupants = Set.of(
                 new Occupant(Occupant.Kind.PAWN, 10),
@@ -358,7 +377,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), new Occupant(Occupant.Kind.PAWN, 10));
         assertThrows(IllegalArgumentException.class, () -> {
             placedTile.withOccupant(new Occupant(Occupant.Kind.PAWN, 11));
@@ -377,7 +396,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         var newOccupant = new Occupant(Occupant.Kind.PAWN, 10);
         var newPlacedTile = placedTile.withOccupant(newOccupant);
@@ -400,7 +419,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         var newPlacedTile = placedTile.withNoOccupant();
         assertEquals(placedTile, newPlacedTile);
@@ -418,7 +437,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), new Occupant(Occupant.Kind.PAWN, 10));
         var newPlacedTile = placedTile.withNoOccupant();
         assertNull(newPlacedTile.occupant());
@@ -440,7 +459,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0));
         assertEquals(-1, placedTile.idOfZoneOccupiedBy(Occupant.Kind.PAWN));
         assertEquals(-1, placedTile.idOfZoneOccupiedBy(Occupant.Kind.HUT));
@@ -458,7 +477,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var occupant = new Occupant(Occupant.Kind.PAWN, 10);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), occupant);
         assertEquals(10, placedTile.idOfZoneOccupiedBy(Occupant.Kind.PAWN));
@@ -477,7 +496,7 @@ class PlacedTileTest {
         var sideS = new TileSide.Forest(zoneForest1);
         var sideW = new TileSide.Forest(zoneForest2);
 
-        var tile = new Tile(1, Tile.Kind.NORMAL, sideN, sideE, sideS, sideW);
+        var tile = new Tile(1, NORMAL, sideN, sideE, sideS, sideW);
         var occupant = new Occupant(Occupant.Kind.HUT, 10);
         var placedTile = new PlacedTile(tile, PlayerColor.RED, Rotation.NONE, new Pos(0, 0), occupant);
         assertEquals(-1, placedTile.idOfZoneOccupiedBy(Occupant.Kind.PAWN));
