@@ -95,7 +95,12 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     /**
      * Finds the index of the first element in the list that does not satisfy the given predicate,
      * otherwise returns the size of the list.
-     */ // TODO javadoc
+     *
+     * @param tiles the given tiles
+     * @param predicate the given predicate
+     * @return the index of the first element in the list that does not satisfy the given predicate,
+     * or the size of the list
+     */
     private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
         for (int i = 0; i < tiles.size(); i++) {
             if (predicate.test(tiles.get(i))) {

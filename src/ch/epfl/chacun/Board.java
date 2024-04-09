@@ -5,9 +5,6 @@ import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
-// TODO consistency
-// TODO 그대로 return 해도 immu 해치지 않는거 맞는지 ?
-
 /**
  * Represents the game board.
  *
@@ -191,7 +188,7 @@ public final class Board {
         for (int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
                 if (tileAt(pos.translated(i, j)) != null)
-                    adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones()); // TODO
+                    adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones());
             }
         }
 
@@ -327,7 +324,7 @@ public final class Board {
      * @throws IllegalArgumentException if the board is not empty and the given tile cannot be
      * added to the board
      */
-    public Board withNewTile(PlacedTile tile) { // TODO immutability
+    public Board withNewTile(PlacedTile tile) {
         checkArgument(tileIndexes.length == 0 || canAddTile(tile));
 
         PlacedTile[] myPlacedTiles = placedTiles.clone();
@@ -403,21 +400,28 @@ public final class Board {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
-        for (int i : tileIndexes) {
-            if (myPlacedTiles[i].occupant() != null
-                    && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
-
-                for (Zone zone : myPlacedTiles[i].tile().sideZones()) {
-                    if (forests.contains(zone) || rivers.contains(zone))
-                        myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
-                } // TODO
-            }
-        }
+        clearOccupants(forests, myPlacedTiles);
+        clearOccupants(rivers, myPlacedTiles);
 
         forests.forEach(builder::clearGatherers);
         rivers.forEach(builder::clearFishers);
 
         return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
+    }
+
+    private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {
+        for (int i : tileIndexes) {
+            if (myPlacedTiles[i].occupant() != null
+                    && myPlacedTiles[i].occupant().kind().equals(Occupant.Kind.PAWN)) {
+
+                for (Zone zone : myPlacedTiles[i].tile().sideZones()) {
+                    if (areas.stream().anyMatch(area -> area.zones().contains(zone))) {
+                        myPlacedTiles[i] = myPlacedTiles[i].withNoOccupant();
+                        //break;
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -62,7 +62,7 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
 
         Set<Zone> zones = new HashSet<>(sideZones());
         Set<Zone> lakes = zones.stream()
-                .filter(zone -> zone instanceof Zone.River && ((Zone.River) zone).hasLake()) // TODO
+                .filter(zone -> zone instanceof Zone.River r1 && r1.hasLake())
                 .map(zone -> ((Zone.River) zone).lake())
                 .collect(Collectors.toSet());
 

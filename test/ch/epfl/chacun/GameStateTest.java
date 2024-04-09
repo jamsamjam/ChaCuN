@@ -3,803 +3,1027 @@ package ch.epfl.chacun;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static ch.epfl.chacun.Zone.SpecialPower.*;
+import static ch.epfl.chacun.GameState.Action;
+import static ch.epfl.chacun.GameState.initial;
 import static org.junit.jupiter.api.Assertions.*;
 
-class MyGameStateTest {
+class GameStateTest {
     @Test
-    void gameStateWithNullValues() {
+    void gameStateConstructorThrowsWhenDecksBoardNextActionOrMessageBoardAreNull() {
+        var players = List.of(PlayerColor.RED, PlayerColor.BLUE);
+        var tileDecks = shuffledTileDecks();
+        var tileToPlace = allTiles().get(1);
+        var board = Board.EMPTY;
+        var nextAction = Action.START_GAME;
+        var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
 
-    }
-
-    private static Tile getTile(Tile.Kind kind) {
-        return getTile(kind);
-    }
-
-    @Test
-    void currentPlayerWorks() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        var dS = List.of(allTiles.get(56));
-        var dN = List.of(allTiles.get(49), allTiles.get(27), allTiles.get(94));
-        var dM = List.of(allTiles.get(42));
-
-        var decks = new TileDecks(dS, dN, dM);
-
-        List<Tile> dS1 = List.of();
-        var decks1 = new TileDecks(dS1, dN, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0)); //start
-        var t42 = new PlacedTile(allTiles.get(42), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0)); //menhir
-        var t49 = new PlacedTile(allTiles.get(49), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 0));
-        var t27 = new PlacedTile(allTiles.get(27), PlayerColor.BLUE, Rotation.NONE, new Pos(-2, 0));
-        var t94 = new PlacedTile(allTiles.get(94), PlayerColor.PURPLE, Rotation.NONE, new Pos(0, -1)); //hunting_trap
-
-        //var meadow56 = (Zone.Meadow) t56.zoneWithId(56_0);
-
-        var b = Board.EMPTY;
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var expectedPlayer = PlayerColor.BLUE;
-        var testState = GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm);
-
-        assertNull(GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm).currentPlayer());
-        assertEquals(expectedPlayer, testState.withStartingTilePlaced().currentPlayer());
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(players, null, tileToPlace, board, nextAction, messageBoard);
+        });
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(players, tileDecks, tileToPlace, null, nextAction, messageBoard);
+        });
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(players, tileDecks, tileToPlace, board, null, messageBoard);
+        });
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(players, tileDecks, tileToPlace, board, nextAction, null);
+        });
     }
 
     @Test
-    void freeOccupantsCountWorks() {
+    void gameStateConstructorThrowsWithTooFewPlayers() {
+        var tileDecks = shuffledTileDecks();
+        var tileToPlace = allTiles().get(1);
+        var board = Board.EMPTY;
+        var nextAction = Action.START_GAME;
+        var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
 
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(List.of(), tileDecks, tileToPlace, board, nextAction, messageBoard);
+        });
+        assertThrows(RuntimeException.class, () -> {
+            new GameState(List.of(PlayerColor.RED), tileDecks, tileToPlace, board, nextAction, messageBoard);
+        });
     }
 
     @Test
-    void lastTilePotentialOccupantsWorks() {
-        var allTiles = allTiles();
+    void gameStateIsImmutable() {
+        var players = List.of(PlayerColor.RED, PlayerColor.BLUE, PlayerColor.YELLOW, PlayerColor.PURPLE);
+        var tileDecks = shuffledTileDecks();
+        var board = Board.EMPTY;
+        var nextAction = Action.START_GAME;
+        var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
 
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+        var mutablePlayers = new ArrayList<>(players);
+        var gameState = new GameState(mutablePlayers, tileDecks, null, board, nextAction, messageBoard);
 
-        // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(67), allTiles.get(75));
-        var dM = List.of(allTiles.get(93));
+        mutablePlayers.clear();
+        assertEquals(players, gameState.players());
 
-        var dN1 = List.of(allTiles.get(75));
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 1)); //logboat
-
-        var b = Board.EMPTY.withNewTile(t56);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        Occupant o1 = new Occupant(Occupant.Kind.PAWN, 67_0);
-        Occupant o2 = new Occupant(Occupant.Kind.PAWN, 67_1);
-        Occupant o3 = new Occupant(Occupant.Kind.PAWN, 67_2);
-
-        var expected = Set.of(o1, o2, o3);
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE,  mb);
-
-        assertEquals(expected, test.lastTilePotentialOccupants());
+        try {
+            gameState.players().clear();
+        } catch (UnsupportedOperationException e) {
+            // expected
+        }
+        assertEquals(players, gameState.players());
     }
 
     @Test
-    void withStartingTilePlacedWorks() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        var dS = List.of(allTiles.get(56));
-        var dN = List.of(allTiles.get(90), allTiles.get(73));
-        var dM = List.of(allTiles.get(93));
-
-        List<Tile> dS1 = List.of();
-        List<Tile> dN1 = List.of(allTiles.get(73));
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS1, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t90 = new PlacedTile(allTiles.get(90), PlayerColor.BLUE, Rotation.RIGHT, new Pos(1, 0));
-        var t73 = new PlacedTile(allTiles.get(73), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.LEFT, new Pos(-1, 1)); //logboat
-
-        var b = Board.EMPTY.withNewTile(t56);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                allTiles.get(90), Board.EMPTY.withNewTile(t56), GameState.Action.PLACE_TILE,  mb);
-
-        assertEquals(expectedState, GameState.initial(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks, tm).withStartingTilePlaced());
+    void gameStateInitialProducesCorrectState() {
+        var players = List.of(PlayerColor.values());
+        var tileDecks = shuffledTileDecks();
+        var textMaker = new BasicTextMaker();
+        for (int i = 2; i <= players.size(); i += 1) {
+            var subPlayers = players.subList(0, i);
+            var state = initial(subPlayers, tileDecks, textMaker);
+            assertEquals(subPlayers, state.players());
+            assertEquals(tileDecks, state.tileDecks());
+            assertNull(state.tileToPlace());
+            assertEquals(Board.EMPTY, state.board());
+            assertEquals(Action.START_GAME, state.nextAction());
+            assertEquals(textMaker, state.messageBoard().textMaker());
+            assertTrue(state.messageBoard().messages().isEmpty());
+        }
     }
 
     @Test
-    void withPlacedTileWorksWithNormalTile() {
-        var allTiles = allTiles();
+    void gameStateCurrentPlayerWorks() {
+        var players = Arrays.asList(PlayerColor.values());
+        var tileDecks = shuffledTileDecks();
+        var tileToPlace = allTiles().get(1);
+        var board = Board.EMPTY;
+        var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
+        for (int i = 0; i < players.size(); i += 1) {
+            var immutablePlayers = List.copyOf(players);
+            for (var action : Action.values()) {
+                var actualTileToPlace = action == Action.PLACE_TILE ? tileToPlace : null;
+                var state = new GameState(immutablePlayers, tileDecks, actualTileToPlace, board, action, messageBoard);
 
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(67), allTiles.get(75));
-        var dM = List.of(allTiles.get(93));
-
-        var dN1 = List.of(allTiles.get(75));
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 1)); //logboat
-
-        var b = Board.EMPTY.withNewTile(t56);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(75), b, GameState.Action.PLACE_TILE,  mb);
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE,  mb);
-
-        assertEquals(expectedState, test.withPlacedTile(t67));
+                if (action == Action.START_GAME || action == Action.END_GAME)
+                    assertNull(state.currentPlayer());
+                else
+                    assertEquals(immutablePlayers.getFirst(), state.currentPlayer());
+            }
+            Collections.rotate(players, 1);
+        }
     }
 
     @Test
-    void withPlacedTileWorksWithClosedForest() {
-        var allTiles = allTiles();
+    void gameStateWithStartingTilePlacedWorks() {
+        for (var seed : List.of(0, 2024, 65536)) {
+            var players = List.of(PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN);
+            var tileDecks = shuffledTileDecks(seed);
+            var board = Board.EMPTY;
+            var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
+            var state = new GameState(players, tileDecks, null, board, Action.START_GAME, messageBoard)
+                    .withStartingTilePlaced();
 
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+            var expectedPlacedInitialTile =
+                    new PlacedTile(tileDecks.startTiles().getFirst(), null, Rotation.NONE, Pos.ORIGIN);
 
-        // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(75));
-        var dM = List.of(allTiles.get(93));
-
-        List<Tile> dN1 = List.of();
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 1)); //logboat
-
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t67);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(75), b, GameState.Action.PLACE_TILE,  mb);
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                null, b.withNewTile(t75), GameState.Action.OCCUPY_TILE,  mb);
-
-        assertEquals(expectedState, test.withPlacedTile(t75));
+            assertEquals(players, state.players());
+            assertTrue(state.tileDecks().startTiles().isEmpty());
+            assertEquals(
+                    tileDecks.normalTiles().subList(1, tileDecks.normalTiles().size()),
+                    state.tileDecks().normalTiles());
+            assertEquals(tileDecks.menhirTiles(), state.tileDecks().menhirTiles());
+            assertEquals(tileDecks.normalTiles().getFirst(), state.tileToPlace());
+            assertEquals(expectedPlacedInitialTile, state.board().tileAt(Pos.ORIGIN));
+            assertEquals(Action.PLACE_TILE, state.nextAction());
+            assertEquals(messageBoard, state.messageBoard());
+        }
     }
 
     @Test
-    void withPlacedTileWorksWithLogboat() {
-        var allTiles = allTiles();
+    void gameStateWithPlacedTileWorksForNormalTile() {
+        var state = initialGameState(List.of(0), List.of());
 
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+        assert state.tileToPlace().id() == 0;
+        var placedTile0 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(1, 0));
 
-        // tiledecks
-        List<Tile> dS = List.of();
-        List<Tile> dN = List.of(allTiles.get(20));
-        List<Tile> dM = List.of(allTiles.get(93));
+        var state1 = state.withPlacedTile(placedTile0);
 
-        List<Tile> dM1 = List.of();
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN, dM1);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t93 = new PlacedTile(allTiles.get(93), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 0)); //logboat
-
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t67).withNewTile(t75);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var l1 = new Zone.Lake(56_8, 1, null);
-        //var a0_0 = new Animal(56_0_0, Animal.Kind.AUROCHS);
-        //var z0 = new Zone.Meadow(56_0, List.of(a0_0), null);
-        var z1 = new Zone.Forest(56_1, Zone.Forest.Kind.WITH_MENHIR);
-        //var z2 = new Zone.Meadow(56_2, List.of(), null);
-        var z3 = new Zone.River(56_3, 0, l1);
-
-        var l11 = new Zone.Lake(93_8, 1, LOGBOAT);
-        //var z0 = new Zone.Meadow(93_0, List.of(), null);
-        var z11 = new Zone.River(93_1, 0, l1);
-        //var z2 = new Zone.Meadow(93_2, List.of(), null);
-        var z33 = new Zone.River(93_3, 0, l1);
-        //var z4 = new Zone.Meadow(93_4, List.of(), null);
-        var z5 = new Zone.River(93_5, 0, l1);
-
-
-        var riverSystem = new Area<Zone.Water>(Set.of(l1, z3, l11, z11, z33), List.of(), 2);
-        var partitions = new ZonePartitions(
-                new ZonePartition<>(),
-                new ZonePartition<>(),
-                new ZonePartition<>(),
-                new ZonePartition<>(Set.of(riverSystem)));
-
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                null, b.withNewTile(t93), GameState.Action.OCCUPY_TILE, mb.withScoredLogboat(PlayerColor.BLUE, riverSystem));
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(93), b, GameState.Action.PLACE_TILE, mb);
-
-        assertEquals(expectedState, test.withPlacedTile(t93));
-    }
-
-    // not working because the cancelledAnimal set is not updated
-    @Test
-    void withPlacedTileWorksWithHT() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        List<Tile> dS = List.of();
-        List<Tile> dN = List.of(allTiles.get(20));
-        List<Tile> dM = List.of(allTiles.get(94));
-
-        List<Tile> dM1 = List.of();
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN, dM1);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t94 = new PlacedTile(allTiles.get(94), PlayerColor.PURPLE, Rotation.LEFT, new Pos(1, 1)); //hunting trap
-
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t67).withNewTile(t75);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var z0 = new Zone.Forest(67_0, Zone.Forest.Kind.PLAIN);
-        var z1 = new Zone.Forest(67_1, Zone.Forest.Kind.PLAIN);
-        var a2_0 = new Animal(67_2_0, Animal.Kind.DEER);
-        var z2 = new Zone.Meadow(67_2, List.of(a2_0), null);
-
-        var z00 = new Zone.Forest(94_0, Zone.Forest.Kind.PLAIN);
-        var z11 = new Zone.Meadow(94_1, List.of(), Zone.SpecialPower.HUNTING_TRAP);
-
-        Area<Zone.Meadow> adjacentMeadow = new Area<>(Set.of(z2, z11), List.of(), 3);
-
-
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                null, b.withNewTile(t94), GameState.Action.OCCUPY_TILE, mb.withScoredHuntingTrap(PlayerColor.BLUE, adjacentMeadow));
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(94), b, GameState.Action.PLACE_TILE, mb);
-
-        assertEquals(expectedState, test.withPlacedTile(t94));
-    }
-
-    /*@Test
-    void withPlacedTileWorksWithHT_Tiger() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        List<Tile> dS = List.of();
-        List<Tile> dN = List.of(allTiles.get(20));
-        List<Tile> dM = List.of(allTiles.get(94));
-
-        List<Tile> dM1 = List.of();
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN, dM1);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t94 = new PlacedTile(allTiles.get(94), PlayerColor.PURPLE, Rotation.LEFT, new Pos(1, 1)); //hunting trap
-
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t67).withNewTile(t75);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        //67
-        var z0 = new Zone.Forest(67_0, Zone.Forest.Kind.PLAIN);
-        var z1 = new Zone.Forest(67_1, Zone.Forest.Kind.PLAIN);
-        var a2_0 = new Animal(67_2_0, Animal.Kind.DEER);
-        var z2 = new Zone.Meadow(67_2, List.of(a2_0), null);
-
-        var z00 = new Zone.Forest(94_0, Zone.Forest.Kind.PLAIN);
-        var a2_1 = new Animal(94_1_0, Animal.Kind.TIGER);
-        var z11 = new Zone.Meadow(94_1, List.of(a2_1), Zone.SpecialPower.HUNTING_TRAP);
-
-        Area<Zone.Meadow> adjacentMeadow = new Area<>(Set.of(z2, z11), List.of(), 3);
-
-
-        var expectedState = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                null, b.withNewTile(t94), GameState.Action.OCCUPY_TILE, mb.withScoredHuntingTrap(PlayerColor.BLUE, adjacentMeadow));
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(94), b, GameState.Action.PLACE_TILE, mb);
-
-        assertEquals(expectedState, test.withPlacedTile(t94));
-    }*/
-
-    @Test
-    void placedtile_turnfinished() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(67), allTiles.get(75));
-        var dM = List.of(allTiles.get(88));
-
-        List<Tile> dN1 = List.of(allTiles.get(75));
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t88 = new PlacedTile(allTiles.get(88), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 0)); //shaman
-
-        var b = Board.EMPTY.withNewTile(t56);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        var expected = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks,
-                allTiles.get(67), b, GameState.Action.PLACE_TILE,  mb);
-
-        assertEquals(expected, test.withPlacedTile(t67));
+        assertEquals(state.players(), state1.players());
+        assertEquals(state.tileDecks(), state1.tileDecks());
+        assertEquals(placedTile0, state1.board().lastPlacedTile());
+        assertEquals(Action.OCCUPY_TILE, state1.nextAction());
+        assertEquals(state.messageBoard(), state1.messageBoard());
     }
 
     @Test
-    void withNewOccupantWorks_Pawn() {
-        var allTiles = allTiles();
+    void gameStateWithPlacedTileWorksForNormalUnoccupyableTile() {
+        var state = initialGameState(List.of(61, 62, 0), List.of());
 
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
+        // Place tile 61 (containing a single meadow) and occupy its only zone.
+        assert state.tileToPlace().id() == 61;
+        var placedTile61 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(0, -1));
+        state = state
+                .withPlacedTile(placedTile61)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 61_0));
 
-        // tiledecks
-        List<Tile> dS = List.of();
-        var dN = List.of(allTiles.get(67), allTiles.get(75));
-        var dM = List.of(allTiles.get(88));
+        // Place tile 62 (containing a single meadow), whose single zone cannot be occupied.
+        assertEquals(62, state.tileToPlace().id());
+        var placedTile62 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(0, -2));
+        state = state.withPlacedTile(placedTile62);
 
-        List<Tile> dN1 = List.of(allTiles.get(75));
-
-        var decks = new TileDecks(dS, dN1, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t88 = new PlacedTile(allTiles.get(88), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 0)); //shaman
-
-        var b = Board.EMPTY.withNewTile(t56);
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        Occupant occ = new Occupant(Occupant.Kind.PAWN, 67_2); //in forest
-
-        var expected = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
-                allTiles.get(75), b.withNewTile(t67).withOccupant(occ), GameState.Action.PLACE_TILE, mb);
-        var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1,
-                null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
-
-        assertEquals(expected, test.withNewOccupant(occ));
-    }
-
-    /*@Test
-    void getWinner() {
-        var allTiles = allTiles();
-
-        var players = List.of(PlayerColor.BLUE, PlayerColor.PURPLE);
-
-        // tiledecks
-        List<Tile> dS = List.of(allTiles.get(56));
-        var dN = List.of( allTiles.get(75), allTiles.get(23));
-        var dM = List.of(allTiles.get(88));
-
-        List<Tile> dN1 = List.of();
-
-        var decks = new TileDecks(dS, dN, dM);
-        var decks1 = new TileDecks(dS, dN1, dM);
-
-        var t56 = new PlacedTile(allTiles.get(56), null, Rotation.NONE, new Pos(0, 0));
-        var t67 = new PlacedTile(allTiles.get(67), PlayerColor.BLUE, Rotation.LEFT, new Pos(1, 0));
-        var t75 = new PlacedTile(allTiles.get(75), PlayerColor.PURPLE, Rotation.LEFT, new Pos(0, 1));
-        var t88 = new PlacedTile(allTiles.get(88), PlayerColor.PURPLE, Rotation.NONE, new Pos(-1, 0)); //shaman
-
-        Occupant occ = new Occupant(Occupant.Kind.PAWN, 75_1); //blue_in forest
-
-        var b = Board.EMPTY.withNewTile(t56).withNewTile(t67).withNewTile(t75).withOccupant(occ);
-        //.withOccupant(occ);
-
-        var menhirForest = b.forestArea(t67.forestZones().stream().toList().getFirst());
-
-        var tm = new BasicTextMaker();
-        var mb = new MessageBoard(tm, List.of());
-
-        GameState gameState = GameState.initial(players, decks, tm).withStartingTilePlaced()
-                .withPlacedTile(t67)
-                .withNewOccupant(null)
-                .withPlacedTile(t75)
-                .withNewOccupant(occ);
-        GameState expected = new GameState(null, null, null, b, GameState.Action.END_GAME,
-                mb.withWinners(Set.of(PlayerColor.PURPLE), 6));
-        assertEquals(expected, gameState.withFinalPointsCounted());
-
-        var test = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
-                allTiles.get(75), b, GameState.Action.PLACE_TILE, mb);
-        var expected1 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks,
-                null, b.withNewTile(t75), GameState.Action.OCCUPY_TILE, mb);
-
-        System.out.println(expected1.board().lastPlacedTile());
-
-        var expected2 = new GameState(List.of(PlayerColor.PURPLE, PlayerColor.BLUE), decks1,
-                allTiles.get(88), b.withNewTile(t75), GameState.Action.PLACE_TILE, mb.withScoredForest(menhirForest).withClosedForestWithMenhir(PlayerColor.PURPLE, menhirForest));
-        //var test = new GameState(List.of(PlayerColor.BLUE, PlayerColor.PURPLE), decks1, null, b.withNewTile(t67), GameState.Action.OCCUPY_TILE, mb);
-
-        assertEquals(expected1, test.withPlacedTile(t75));
-
-        var newBoard = Board.EMPTY
-                .withNewTile(t56)
-                .withNewTile(t67)
-                .withNewTile(t75);
-
-        var forests1 = Set.of((Zone.Forest) t56.zoneWithId(56_1),
-                (Zone.Forest) t67.zoneWithId(67_0),
-                (Zone.Forest) t75.zoneWithId(75_1));
-
-        var forest1 = new Area<>(forests1, List.of(), 0);
-
-        //assertEquals(Set.of(forest1), newBoard.forestsClosedByLastTile());
-        System.out.println(newBoard.forestsClosedByLastTile().size());
-        assertEquals(expected2, expected1.withNewOccupant(occ));
-    }
-*/
-    @Test
-    void checkWithPlacedTileCanPlaceOccupant(){
-        var z01 = new Zone.Forest(94_0, Zone.Forest.Kind.PLAIN);
-        var z11 = new Zone.Meadow(94_1, List.of(), Zone.SpecialPower.HUNTING_TRAP);
-        var sN1 = new TileSide.Forest(z01);
-        var sE1 = new TileSide.Meadow(z11);
-        var sS1 = new TileSide.Meadow(z11);
-        var sW1 = new TileSide.Meadow(z11);
-        Tile tile94 = new Tile(94, Tile.Kind.MENHIR, sN1, sE1, sS1, sW1);
-
-        var z02 = new Zone.Forest(54_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z12 = new Zone.Meadow(54_1, List.of(), null);
-        var z22 = new Zone.River(54_2, 0, null);
-        var a3_02 = new Animal(54_3_0, Animal.Kind.DEER);
-        var z32 = new Zone.Meadow(54_3, List.of(a3_02), null);
-        var z42 = new Zone.Meadow(54_4, List.of(), null);
-        var sN2 = new TileSide.Forest(z02);
-        var sE2 = new TileSide.River(z12, z22, z32);
-        var sS2 = new TileSide.River(z32, z22, z42);
-        var sW2 = new TileSide.Forest(z02);
-        Tile tile54 = new Tile(54, Tile.Kind.NORMAL, sN2, sE2, sS2, sW2);
-
-        var z03 = new Zone.Forest(55_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z13 = new Zone.Forest(55_1, Zone.Forest.Kind.PLAIN);
-        var z23 = new Zone.Meadow(55_2, List.of(), null);
-        var z33 = new Zone.River(55_3, 0, null);
-        var z43 = new Zone.Meadow(55_4, List.of(), null);
-        var sN3 = new TileSide.Forest(z03);
-        var sE3 = new TileSide.Forest(z03);
-        var sS3 = new TileSide.Forest(z13);
-        var sW3 = new TileSide.River(z23, z33, z43);
-        Tile tile55 = new Tile(55, Tile.Kind.NORMAL, sN3, sE3, sS3, sW3);
-
-        var l1 = new Zone.Lake(56_8, 1, null);
-        var a0_0 = new Animal(56_0_0, Animal.Kind.AUROCHS);
-        var z0 = new Zone.Meadow(56_0, List.of(a0_0), null);
-        var z1 = new Zone.Forest(56_1, Zone.Forest.Kind.WITH_MENHIR);
-        var z2 = new Zone.Meadow(56_2, List.of(), null);
-        var z3 = new Zone.River(56_3, 0, l1);
-        var sN = new TileSide.Meadow(z0);
-        var sE = new TileSide.Forest(z1);
-        var sS = new TileSide.Forest(z1);
-        var sW = new TileSide.River(z2, z3, z0);
-        Tile tile56 = new Tile(56, Tile.Kind.START, sN, sE, sS, sW);
-
-        var l14 = new Zone.Lake(57_8, 2, null);
-        var z04 = new Zone.Meadow(57_0, List.of(), null);
-        var z14 = new Zone.River(57_1, 0, l14);
-        var z24 = new Zone.Meadow(57_2, List.of(), null);
-        var z34 = new Zone.Forest(57_3, Zone.Forest.Kind.PLAIN);
-        var z44 = new Zone.Forest(57_4, Zone.Forest.Kind.WITH_MENHIR);
-        var sN4 = new TileSide.River(z04, z14, z24);
-        var sE4 = new TileSide.Forest(z34);
-        var sS4 = new TileSide.Forest(z44);
-        var sW4= new TileSide.Forest(z44);
-        Tile tile57 = new Tile(57, Tile.Kind.NORMAL, sN4, sE4,sS4, sW4);
-
-        var z05 = new Zone.Forest(44_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z15 = new Zone.Forest(44_1, Zone.Forest.Kind.PLAIN);
-        var a2_05 = new Animal(44_2_0, Animal.Kind.DEER);
-        var z25 = new Zone.Meadow(44_2, List.of(a2_05), null);
-        var sN5 = new TileSide.Forest(z05);
-        var sE5 = new TileSide.Forest(z15);
-        var sS5 = new TileSide.Meadow(z25);
-        var sW5 = new TileSide.Forest(z05);
-        Tile tile44 = new Tile(44, Tile.Kind.NORMAL, sN5, sE5, sS5, sW5);
-
-        var z06 = new Zone.Forest(43_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z16 = new Zone.Forest(43_1, Zone.Forest.Kind.PLAIN);
-        var z26 = new Zone.Meadow(43_2, List.of(), null);
-        var sN6 = new TileSide.Forest(z06);
-        var sE6 = new TileSide.Forest(z06);
-        var sS6 = new TileSide.Forest(z16);
-        var sW6 = new TileSide.Meadow(z26);
-        Tile tile43 = new Tile(43, Tile.Kind.NORMAL, sN6, sE6, sS6, sW6);
-
-        var l17 = new Zone.Lake(2_8, 1, null);
-        var z07 = new Zone.Meadow(2_0, List.of(), null);
-        var z17 = new Zone.River(2_1, 0, l1);
-        var z27 = new Zone.Meadow(2_2, List.of(), null);
-        var z37 = new Zone.Forest(2_3, Zone.Forest.Kind.WITH_MENHIR);
-        var sN7 = new TileSide.Meadow(z07);
-        var sE7 = new TileSide.River(z07, z17, z27);
-        var sS7 = new TileSide.Forest(z37);
-        var sW7 = new TileSide.Forest(z37);
-        Tile tile02 = new Tile(2, Tile.Kind.NORMAL, sN7, sE7, sS7, sW7);
-
-        var z08 = new Zone.Forest(29_0, Zone.Forest.Kind.PLAIN);
-        var z18 = new Zone.Meadow(29_1, List.of(), null);
-        var z28 = new Zone.River(29_2, 0, null);
-        var z38 = new Zone.Meadow(29_3, List.of(), null);
-        var sN8 = new TileSide.Forest(z08);
-        var sE8 = new TileSide.River(z18, z28, z38);
-        var sS8 = new TileSide.River(z38, z28, z18);
-        var sW8 = new TileSide.Forest(z08);
-        Tile tile29 = new Tile(29, Tile.Kind.NORMAL, sN8, sE8, sS8, sW8);
-
-        var a0_09 = new Animal(41_0_0, Animal.Kind.DEER);
-        var z09 = new Zone.Meadow(41_0, List.of(a0_09), null);
-        var z19 = new Zone.Forest(41_1, Zone.Forest.Kind.PLAIN);
-        var z29 = new Zone.Forest(41_2, Zone.Forest.Kind.PLAIN);
-        var sN9 = new TileSide.Meadow(z09);
-        var sE9 = new TileSide.Forest(z19);
-        var sS9 = new TileSide.Meadow(z09);
-        var sW9 = new TileSide.Forest(z29);
-        Tile tile41 = new Tile(41, Tile.Kind.NORMAL, sN9, sE9, sS9, sW9);
-
-        List<PlayerColor> players = List.of(PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN);
-        TileDecks myDecks = new TileDecks(List.of(tile56), List.of(tile54, tile43, tile55, tile44, tile02, tile29, tile41, tile57), List.of(tile94));
-        Board myBoard = Board.EMPTY;
-        GameState.Action nextAction = GameState.Action.START_GAME;
-        MessageBoard message = new MessageBoard(new BasicTextMaker(), List.of());
-
-        GameState myGame = new GameState(players, myDecks, null, myBoard, nextAction, message);
-
-        myGame = myGame.withStartingTilePlaced();
-        myGame = myGame.withPlacedTile(new PlacedTile(tile54, PlayerColor.RED, Rotation.NONE, new Pos(1,0)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile43, PlayerColor.BLUE, Rotation.NONE, new Pos(1,-1)));
-        myGame = myGame.withNewOccupant(new Occupant(Occupant.Kind.PAWN, 43_2));
-        myGame = myGame.withPlacedTile(new PlacedTile(tile55, PlayerColor.GREEN, Rotation.HALF_TURN, new Pos(-1,0)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile44, PlayerColor.RED, Rotation.LEFT, new Pos(-1,-1)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile02, PlayerColor.BLUE, Rotation.LEFT, new Pos(-1,-2)));
-        myGame = myGame.withNewOccupant(new Occupant(Occupant.Kind.PAWN, 2_3));
-        myGame = myGame.withPlacedTile(new PlacedTile(tile29, PlayerColor.GREEN, Rotation.LEFT, new Pos(0,-2)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile41, PlayerColor.RED, Rotation.LEFT, new Pos(0,1)));
-        myGame = myGame.withNewOccupant(null);
-
-        myDecks = myGame.tileDecks();
-        myBoard = myGame.board();
-        myBoard = myBoard.withNewTile(new PlacedTile(tile94, PlayerColor.RED, Rotation.NONE, new Pos(0,-1)));
-        Set<Animal> cancelledAnimaks = Set.of(a0_0, a2_05);
-        myBoard = myBoard.withMoreCancelledAnimals(cancelledAnimaks);
-        nextAction = GameState.Action.PLACE_TILE;
-        Area<Zone.Meadow> myAreaMeadow = new Area<>(Set.of(z11, z26, z0, z23, z25), List.of(PlayerColor.BLUE), 0);
-        Area<Zone.Forest> myAreaForest1 = new Area<>(Set.of(z02, z1, z19, z06, z16), List.of(), 2);
-        Area<Zone.Forest> myAreaForest2 = new Area<>(Set.of(z08, z37, z01, z15), List.of(PlayerColor.BLUE), 0);
-        message = message.withClosedForestWithMenhir(PlayerColor.RED, myAreaForest1);
-        message = message.withScoredHuntingTrap(PlayerColor.RED, myAreaMeadow);
-        message = message.withScoredMeadow(myAreaMeadow, cancelledAnimaks);
-        message = message.withScoredForest(myAreaForest1);
-        message = message.withScoredForest(myAreaForest2);
-        message = message.withClosedForestWithMenhir(PlayerColor.RED, myAreaForest2);
-        players = List.of(PlayerColor.BLUE, PlayerColor.GREEN, PlayerColor.RED);
-        myDecks = myDecks.withTopTileDrawn(Tile.Kind.NORMAL);
-        //myBoard = myBoard.withoutGatherersOrFishersIn(Set.of(myAreaForest2), Set.of());
-        GameState myFinalGame = new GameState(players, myDecks, tile57, myBoard, nextAction, message);
-
-        GameState myActualGame = myGame.withPlacedTile(new PlacedTile(tile94, PlayerColor.RED, Rotation.NONE, new Pos(0, -1)));
-
-        assertEquals(myFinalGame, myActualGame);
+        assertEquals(Action.PLACE_TILE, state.nextAction());
+        assertEquals(0, state.tileToPlace().id());
+        assertEquals(PlayerColor.GREEN, state.currentPlayer());
     }
 
     @Test
-    public void checkWithFinalPointsCounted() {
-        var z01 = new Zone.Forest(94_0, Zone.Forest.Kind.PLAIN);
-        var z11 = new Zone.Meadow(94_1, List.of(), Zone.SpecialPower.HUNTING_TRAP);
-        var sN1 = new TileSide.Forest(z01);
-        var sE1 = new TileSide.Meadow(z11);
-        var sS1 = new TileSide.Meadow(z11);
-        var sW1 = new TileSide.Meadow(z11);
-        Tile tile94 = new Tile(94, Tile.Kind.MENHIR, sN1, sE1, sS1, sW1);
+    void gameStateWithPlacedTileCorrectlyHandlesOccupantsOfClosedRiver() {
+        var state = initialGameState(List.of(1, 0), List.of());
 
-        var z02 = new Zone.Forest(54_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z12 = new Zone.Meadow(54_1, List.of(), null);
-        var z22 = new Zone.River(54_2, 0, null);
-        var a3_02 = new Animal(54_3_0, Animal.Kind.DEER);
-        var z32 = new Zone.Meadow(54_3, List.of(a3_02), null);
-        var z42 = new Zone.Meadow(54_4, List.of(), null);
-        var sN2 = new TileSide.Forest(z02);
-        var sE2 = new TileSide.River(z12, z22, z32);
-        var sS2 = new TileSide.River(z32, z22, z42);
-        var sW2 = new TileSide.Forest(z02);
-        Tile tile54 = new Tile(54, Tile.Kind.NORMAL, sN2, sE2, sS2, sW2);
+        assert state.tileToPlace().id() == 1;
+        var placedTile1 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile1)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 1_1)); // occupy river
 
-        var z03 = new Zone.Forest(55_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z13 = new Zone.Forest(55_1, Zone.Forest.Kind.PLAIN);
-        var z23 = new Zone.Meadow(55_2, List.of(), null);
-        var z33 = new Zone.River(55_3, 0, null);
-        var z43 = new Zone.Meadow(55_4, List.of(), null);
-        var sN3 = new TileSide.Forest(z03);
-        var sE3 = new TileSide.Forest(z03);
-        var sS3 = new TileSide.Forest(z13);
-        var sW3 = new TileSide.River(z23, z33, z43);
-        Tile tile55 = new Tile(55, Tile.Kind.NORMAL, sN3, sE3, sS3, sW3);
+        var expectedRiverMessage = new MessageBoard.Message(
+                "{RED}|6|4|2",
+                6,
+                Set.of(PlayerColor.RED),
+                Set.of(56, 1));
+        assertEquals(expectedRiverMessage, state.messageBoard().messages().getLast());
+        assertEquals(5, state.freeOccupantsCount(PlayerColor.RED, Occupant.Kind.PAWN));
 
-        var l1 = new Zone.Lake(56_8, 1, null);
-        var a0_0 = new Animal(56_0_0, Animal.Kind.AUROCHS);
-        var z0 = new Zone.Meadow(56_0, List.of(a0_0), null);
-        var z1 = new Zone.Forest(56_1, Zone.Forest.Kind.WITH_MENHIR);
-        var z2 = new Zone.Meadow(56_2, List.of(), null);
-        var z3 = new Zone.River(56_3, 0, l1);
-        var sN = new TileSide.Meadow(z0);
-        var sE = new TileSide.Forest(z1);
-        var sS = new TileSide.Forest(z1);
-        var sW = new TileSide.River(z2, z3, z0);
-        Tile tile56 = new Tile(56, Tile.Kind.START, sN, sE, sS, sW);
-
-        var z05 = new Zone.Forest(44_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z15 = new Zone.Forest(44_1, Zone.Forest.Kind.PLAIN);
-        var a2_05 = new Animal(44_2_0, Animal.Kind.DEER);
-        var z25 = new Zone.Meadow(44_2, List.of(a2_05), null);
-        var sN5 = new TileSide.Forest(z05);
-        var sE5 = new TileSide.Forest(z15);
-        var sS5 = new TileSide.Meadow(z25);
-        var sW5 = new TileSide.Forest(z05);
-        Tile tile44 = new Tile(44, Tile.Kind.NORMAL, sN5, sE5, sS5, sW5);
-
-        var z06 = new Zone.Forest(43_0, Zone.Forest.Kind.WITH_MENHIR);
-        var z16 = new Zone.Forest(43_1, Zone.Forest.Kind.PLAIN);
-        var z26 = new Zone.Meadow(43_2, List.of(), null);
-        var sN6 = new TileSide.Forest(z06);
-        var sE6 = new TileSide.Forest(z06);
-        var sS6 = new TileSide.Forest(z16);
-        var sW6 = new TileSide.Meadow(z26);
-        Tile tile43 = new Tile(43, Tile.Kind.NORMAL, sN6, sE6, sS6, sW6);
-
-        var l17 = new Zone.Lake(2_8, 1, null);
-        var z07 = new Zone.Meadow(2_0, List.of(), null);
-        var z17 = new Zone.River(2_1, 0, l1);
-        var z27 = new Zone.Meadow(2_2, List.of(), null);
-        var z37 = new Zone.Forest(2_3, Zone.Forest.Kind.WITH_MENHIR);
-        var sN7 = new TileSide.Meadow(z07);
-        var sE7 = new TileSide.River(z07, z17, z27);
-        var sS7 = new TileSide.Forest(z37);
-        var sW7 = new TileSide.Forest(z37);
-        Tile tile02 = new Tile(2, Tile.Kind.NORMAL, sN7, sE7, sS7, sW7);
-
-        var z08 = new Zone.Forest(29_0, Zone.Forest.Kind.PLAIN);
-        var z18 = new Zone.Meadow(29_1, List.of(), null);
-        var z28 = new Zone.River(29_2, 0, null);
-        var z38 = new Zone.Meadow(29_3, List.of(), null);
-        var sN8 = new TileSide.Forest(z08);
-        var sE8 = new TileSide.River(z18, z28, z38);
-        var sS8 = new TileSide.River(z38, z28, z18);
-        var sW8 = new TileSide.Forest(z08);
-        Tile tile29 = new Tile(29, Tile.Kind.NORMAL, sN8, sE8, sS8, sW8);
-
-        var a0_09 = new Animal(41_0_0, Animal.Kind.DEER);
-        var z09 = new Zone.Meadow(41_0, List.of(a0_09), null);
-        var z19 = new Zone.Forest(41_1, Zone.Forest.Kind.PLAIN);
-        var z29 = new Zone.Forest(41_2, Zone.Forest.Kind.PLAIN);
-        var sN9 = new TileSide.Meadow(z09);
-        var sE9 = new TileSide.Forest(z19);
-        var sS9 = new TileSide.Meadow(z09);
-        var sW9 = new TileSide.Forest(z29);
-        Tile tile41 = new Tile(41, Tile.Kind.NORMAL, sN9, sE9, sS9, sW9);
-
-        List<PlayerColor> players = List.of(PlayerColor.RED, PlayerColor.BLUE, PlayerColor.GREEN);
-        TileDecks myDecks = new TileDecks(List.of(tile56), List.of(tile54, tile43, tile55, tile44, tile02, tile29, tile41), List.of(tile94));
-        Board myBoard = Board.EMPTY;
-        GameState.Action nextAction = GameState.Action.START_GAME;
-        MessageBoard message = new MessageBoard(new BasicTextMaker(), List.of());
-
-        GameState myGame = new GameState(players, myDecks, null, myBoard, nextAction, message);
-
-        myGame = myGame.withStartingTilePlaced();
-        myGame = myGame.withPlacedTile(new PlacedTile(tile54, PlayerColor.RED, Rotation.NONE, new Pos(1,0)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile43, PlayerColor.BLUE, Rotation.NONE, new Pos(1,-1)));
-        myGame = myGame.withNewOccupant(new Occupant(Occupant.Kind.PAWN, 43_2));
-        myGame = myGame.withPlacedTile(new PlacedTile(tile55, PlayerColor.GREEN, Rotation.HALF_TURN, new Pos(-1,0)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile44, PlayerColor.RED, Rotation.LEFT, new Pos(-1,-1)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile02, PlayerColor.BLUE, Rotation.LEFT, new Pos(-1,-2)));
-        myGame = myGame.withNewOccupant(new Occupant(Occupant.Kind.PAWN, 2_3));
-        myGame = myGame.withPlacedTile(new PlacedTile(tile29, PlayerColor.GREEN, Rotation.LEFT, new Pos(0,-2)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile41, PlayerColor.RED, Rotation.LEFT, new Pos(0,1)));
-        myGame = myGame.withNewOccupant(null);
-        myGame = myGame.withPlacedTile(new PlacedTile(tile94, PlayerColor.RED, Rotation.NONE, new Pos(0, -1)));
-
-        Area<Zone.Meadow> myAreaMeadow = new Area<>(Set.of(z11, z26, z0, z23, z25), List.of(PlayerColor.BLUE), 0);
-        Area<Zone.Forest> myAreaForest1 = new Area<>(Set.of(z02, z1, z19, z06, z16), List.of(), 0);
-        Area<Zone.Forest> myAreaForest2 = new Area<>(Set.of(z08, z37, z01, z15), List.of(PlayerColor.BLUE), 0);
-        Area<Zone.River> myAreaRiver = new Area<>(Set.of(z3, z33), List.of(), 0);
-        Area<Zone.Water> myAreaWater = new Area<>(Set.of(z3, z33, l1), List.of(), 0);
-
-        myBoard = myBoard.withNewTile(new PlacedTile(myDecks.startTiles().get(0), null, Rotation.NONE, new Pos(0,0)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile54, PlayerColor.RED, Rotation.NONE, new Pos(1,0)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile43, PlayerColor.BLUE, Rotation.NONE, new Pos(1,-1)));
-        myBoard = myBoard.withOccupant(new Occupant(Occupant.Kind.PAWN, 43_2));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile55, PlayerColor.GREEN, Rotation.HALF_TURN, new Pos(-1,0)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile44, PlayerColor.RED, Rotation.LEFT, new Pos(-1,-1)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile02, PlayerColor.BLUE, Rotation.LEFT, new Pos(-1,-2)));
-        myBoard = myBoard.withOccupant(new Occupant(Occupant.Kind.PAWN, 2_3));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile29, PlayerColor.GREEN, Rotation.LEFT, new Pos(0,-2)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile41, PlayerColor.RED, Rotation.LEFT, new Pos(0,1)));
-        myBoard = myBoard.withNewTile(new PlacedTile(tile94, PlayerColor.RED, Rotation.NONE, new Pos(0, -1)));
-
-        myDecks = myGame.tileDecks();
-
-        message = message.withClosedForestWithMenhir(PlayerColor.RED, myAreaForest1);
-        message = message.withScoredHuntingTrap(PlayerColor.RED, myAreaMeadow);
-        //myBoard = myBoard.withoutGatherersOrFishersIn(Set.of(myAreaForest2), Set.of());
-        Set<Animal> cancelledAnimaks = Set.of(a2_05, a0_0);
-        myBoard = myBoard.withMoreCancelledAnimals(cancelledAnimaks);
-        message = message.withScoredMeadow(myAreaMeadow, cancelledAnimaks);
-        message = message.withScoredForest(myAreaForest1);
-        message = message.withScoredForest(myAreaForest2);
-        message = message.withScoredRiver(myAreaRiver);
-        message = message.withScoredRiverSystem(myAreaWater);
-        message = message.withClosedForestWithMenhir(PlayerColor.RED, myAreaForest2);
-        players = List.of(PlayerColor.BLUE, PlayerColor.GREEN, PlayerColor.RED);
-        message = message.withWinners(Set.of(PlayerColor.BLUE), 8);
-
-        GameState myFinalGame = new GameState(players, myDecks, null, myBoard, GameState.Action.END_GAME, message);
-        assertEquals(myFinalGame, myGame);
+        assertEquals(0, state.tileToPlace().id());
     }
 
+    @Test
+    void gameStateWithPlacedTileCorrectlyHandlesOccupantsOfClosedForest() {
+        var state = initialGameState(List.of(1, 37, 0), List.of());
+
+        assert state.tileToPlace().id() == 1;
+        var placedTile1 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile1)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 1_3)); // occupy forest
+
+        System.out.println(state.board().occupants());
+        System.out.println(state.board().forestsClosedByLastTile());
+
+        assert state.tileToPlace().id() == 37;
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        System.out.println(state.board().occupants());
+        System.out.println(state.board().forestsClosedByLastTile());
+        System.out.println(state.freeOccupantsCount(PlayerColor.RED, Occupant.Kind.PAWN));
+        System.out.println(state.board().occupantCount(PlayerColor.RED, Occupant.Kind.PAWN));
+
+        var expectedForestMessage = new MessageBoard.Message(
+                "{RED}|4|0|2",
+                4,
+                Set.of(PlayerColor.RED),
+                Set.of(37, 1));
+        assertEquals(expectedForestMessage, state.messageBoard().messages().getLast());
+        assertEquals(5, state.freeOccupantsCount(PlayerColor.RED, Occupant.Kind.PAWN));
+
+        assertEquals(0, state.tileToPlace().id());
+    }
+
+    @Test
+    void gameStateWithPlacedTileCorrectlyHandlesOccupantsOfForestWithManyOfThem() {
+        var state = initialGameState(List.of(1, 42, 47, 28, 58, 0), List.of());
+
+        var t1 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1,0));
+        state = state
+                .withPlacedTile(t1)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 1_3));
+
+        var t42 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1,1));
+        state = state
+                .withPlacedTile(t42)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 42_1));
+
+        var t47 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.RIGHT, new Pos(1,0));
+        state = state
+                .withPlacedTile(t47)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 47_3));
+
+        var t28 = new PlacedTile(state.tileToPlace(), PlayerColor.YELLOW, Rotation.RIGHT, new Pos(1,1));
+        state = state
+                .withPlacedTile(t28)
+                .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 28_3));
+
+        var t58 = new PlacedTile(state.tileToPlace(), PlayerColor.PURPLE, Rotation.NONE, new Pos(0,1));
+        state = state
+                .withPlacedTile(t58)
+                .withNewOccupant(null);
+
+        var expectedForestMessage = new MessageBoard.Message(
+                "{RED,GREEN,YELLOW}|12|0|6",
+                12,
+                Set.of(PlayerColor.RED, PlayerColor.GREEN, PlayerColor.YELLOW),
+                Set.of(42, 56, 58, 47, 1, 28));
+
+        assertTrue(state.messageBoard().messages().contains(expectedForestMessage));
+        for (PlayerColor playerColor : PlayerColor.values()) {
+            var expectedFreePawns = playerColor == PlayerColor.BLUE ? 4 : 5;
+            assertEquals(expectedFreePawns, state.freeOccupantsCount(playerColor, Occupant.Kind.PAWN));
+        }
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWhenClosingForestWithMenhir() {
+        var state = initialGameState(List.of(37, 41, 0), List.of());
+        var topMenhirTile = state.tileDecks().topTile(Tile.Kind.MENHIR);
+
+        assert state.tileToPlace().id() == 37;
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(1, 0));
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(null);
+
+        assertEquals(Action.PLACE_TILE, state.nextAction());
+        assertEquals(topMenhirTile, state.tileToPlace());
+        assertEquals(PlayerColor.BLUE, state.currentPlayer());
+        assertEquals(1, state.messageBoard().messages().size());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWhenPlacingShamanButNoOccupantCanBeRetaken() {
+        var state = initialGameState(List.of(37, 41, 0), List.of(88));
+
+        assert state.tileToPlace().id() == 37;
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(1, 0));
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(null);
+
+        assertEquals(88, state.tileToPlace().id()); // Shaman tile
+        var placedTile88 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 0));
+        state = state.withPlacedTile(placedTile88);
+
+        assertEquals(Action.OCCUPY_TILE, state.nextAction());
+        assertEquals(PlayerColor.BLUE, state.currentPlayer());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWhenPlacingShamanAndOccupantCanBeRetaken() {
+        var state = initialGameState(List.of(37, 41, 0), List.of(88));
+
+        assert state.tileToPlace().id() == 37;
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(1, 0));
+        var occupant = new Occupant(Occupant.Kind.PAWN, 41_0);
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(occupant);
+
+        assertEquals(88, state.tileToPlace().id()); // Shaman tile
+        var placedTile88 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 0));
+        state = state.withPlacedTile(placedTile88);
+
+        assertEquals(Action.RETAKE_PAWN, state.nextAction());
+        assertEquals(PlayerColor.BLUE, state.currentPlayer());
+        assertEquals(4, state.freeOccupantsCount(PlayerColor.BLUE, Occupant.Kind.PAWN));
+
+        // First possible future: player retakes a pawn
+        var state1 = state.withOccupantRemoved(occupant);
+        assertEquals(5, state1.freeOccupantsCount(PlayerColor.BLUE, Occupant.Kind.PAWN));
+
+        // Second possible future: player does not retake a pawn
+        var state2 = state.withOccupantRemoved(null);
+        assertEquals(4, state2.freeOccupantsCount(PlayerColor.BLUE, Occupant.Kind.PAWN));
+    }
+
+    @Test
+    void gameStateWithOccupantRemovedAllowsShamanToRetakeOccupant() {
+        var state = initialGameState(List.of(37, 41, 0), List.of(88));
+
+        assert state.tileToPlace().id() == 37;
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(1, 0));
+        var occupant41 = new Occupant(Occupant.Kind.PAWN, 41_0);
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(occupant41);
+
+        assertEquals(88, state.tileToPlace().id()); // Shaman tile
+        var placedTile88 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile88)
+                .withOccupantRemoved(occupant41);
+
+        assertEquals(Action.OCCUPY_TILE, state.nextAction());
+        assertEquals(5, state.freeOccupantsCount(PlayerColor.BLUE, Occupant.Kind.PAWN));
+        assertEquals(PlayerColor.BLUE, state.currentPlayer());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWithLogboat() {
+        var state = initialGameState(List.of(5, 37, 41), List.of(93));
+
+        assert state.tileToPlace().id() == 5;
+        var placedTile5 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile5)
+                .withNewOccupant(null);
+
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(1, 0));
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(null);
+
+        assertEquals(93, state.tileToPlace().id());
+        var placedTile93 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(-2, 0));
+        state = state.withPlacedTile(placedTile93)
+                .withNewOccupant(null);
+
+        var expectedLogboatMessage = new MessageBoard.Message("GREEN|6|3", 6, Set.of(PlayerColor.GREEN), Set.of(56, 5, 93));
+        assertEquals(expectedLogboatMessage, state.messageBoard().messages().getLast());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWithHuntingTrap() {
+        var state = initialGameState(List.of(8, 37, 41), List.of(94));
+
+        assert state.tileToPlace().id() == 8;
+        var placedTile8 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile8)
+                .withNewOccupant(null);
+
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(1, 0));
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(null);
+
+        assertEquals(94, state.tileToPlace().id());
+        var placedTile94 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(0, -1));
+        state = state.withPlacedTile(placedTile94)
+                .withNewOccupant(null);
+
+        var expectedHuntingTrapMessage = new MessageBoard.Message(
+                "GREEN|3|0×MAMMOTH/1×AUROCHS/1×DEER/0×TIGER",
+                3,
+                Set.of(PlayerColor.GREEN),
+                Set.of(56, 94, 8));
+        assertEquals(expectedHuntingTrapMessage, state.messageBoard().messages().getLast());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksWithNonImmediateSpecialPower() {
+        var state = initialGameState(List.of(5, 37, 41, 0), List.of(92));
+
+        assert state.tileToPlace().id() == 5;
+        var placedTile5 = new PlacedTile(state.tileToPlace(), PlayerColor.RED, Rotation.NONE, new Pos(-1, 0));
+        state = state
+                .withPlacedTile(placedTile5)
+                .withNewOccupant(null);
+
+        var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(0, 1));
+        state = state
+                .withPlacedTile(placedTile37)
+                .withNewOccupant(null);
+
+        assertEquals(41, state.tileToPlace().id());
+        var placedTile41 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(1, 0));
+        state = state
+                .withPlacedTile(placedTile41)
+                .withNewOccupant(null);
+
+        assertEquals(92, state.tileToPlace().id());
+        var placedTile92 = new PlacedTile(state.tileToPlace(), PlayerColor.GREEN, Rotation.NONE, new Pos(0, -1));
+        state = state.withPlacedTile(placedTile92)
+                .withNewOccupant(null);
+
+        assertEquals(Action.PLACE_TILE, state.nextAction());
+        assertEquals(PlayerColor.YELLOW, state.currentPlayer());
+        assertEquals(0, state.tileToPlace().id());
+    }
+
+    @Test
+    void gameStateLastTilePotentialOccupantsWorksWhenPlayerIsOutOfPawns() {
+        var positions = Map.ofEntries(
+                Map.entry(34, new Pos(-3, -1)),
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(61, new Pos(0, -1)),
+                Map.entry(62, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(3, new Pos(-2, 1)),
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)));
+
+        var occupants = Map.of(
+                55, new Occupant(Occupant.Kind.PAWN, 55_0), // gatherer (BLUE)
+                18, new Occupant(Occupant.Kind.PAWN, 18_2), // hunter (BLUE)
+                1, new Occupant(Occupant.Kind.PAWN, 1_3), // gatherer (BLUE)
+                67, new Occupant(Occupant.Kind.PAWN, 67_0), // gatherer (BLUE)
+                3, new Occupant(Occupant.Kind.PAWN, 3_0) // hunter (BLUE)
+        );
+
+        var normalTilesIds = List.of(61, 55, 51, 18, 62, 1, 34, 67, 31, 3, 49, 48);
+        var state = initialGameState(List.of(PlayerColor.RED, PlayerColor.BLUE), normalTilesIds, List.of());
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            return new PlacedTile(t, playersIt.next(), Rotation.NONE, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state
+                    .withPlacedTile(placedTile)
+                    .withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        assertEquals(48, state.tileToPlace().id());
+        state = state.withPlacedTile(new PlacedTile(state.tileToPlace(), playersIt.next(), Rotation.NONE, new Pos(-4, 1)));
+        assertEquals(Set.of(new Occupant(Occupant.Kind.HUT, 48_1)), state.lastTilePotentialOccupants());
+    }
+
+    @Test
+    void gameStateLastTilePotentialOccupantsWorksWhenPlayerIsOutOfHuts() {
+        var positions = Map.ofEntries(
+                Map.entry(34, new Pos(-3, -1)),
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(61, new Pos(0, -1)),
+                Map.entry(62, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(3, new Pos(-2, 1)),
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)));
+
+        var occupants = Map.of(
+                55, new Occupant(Occupant.Kind.HUT, 55_3), // fisher's hut (BLUE)
+                18, new Occupant(Occupant.Kind.HUT, 18_1), // fisher's hut (BLUE)
+                 1, new Occupant(Occupant.Kind.HUT, 1_8) // fisher's hut (BLUE)
+        );
+
+        var normalTilesIds = List.of(61, 55, 51, 18, 62, 1, 34, 67, 31, 3, 49, 0);
+        var state = initialGameState(List.of(PlayerColor.RED, PlayerColor.BLUE), normalTilesIds, List.of());
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            return new PlacedTile(t, playersIt.next(), Rotation.NONE, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state
+                    .withPlacedTile(placedTile)
+                    .withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        assertEquals(0, state.tileToPlace().id());
+        state = state.withPlacedTile(new PlacedTile(state.tileToPlace(), playersIt.next(), Rotation.NONE, new Pos(-1, -2)));
+        var expectedOccupants = Set.of(
+                new Occupant(Occupant.Kind.PAWN, 0),
+                new Occupant(Occupant.Kind.PAWN, 1),
+                new Occupant(Occupant.Kind.PAWN, 2),
+                new Occupant(Occupant.Kind.PAWN, 3),
+                new Occupant(Occupant.Kind.PAWN, 4));
+        assertEquals(expectedOccupants, state.lastTilePotentialOccupants());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksAtEndOfGame() {
+        var positions = Map.ofEntries(
+                Map.entry(34, new Pos(-3, -1)),
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(61, new Pos(0, -1)),
+                Map.entry(62, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(3, new Pos(-2, 1)),
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)));
+
+        var occupants = Map.of(
+                61, new Occupant(Occupant.Kind.PAWN, 61_0), // hunter (RED)
+                55, new Occupant(Occupant.Kind.PAWN, 55_3), // fisher (BLUE)
+                51, new Occupant(Occupant.Kind.PAWN, 51_1), // fisher (GREEN)
+                18, new Occupant(Occupant.Kind.PAWN, 18_2), // hunter (YELLOW)
+                 1, new Occupant(Occupant.Kind.HUT, 1_8), // fisher's hut (RED)
+                34, new Occupant(Occupant.Kind.PAWN, 34_1), // hunter (BLUE)
+                 3, new Occupant(Occupant.Kind.PAWN, 3_5), // fisher (PURPLE)
+                49, new Occupant(Occupant.Kind.PAWN, 49_2) // hunter (RED)
+        );
+
+        var unoccupyableTiles = Set.of(62);
+
+        var normalTilesIds = List.of(61, 55, 51, 18, 62, 1, 34, 67, 31, 3, 49);
+        var state = initialGameState(normalTilesIds, List.of());
+
+        state = truncateDeck(state, Tile.Kind.NORMAL, normalTilesIds.size() - 1);
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            return new PlacedTile(t, playersIt.next(), Rotation.NONE, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state.withPlacedTile(placedTile);
+            if (!unoccupyableTiles.contains(placedTile.id()))
+                state = state.withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        var expectedPoints = Map.of(
+                PlayerColor.RED, 13,
+                PlayerColor.BLUE, 12,
+                PlayerColor.GREEN, 6,
+                PlayerColor.YELLOW, 1,
+                PlayerColor.PURPLE, 6);
+
+        var actualPoints = new HashMap<>(state.messageBoard().points());
+        actualPoints.values().removeIf(v -> v == 0);
+
+        assertEquals(Action.END_GAME, state.nextAction());
+        assertEquals(expectedPoints, actualPoints);
+        assertEquals("{RED}|13", state.messageBoard().messages().getLast().text());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksAtEndOfGameWithFire() {
+        var positions = Map.ofEntries(
+                Map.entry(34, new Pos(-3, -1)),
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(85, new Pos(0, -1)), // WILD_FIRE
+                Map.entry(62, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(3, new Pos(-2, 1)),
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)),
+                Map.entry(36, new Pos(-1, -2)));
+
+        var occupants = Map.of(
+                51, new Occupant(Occupant.Kind.PAWN, 51_0) // hunter (BLUE)
+        );
+
+        var unoccupyableTiles = Set.of(62, 85);
+
+        var normalTilesIds = List.of(55, 51, 18, 62, 1, 34, 67, 31, 36, 3, 49);
+        var state = initialGameState(normalTilesIds, List.of(85));
+
+        state = truncateDeck(state, Tile.Kind.NORMAL, normalTilesIds.size() - 1);
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            var placer = switch (t.kind()) {
+                case NORMAL -> playersIt.next();
+                case MENHIR -> s.board().lastPlacedTile().placer();
+                default -> throw new Error();
+            };
+            return new PlacedTile(t, placer, Rotation.NONE, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state.withPlacedTile(placedTile);
+            if (!unoccupyableTiles.contains(placedTile.id()))
+                state = state.withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        var expectedPoints = Map.of(PlayerColor.BLUE, 7);
+
+        var actualPoints = new HashMap<>(state.messageBoard().points());
+        actualPoints.values().removeIf(v -> v == 0);
+
+        assertEquals(expectedPoints, actualPoints);
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksAtEndOfGameWithPitTrap() {
+        var positions = Map.ofEntries(
+                Map.entry(92, new Pos(-3, -1)), // PIT_TRAP
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(62, new Pos(0, -1)),
+                Map.entry(34, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(3, new Pos(-2, 1)),
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)),
+                Map.entry(36, new Pos(-1, -2)));
+
+        var rotations = Map.of(92, Rotation.LEFT);
+
+        var occupants = Map.of(
+                62, new Occupant(Occupant.Kind.PAWN, 62_0) // hunter (RED)
+        );
+
+        var normalTilesIds = List.of(62, 55, 51, 18, 34, 1, 67, 31, 3, 49, 36);
+        var state = initialGameState(normalTilesIds, List.of(92));
+
+        state = truncateDeck(state, Tile.Kind.NORMAL, normalTilesIds.size() - 1);
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            var r = rotations.getOrDefault(t.id(), Rotation.NONE);
+            return new PlacedTile(t, playersIt.next(), r, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state.withPlacedTile(placedTile)
+                    .withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        var expectedPoints = Map.of(PlayerColor.RED, 6);
+
+        var actualPoints = new HashMap<>(state.messageBoard().points());
+        actualPoints.values().removeIf(v -> v == 0);
+
+        assertEquals(Action.END_GAME, state.nextAction());
+        assertEquals(expectedPoints, actualPoints);
+        assertEquals("{RED}|6", state.messageBoard().messages().getLast().text());
+    }
+
+    @Test
+    void gameStateWithPlacedTileWorksAtEndOfGameWithRaft() {
+        var positions = Map.ofEntries(
+                Map.entry(34, new Pos(-3, -1)),
+                Map.entry(67, new Pos(-2, -1)),
+                Map.entry(31, new Pos(-1, -1)),
+                Map.entry(61, new Pos(0, -1)),
+                Map.entry(62, new Pos(-3, 0)),
+                Map.entry(18, new Pos(-2, 0)),
+                Map.entry(51, new Pos(-1, 0)),
+                Map.entry(1, new Pos(-3, 1)),
+                Map.entry(91, new Pos(-2, 1)), // RAFT
+                Map.entry(49, new Pos(-1, 1)),
+                Map.entry(55, new Pos(0, 1)),
+                Map.entry(36, new Pos(-1, -2)));
+
+        var occupants = Map.of(
+                51, new Occupant(Occupant.Kind.HUT, 51_1) // fisher's hut (GREEN)
+        );
+
+        var normalTilesIds = List.of(61, 55, 51, 18, 62, 1, 34, 67, 31, 49, 36);
+        var state = initialGameState(normalTilesIds, List.of(91));
+
+        state = truncateDeck(state, Tile.Kind.NORMAL, normalTilesIds.size() - 1);
+
+        var players = state.players();
+        var playersIt = Stream.generate(() -> players)
+                .flatMap(Collection::stream)
+                .iterator();
+
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> {
+            var t = s.tileToPlace();
+            return new PlacedTile(t, playersIt.next(), Rotation.NONE, positions.get(t.id()));
+        };
+
+        // Place all tiles
+        for (int i = 0; i < positions.size(); i += 1) {
+            var placedTile = nextPlacedTile.apply(state);
+            state = state
+                    .withPlacedTile(placedTile)
+                    .withNewOccupant(occupants.get(placedTile.id()));
+        }
+
+        var expectedPoints = Map.of(PlayerColor.GREEN, 8);
+
+        var actualPoints = new HashMap<>(state.messageBoard().points());
+        actualPoints.values().removeIf(v -> v == 0);
+
+        assertEquals(Action.END_GAME, state.nextAction());
+        assertEquals(expectedPoints, actualPoints);
+        assertEquals("{GREEN}|8", state.messageBoard().messages().getLast().text());
+    }
+
+    private static GameState initialGameState(List<Integer> firstNormalTiles, List<Integer> firstMenhirTiles) {
+        return initialGameState(List.of(PlayerColor.values()), firstNormalTiles, firstMenhirTiles);
+    }
+
+    private static GameState initialGameState(List<PlayerColor> players,
+                                              List<Integer> firstNormalTiles,
+                                              List<Integer> firstMenhirTiles) {
+        var tileDecks = tileDecks(firstNormalTiles, firstMenhirTiles);
+
+        var startingTile = tileDecks.topTile(Tile.Kind.START);
+        var firstTileToPlace = tileDecks.topTile(Tile.Kind.NORMAL);
+        var tileDecks1 = tileDecks
+                .withTopTileDrawn(Tile.Kind.START)
+                .withTopTileDrawn(Tile.Kind.NORMAL);
+        var placedStartingTile = new PlacedTile(startingTile, null, Rotation.NONE, Pos.ORIGIN);
+        var board = Board.EMPTY.withNewTile(placedStartingTile);
+        var messageBoard = new MessageBoard(new BasicTextMaker(), List.of());
+        return new GameState(players, tileDecks1, firstTileToPlace, board, Action.PLACE_TILE, messageBoard);
+    }
+
+    private static GameState truncateDeck(GameState state, Tile.Kind deckKind, int deckSize) {
+        var decks1 = switch (state.tileDecks()) {
+            case TileDecks(List<Tile> s, List<Tile> n, List<Tile> m) when deckKind == Tile.Kind.NORMAL ->
+                    new TileDecks(s, n.subList(0, deckSize), m);
+            case TileDecks(List<Tile> s, List<Tile> n, List<Tile> m) when deckKind == Tile.Kind.MENHIR ->
+                    new TileDecks(s, n, m.subList(0, deckSize));
+            default -> throw new Error("cannot truncate that deck");
+        };
+        return new GameState(
+                state.players(),
+                decks1,
+                state.tileToPlace(),
+                state.board(),
+                state.nextAction(),
+                state.messageBoard());
+    }
+
+    private static TileDecks shuffledTileDecks() {
+        return shuffledTileDecks(2024);
+    }
+
+    private static TileDecks shuffledTileDecks(long shufflingSeed) {
+        var tileDecks = tileDecks(List.of(), List.of());
+        var random = new Random(shufflingSeed);
+
+        var shuffledNormalTiles = new ArrayList<>(tileDecks.normalTiles());
+        Collections.shuffle(shuffledNormalTiles, random);
+
+        var shuffledMenhirTiles = new ArrayList<>(tileDecks.menhirTiles());
+        Collections.shuffle(shuffledMenhirTiles, random);
+
+        return new TileDecks(
+                tileDecks.startTiles(),
+                List.copyOf(shuffledNormalTiles),
+                List.copyOf(shuffledMenhirTiles));
+    }
+
+    private static TileDecks tileDecks(List<Integer> firstNormalTiles, List<Integer> firstMenhirTiles) {
+        var partitionedTiles = allTiles().stream()
+                .collect(Collectors.groupingBy(Tile::kind));
+
+        var normalTiles = moveTilesToFront(partitionedTiles.get(Tile.Kind.NORMAL), firstNormalTiles);
+        var menhirTiles = moveTilesToFront(partitionedTiles.get(Tile.Kind.MENHIR), firstMenhirTiles);
+
+        return new TileDecks(
+                List.copyOf(partitionedTiles.get(Tile.Kind.START)),
+                List.copyOf(normalTiles),
+                List.copyOf(menhirTiles));
+    }
+
+    private static List<Tile> moveTilesToFront(List<Tile> tiles, List<Integer> tileIds) {
+        var reorderedTiles = new ArrayList<Tile>(Collections.nCopies(tileIds.size(), null));
+        for (var t : tiles) {
+            var i = tileIds.indexOf(t.id());
+            if (i == -1)
+                reorderedTiles.add(t);
+            else {
+                var oldTile = reorderedTiles.set(i, t);
+                assert oldTile == null;
+            }
+        }
+        return List.copyOf(reorderedTiles);
+    }
+
+    private static class BasicTextMaker implements TextMaker {
+        private static String scorers(Set<PlayerColor> scorers) {
+            return scorers.stream()
+                    .sorted()
+                    .map(Object::toString)
+                    .collect(Collectors.joining(",", "{", "}"));
+        }
+
+        private static String animals(Map<Animal.Kind, Integer> animals) {
+            return Arrays.stream(Animal.Kind.values())
+                    .map(k -> animals.getOrDefault(k, 0) + "×" + k)
+                    .collect(Collectors.joining("/"));
+        }
+
+        @Override
+        public String playerName(PlayerColor playerColor) {
+            return playerColor.name();
+        }
+
+        @Override
+        public String points(int points) {
+            return String.valueOf(points);
+        }
+
+        @Override
+        public String playerClosedForestWithMenhir(PlayerColor player) {
+            return playerName(player);
+        }
+
+        @Override
+        public String playersScoredForest(Set<PlayerColor> scorers,
+                                          int points,
+                                          int mushroomGroupCount,
+                                          int tileCount) {
+            return String.join("|",
+                    scorers(scorers),
+                    points(points),
+                    String.valueOf(mushroomGroupCount),
+                    String.valueOf(tileCount));
+        }
+
+        @Override
+        public String playersScoredRiver(Set<PlayerColor> scorers,
+                                         int points,
+                                         int fishCount,
+                                         int tileCount) {
+            return String.join("|",
+                    scorers(scorers),
+                    points(points),
+                    String.valueOf(fishCount),
+                    String.valueOf(tileCount));
+        }
+
+        @Override
+        public String playerScoredHuntingTrap(PlayerColor scorer,
+                                              int points,
+                                              Map<Animal.Kind, Integer> animals) {
+            return String.join("|",
+                    playerName(scorer),
+                    String.valueOf(points),
+                    animals(animals));
+        }
+
+        @Override
+        public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
+            return String.join("|",
+                    playerName(scorer),
+                    points(points),
+                    String.valueOf(lakeCount));
+        }
+
+        @Override
+        public String playersScoredMeadow(Set<PlayerColor> scorers,
+                                          int points,
+                                          Map<Animal.Kind, Integer> animals) {
+            return String.join(
+                    "|",
+                    scorers(scorers),
+                    points(points),
+                    animals(animals));
+        }
+
+        @Override
+        public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
+            return String.join(
+                    "|",
+                    scorers(scorers),
+                    points(points),
+                    String.valueOf(fishCount));
+        }
+
+        @Override
+        public String playersScoredPitTrap(Set<PlayerColor> scorers,
+                                           int points,
+                                           Map<Animal.Kind, Integer> animals) {
+            return String.join("|",
+                    scorers(scorers),
+                    String.valueOf(points),
+                    animals(animals));
+        }
+
+        @Override
+        public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
+            return String.join("|",
+                    scorers(scorers),
+                    String.valueOf(points),
+                    String.valueOf(lakeCount));
+        }
+
+        @Override
+        public String playersWon(Set<PlayerColor> winners, int points) {
+            return String.join("|",
+                    scorers(winners),
+                    points(points));
+        }
+
+        @Override
+        public String clickToOccupy() {
+            return "clickToOccupy";
+        }
+
+        @Override
+        public String clickToUnoccupy() {
+            return "clickToUnoccupy";
+        }
+    }
+
+    //<editor-fold desc="Tiles">
     private static List<Tile> allTiles() {
         ArrayList<Tile> tiles = new ArrayList<>();
         {   // Tile 0
@@ -1920,7 +2144,7 @@ class MyGameStateTest {
             tiles.add(new Tile(92, Tile.Kind.MENHIR, sN, sE, sS, sW));
         }
         {   // Tile 93
-            var l1 = new Zone.Lake(93_8, 1, LOGBOAT);
+            var l1 = new Zone.Lake(93_8, 1, Zone.SpecialPower.LOGBOAT);
             var z0 = new Zone.Meadow(93_0, List.of(), null);
             var z1 = new Zone.River(93_1, 0, l1);
             var z2 = new Zone.Meadow(93_2, List.of(), null);
@@ -1945,131 +2169,5 @@ class MyGameStateTest {
         tiles.trimToSize();
         return Collections.unmodifiableList(tiles);
     }
-
-    class BasicTextMaker implements TextMaker {
-        private static String scorers(Set<PlayerColor> scorers) {
-            return scorers.stream()
-                    .sorted()
-                    .map(Object::toString)
-                    .collect(Collectors.joining(",", "{", "}"));
-        }
-
-        private static String animals(Map<Animal.Kind, Integer> animals) {
-            return Arrays.stream(Animal.Kind.values())
-                    .map(k -> animals.getOrDefault(k, 0) + "×" + k)
-                    .collect(Collectors.joining("/"));
-        }
-
-        @Override
-        public String playerName(PlayerColor playerColor) {
-            return playerColor.name();
-        }
-
-        @Override
-        public String points(int points) {
-            return String.valueOf(points);
-        }
-
-        @Override
-        public String playerClosedForestWithMenhir(PlayerColor player) {
-            return playerName(player);
-        }
-
-        @Override
-        public String playersScoredForest(Set<PlayerColor> scorers,
-                                          int points,
-                                          int mushroomGroupCount,
-                                          int tileCount) {
-            return String.join("|",
-                    scorers(scorers),
-                    points(points),
-                    String.valueOf(mushroomGroupCount),
-                    String.valueOf(tileCount));
-        }
-
-        @Override
-        public String playersScoredRiver(Set<PlayerColor> scorers,
-                                         int points,
-                                         int fishCount,
-                                         int tileCount) {
-            return String.join("|",
-                    scorers(scorers),
-                    points(points),
-                    String.valueOf(fishCount),
-                    String.valueOf(tileCount));
-        }
-
-        @Override
-        public String playerScoredHuntingTrap(PlayerColor scorer,
-                                              int points,
-                                              Map<Animal.Kind, Integer> animals) {
-            return String.join("|",
-                    playerName(scorer),
-                    String.valueOf(points),
-                    animals(animals));
-        }
-
-        @Override
-        public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
-            return String.join("|",
-                    playerName(scorer),
-                    points(points),
-                    String.valueOf(lakeCount));
-        }
-
-        @Override
-        public String playersScoredMeadow(Set<PlayerColor> scorers,
-                                          int points,
-                                          Map<Animal.Kind, Integer> animals) {
-            return String.join(
-                    "|",
-                    scorers(scorers),
-                    points(points),
-                    animals(animals));
-        }
-
-        @Override
-        public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
-            return String.join(
-                    "|",
-                    scorers(scorers),
-                    points(points),
-                    String.valueOf(fishCount));
-        }
-
-        @Override
-        public String playersScoredPitTrap(Set<PlayerColor> scorers,
-                                           int points,
-                                           Map<Animal.Kind, Integer> animals) {
-            return String.join("|",
-                    scorers(scorers),
-                    String.valueOf(points),
-                    animals(animals));
-        }
-
-        @Override
-        public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
-            return String.join("|",
-                    scorers(scorers),
-                    String.valueOf(points),
-                    String.valueOf(lakeCount));
-        }
-
-        @Override
-        public String playersWon(Set<PlayerColor> winners, int points) {
-            return String.join("|",
-                    scorers(winners),
-                    points(points));
-        }
-
-        @Override
-        public String clickToOccupy() {
-            return "clickToOccupy";
-        }
-
-        @Override
-        public String clickToUnoccupy() {
-            return "clickToUnoccupy";
-        }
-    }
+    //</editor-fold>
 }

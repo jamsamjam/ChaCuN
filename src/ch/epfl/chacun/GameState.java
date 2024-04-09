@@ -2,8 +2,10 @@ package ch.epfl.chacun;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ch.epfl.chacun.Area.hasMenhir;
+import static ch.epfl.chacun.Occupant.Kind.*;
 import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 import static ch.epfl.chacun.Tile.Kind.*;
@@ -36,7 +38,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState {
         players = List.copyOf(players);
         checkArgument(players.size() >= 2);
-        checkArgument(tileToPlace == null ^ nextAction == Action.PLACE_TILE); // TODO check XOR
+        checkArgument(tileToPlace == null ^ nextAction == Action.PLACE_TILE);
         Objects.requireNonNull(tileDecks);
         Objects.requireNonNull(board);
         Objects.requireNonNull(nextAction);
@@ -54,7 +56,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return the initial game state
      */
     public static GameState initial(List<PlayerColor> players, TileDecks tileDecks, TextMaker textMaker) {
-        return new GameState(players, tileDecks, null, Board.EMPTY, Action.START_GAME,
+        return new GameState(players,
+                tileDecks,
+                null,
+                Board.EMPTY,
+                Action.START_GAME,
                 new MessageBoard(textMaker, List.of()));
     }
 
@@ -92,17 +98,16 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @throws IllegalArgumentException if the board is empty
      */
     public Set<Occupant> lastTilePotentialOccupants() {
-        // TODO board vs. board() vs. myBoard = ..
         checkArgument(board.lastPlacedTile() != null);
         Set<Occupant> occupants = new HashSet<>();
 
-        for (var o : board.lastPlacedTile().potentialOccupants()) {
-            if (freeOccupantsCount(currentPlayer(), o.kind()) >= 1) {
-                switch (board().lastPlacedTile().zoneWithId(o.zoneId())) {
-                    case Zone.Forest f -> { if (!board().forestArea(f).isOccupied()) occupants.add(o); }
-                    case Zone.Meadow m -> { if (!board().meadowArea(m).isOccupied()) occupants.add(o); }
-                    case Zone.River r -> { if (!board().riverArea(r).isOccupied()) occupants.add(o); }
-                    case Zone.Water l -> { if (!board().riverSystemArea(l).isOccupied()) occupants.add(o); }
+        for (var occ : board.lastPlacedTile().potentialOccupants()) {
+            if (freeOccupantsCount(currentPlayer(), occ.kind()) >= 1) {
+                switch (board.lastPlacedTile().zoneWithId(occ.zoneId())) {
+                    case Zone.Forest f -> { if (!board.forestArea(f).isOccupied()) occupants.add(occ); }
+                    case Zone.Meadow m -> { if (!board.meadowArea(m).isOccupied()) occupants.add(occ); }
+                    case Zone.River r -> { if (!board.riverArea(r).isOccupied()) occupants.add(occ); }
+                    case Zone.Water l -> { if (!board.riverSystemArea(l).isOccupied()) occupants.add(occ); }
                 }
             }
         }
@@ -120,11 +125,19 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withStartingTilePlaced() {
         checkArgument(nextAction() == Action.START_GAME);
 
-        return new GameState(players(), tileDecks().withTopTileDrawn(START).withTopTileDrawn(NORMAL),
-                tileDecks().topTile(NORMAL),
-                board().withNewTile(new PlacedTile(tileDecks().topTile(START), null,
-                        Rotation.NONE, Pos.ORIGIN, null)),
-                Action.PLACE_TILE, messageBoard());
+        PlacedTile myTile = new PlacedTile(tileDecks().topTile(START),
+                null,
+                Rotation.NONE,
+                Pos.ORIGIN,
+                null);
+        Board myBoard = board.withNewTile(myTile);
+
+        return new GameState(players,
+                tileDecks.withTopTileDrawn(START).withTopTileDrawn(NORMAL),
+                tileDecks.topTile(NORMAL),
+                myBoard,
+                Action.PLACE_TILE,
+                messageBoard);
     }
 
     /**
@@ -141,9 +154,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         checkArgument(nextAction() == Action.PLACE_TILE);
         checkArgument(tile.occupant() == null);
 
-        Board myBoard = board().withNewTile(tile);
+        Board myBoard = board.withNewTile(tile);
         Action myNextAction = Action.OCCUPY_TILE;
-        MessageBoard myMessageBoard = messageBoard();
+        MessageBoard myMessageBoard = messageBoard;
 
         if (tile.kind() == MENHIR && tile.specialPowerZone() != null) {
             Zone myZone = tile.specialPowerZone();
@@ -152,7 +165,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 case LOGBOAT ->
                         myMessageBoard = myMessageBoard.withScoredLogboat(currentPlayer(), myBoard.riverSystemArea((Zone.Water) myZone));
 
-                case HUNTING_TRAP -> { // TODO
+                case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) myZone);
 
                     int tiger = (int) Area.animals(adjacentMeadow, Set.of()).stream()
@@ -166,13 +179,20 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     myBoard = myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
                 }
 
-                case SHAMAN -> myNextAction = Action.RETAKE_PAWN;
+                case SHAMAN -> {
+                    if (myBoard.occupantCount(currentPlayer(), PAWN) > 0)
+                        myNextAction = Action.RETAKE_PAWN;
+                }
 
-                case null, default -> {} // TODO null needed ?
+                default -> {} // TODO null ?
             }
         }
-        return new GameState(players(), tileDecks(), null,
-                myBoard, myNextAction, myMessageBoard).withTurnFinishedIfOccupationImpossible();
+        return new GameState(players,
+                tileDecks,
+                null,
+                myBoard,
+                myNextAction,
+                myMessageBoard).withTurnFinishedIfOccupationImpossible();
     }
 
     /**
@@ -186,12 +206,13 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      */
     public GameState withOccupantRemoved(Occupant occupant) {
         checkArgument(nextAction() == Action.RETAKE_PAWN);
-        checkArgument (occupant == null || occupant.kind() == Occupant.Kind.PAWN);
+        checkArgument (occupant == null || occupant.kind() == PAWN);
 
-        // TODO need to check that the player has Pawns on the board and go to OccupyTile if not
-
-        return new GameState(players(), tileDecks(), null,
-                occupant != null ? board().withoutOccupant(occupant) : board(), Action.OCCUPY_TILE,
+        return new GameState(players,
+                tileDecks,
+                null,
+                occupant != null ? board().withoutOccupant(occupant) : board(),
+                Action.OCCUPY_TILE,
                 messageBoard()).withTurnFinishedIfOccupationImpossible();
     }
 
@@ -205,9 +226,12 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     public GameState withNewOccupant(Occupant occupant) {
         checkArgument(nextAction() == Action.OCCUPY_TILE);
 
-        return new GameState(players(), tileDecks(), null,
-                occupant != null ? board().withOccupant(occupant) : board(), nextAction(),
-                messageBoard()).withTurnFinished();
+        return new GameState(players,
+                tileDecks,
+                null,
+                occupant != null ? board().withOccupant(occupant) : board(),
+                nextAction,
+                messageBoard).withTurnFinished();
     }
 
     /**
@@ -222,8 +246,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
     private GameState withTurnFinished() {
         List<PlayerColor> myPlayers = new ArrayList<>(players());
         Board myBoard = board();
-        TileDecks myTileDecks = tileDecks();
-        MessageBoard myMessageBoard = messageBoard();
+        TileDecks myTileDecks = tileDecks;
+        MessageBoard myMessageBoard = messageBoard;
+        boolean canPlay2ndTurn = false;
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
@@ -231,16 +256,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             if (hasMenhir(forest)) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
 
-                if (board().lastPlacedTile().tile().kind() == NORMAL) {
+                if (myBoard.lastPlacedTile().tile().kind() == NORMAL) {
                     myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
-                    if (myTileDecks.topTile(MENHIR) != null) {
-                        // 2nd turn
-                        myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
-
-                        return new GameState(myPlayers, myTileDecks.withTopTileDrawn(MENHIR),
-                                tileDecks().topTile(MENHIR), myBoard, Action.PLACE_TILE, myMessageBoard);
-                    }
+                    if (myTileDecks.topTile(MENHIR) != null)
+                        canPlay2ndTurn = true;
                 }
             }
         }
@@ -249,18 +269,36 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             myMessageBoard = myMessageBoard.withScoredRiver(river);
         }
 
-        Collections.rotate(myPlayers, -1);
         myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
+
+        if (canPlay2ndTurn) {
+            return new GameState(myPlayers,
+                    myTileDecks.withTopTileDrawn(MENHIR),
+                    tileDecks().topTile(MENHIR),
+                    myBoard,
+                    Action.PLACE_TILE,
+                    myMessageBoard);
+        }
+
+        Collections.rotate(myPlayers, -1);
         myTileDecks = myTileDecks.withTopTileDrawnUntil(NORMAL, myBoard::couldPlaceTile);
 
         if (myTileDecks.topTile(NORMAL) == null) {
-            return new GameState(myPlayers, myTileDecks,
-                    null, myBoard, Action.END_GAME, myMessageBoard)
-                    .withFinalPointsCounted(); // TODO
+            return new GameState(myPlayers,
+                    myTileDecks,
+                    null,
+                    myBoard,
+                    Action.END_GAME,
+                    myMessageBoard)
+                    .withFinalPointsCounted();
         }
 
-        return new GameState(myPlayers, myTileDecks.withTopTileDrawn(NORMAL),
-                myTileDecks.topTile(NORMAL), myBoard, Action.PLACE_TILE, myMessageBoard);
+        return new GameState(myPlayers,
+                myTileDecks.withTopTileDrawn(NORMAL),
+                myTileDecks.topTile(NORMAL),
+                myBoard,
+                Action.PLACE_TILE,
+                myMessageBoard);
     }
 
     /**
@@ -270,7 +308,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      */
     private GameState withFinalPointsCounted() {
         Board myBoard = board();
-        MessageBoard myMessageBoard = messageBoard();
+        MessageBoard myMessageBoard = messageBoard;
 
         for (var meadow : myBoard.meadowAreas()) {
             Set<Animal> cancelledAnimal = new HashSet<>(myBoard.cancelledAnimals());
@@ -283,22 +321,37 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             }
 
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
+                // TODO https://edstem.org/eu/courses/1101/discussion/99542
+
+                /*Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos(), (Zone.Meadow) meadow.zoneWithSpecialPower(PIT_TRAP));
+
+                Set<Integer> nearTileIds = new HashSet<>();
+                Pos myPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
+
+                for (int i = -1; i <= 1; i++) {
+                    for(int j = -1; j <= 1; j++) {
+                        if (myBoard.tileAt(myPos.translated(i, j)) != null)
+                            nearTileIds.add(myBoard.tileAt(myPos.translated(i, j)).id());
+                    }
+                }*/
+
                 adjDeer = Area.animals(myBoard.adjacentMeadow(myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos(),
                                 (Zone.Meadow) meadow.zoneWithSpecialPower(PIT_TRAP)), Set.of()).stream()
                         .filter(m -> m.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
                 allDeer = Area.animals(meadow, Set.of()).stream()
-                        .filter(m -> m.kind() == Animal.Kind.DEER).collect(Collectors.toSet());
-                allDeer.removeAll(adjDeer);
-                myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, adjDeer);
+                        .filter(m -> m.kind() == Animal.Kind.DEER).sorted().collect(Collectors.toSet());
+//                // TODO boolean false -> true sorted
+
+                myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, allDeer);
             }
 
-            int tiger = (int) Area.animals(meadow, Set.of()).stream()
+            /*int tiger = (int) Area.animals(meadow, Set.of()).stream()
                     .filter(a -> a.kind() == Animal.Kind.TIGER).count();
             // deer that are not within its range must be canceled first
             cancelledAnimal.addAll(allDeer.stream().limit(tiger).collect(Collectors.toSet()));
             if (tiger > allDeer.size()) {
                 cancelledAnimal.addAll(adjDeer.stream().limit(tiger - allDeer.size()).collect(Collectors.toSet()));
-            }
+            }*/
 
             myMessageBoard = myMessageBoard.withScoredMeadow(meadow, cancelledAnimal);
         }
@@ -309,8 +362,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             }
         }
 
-        // TODO
-
         if (myMessageBoard.points().isEmpty()) {
             return new GameState(players(), tileDecks(), null, myBoard, Action.END_GAME,
                     myMessageBoard.withWinners(Set.of(), 0));
@@ -320,18 +371,13 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 Map.Entry.comparingByValue());
         Integer winPoint = maxEntry.getValue();
 
-        /*if (winPoint == null) {
-            return new GameState(players(), tileDecks(), null, myBoard, Action.END_GAME,
-                    myMessageBoard.withWinners(Set.of(), 0));
-        }*/
-
         Set<PlayerColor> winners = myMessageBoard.points().entrySet()
                     .stream()
                     .filter(entry -> Objects.equals(entry.getValue(), winPoint))
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toSet());
 
-        return new GameState(players(), tileDecks(), null, myBoard, Action.END_GAME,
+        return new GameState(players, tileDecks, null, myBoard, Action.END_GAME,
                 myMessageBoard.withWinners(winners, winPoint));
     }
 
