@@ -101,7 +101,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Set<Occupant> occupants = new HashSet<>();
 
         for (var occ : board.lastPlacedTile().potentialOccupants()) {
-            if (freeOccupantsCount(currentPlayer(), occ.kind()) >= 1) {
+            if (freeOccupantsCount(currentPlayer(), occ.kind()) > 0) {
                 switch (board.lastPlacedTile().zoneWithId(occ.zoneId())) {
                     case Zone.Forest f -> {
                         if (!board.forestArea(f).isOccupied()) occupants.add(occ);
@@ -130,7 +130,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @throws IllegalArgumentException if the next action is not START_GAME
      */
     public GameState withStartingTilePlaced() {
-        checkArgument(nextAction() == Action.START_GAME);
+        checkArgument(nextAction == Action.START_GAME);
 
         PlacedTile myTile = new PlacedTile(tileDecks().topTile(START),
                 null,
@@ -158,7 +158,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * is already occupied
      */
     public GameState withPlacedTile(PlacedTile tile) {
-        checkArgument(nextAction() == Action.PLACE_TILE);
+        checkArgument(nextAction == Action.PLACE_TILE);
         checkArgument(tile.occupant() == null);
 
         Board myBoard = board.withNewTile(tile);
@@ -174,10 +174,10 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 case HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), (Zone.Meadow) myZone);
 
-                    int tiger = (int) Area.animals(adjacentMeadow, Set.of()).stream()
+                    int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream()
                             .filter(a -> a.kind() == Animal.Kind.TIGER).count();
                     Set<Animal> deadDear = Area.animals(adjacentMeadow, Set.of()).stream()
-                            .filter(a -> a.kind() == Animal.Kind.DEER).limit(tiger)
+                            .filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount)
                             .collect(Collectors.toSet());
 
                     myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
@@ -216,7 +216,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * occupant is neither null, nor a pawn.
      */
     public GameState withOccupantRemoved(Occupant occupant) {
-        checkArgument(nextAction() == Action.RETAKE_PAWN);
+        checkArgument(nextAction == Action.RETAKE_PAWN);
         checkArgument (occupant == null || occupant.kind() == PAWN);
 
         return new GameState(players,
@@ -234,8 +234,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @param occupant the given occupant or null if the player does not wish to place one
      * @return an updated game state
      */
-    public GameState withNewOccupant(Occupant occupant) { // TODO
-        checkArgument(nextAction() == Action.OCCUPY_TILE);
+    public GameState withNewOccupant(Occupant occupant) {
+        checkArgument(nextAction == Action.OCCUPY_TILE);
 
         return new GameState(players,
                 tileDecks,
@@ -254,9 +254,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         return lastTilePotentialOccupants().isEmpty() ? this.withTurnFinished() : this;
     }
 
-    private GameState withTurnFinished() { // TODO
+    private GameState withTurnFinished() {
         List<PlayerColor> myPlayers = new ArrayList<>(players());
-        Board myBoard = board();
+        Board myBoard = board;
         TileDecks myTileDecks = tileDecks;
         MessageBoard myMessageBoard = messageBoard;
         boolean canPlay2ndTurn = false;
@@ -321,29 +321,37 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Board myBoard = board;
         MessageBoard myMessageBoard = messageBoard;
 
-        for (var meadow : board.meadowAreas()) {
+        for (var meadow : myBoard.meadowAreas()) {
             if (meadow.zoneWithSpecialPower(WILD_FIRE) != null) {
                 myBoard = myBoard.withMoreCancelledAnimals(Area.animals(meadow, Set.of()).stream()
                         .filter(a -> a.kind() == Animal.Kind.TIGER).collect(Collectors.toSet()));
             }
 
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
-                List<Animal> tigers = Area.animals(meadow, myBoard.cancelledAnimals()).stream() // TODo board vs. myBoard
-                        .filter(a -> a.kind() == Animal.Kind.TIGER).toList();
-                List<Animal> deer = Area.animals(meadow, myBoard.cancelledAnimals()).stream()
-                        .filter(a -> a.kind() == Animal.Kind.DEER).toList();
+                int tigerCount = (int) Area.animals(meadow, myBoard.cancelledAnimals()).stream()
+                        .filter(a -> a.kind() == Animal.Kind.TIGER).count(); // TODO casting
+                List<Animal> deer = new ArrayList<>(Area.animals(meadow, myBoard.cancelledAnimals()).stream()
+                        .filter(a -> a.kind() == Animal.Kind.DEER).toList());
 
-                // TODO deer that are not within its range (far deer) must be canceled first
-                Pos myPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
+                // deer that are not within its range (far deer) must be canceled first
+                Pos pitPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
 
-//                deer.sort(d -> {
-//                    return Boolean.compare((myBoard.tileWithId(d.tileId()).pos().x()) - myPos.x() < 2
-//                            && (myBoard.tileWithId(d.tileId()).pos().y()) - myPos.y() < 2);
-//                });
+                Comparator<Animal> proximityComparator = (deer1, deer2) -> {
+                    Pos pos1 = board.tileWithId(deer1.tileId()).pos();
+                    Pos pos2 = board.tileWithId(deer2.tileId()).pos();
 
-                // deer die - tiger
+                    boolean closeToPitTrap1 = Math.abs(pos1.x() - pitPos.x()) < 2 && Math.abs(pos1.y() - pitPos.y()) < 2;
+                    boolean closeToPitTrap2 = Math.abs(pos2.x() - pitPos.x()) < 2 && Math.abs(pos2.y() - pitPos.y()) < 2;
 
-                //myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, deer);
+                    return Boolean.compare(closeToPitTrap1, closeToPitTrap2);
+                };
+
+                deer.sort(proximityComparator);
+
+                Set<Animal> deadDeer = deer.stream().limit(tigerCount).collect(Collectors.toSet());
+
+                myBoard = myBoard.withMoreCancelledAnimals(deadDeer); // TODO
+                myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, myBoard.cancelledAnimals());
             }
 
             myMessageBoard = myMessageBoard.withScoredMeadow(meadow, myBoard.cancelledAnimals());
@@ -355,7 +363,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             }
         }
 
-        if (myMessageBoard.points().isEmpty()) {
+        if (myMessageBoard.points().isEmpty()) { // TODO
             return new GameState(players,
                     tileDecks,
                     null,

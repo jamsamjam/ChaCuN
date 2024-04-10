@@ -26,6 +26,10 @@ public final class Board {
      * Contains the partitions on the board (those of the zones of the placed tiles).
      */
     private final ZonePartitions zonePartitions;
+
+    /**
+     * All canceled animals.
+     */
     private final Set<Animal> canceledAnimals;
 
     /**
@@ -47,7 +51,6 @@ public final class Board {
      * Represents the range of the board.
      */
     public static final int REACH = 12;
-    private static final int LENGTH = REACH * 2 + 1;
 
     /**
      * Empty board instance.
@@ -67,9 +70,14 @@ public final class Board {
         return null;
     }
 
-    // Returns the index of the given position (without checking if it's in the scope)
+    /**
+     * Returns the index of the given position (without checking if it's in the scope).
+     *
+     * @param pos the given position
+     * @return the index of the given position (without checking if it's in the scope)
+     */
     private int indexOf(Pos pos) {
-        return LENGTH * (pos.y() + REACH) + (pos.x() + REACH);
+        return (REACH * 2 + 1) * (pos.y() + REACH) + (pos.x() + REACH);
     }
 
     /**
@@ -298,7 +306,7 @@ public final class Board {
         return Direction.ALL.stream()
                 .allMatch(direction -> {
                     PlacedTile neighborTile = tileAt(tile.pos().neighbor(direction));
-                    return neighborTile == null || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
+                    return (neighborTile == null) || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
                 });
     }
 
@@ -369,7 +377,6 @@ public final class Board {
         }
 
         throw new IllegalArgumentException();
-        // It can raise an exception when the given tile isn't on the board (prof forgot)
     }
 
     /**
