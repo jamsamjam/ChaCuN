@@ -30,7 +30,7 @@ public final class Board {
     /**
      * All canceled animals.
      */
-    private final Set<Animal> canceledAnimals;
+    private final Set<Animal> cancelledAnimals;
 
     /**
      * Constructs a new Board instance.
@@ -38,13 +38,13 @@ public final class Board {
      * @param placedTiles Array of placed tiles
      * @param tileIndexes Array of tile indexes
      * @param zonePartitions Zone partitions
-     * @param canceledAnimals Set of cancelled animals
+     * @param cancelledAnimals Set of cancelled animals
      */
-    private Board(PlacedTile[] placedTiles, int[] tileIndexes, ZonePartitions zonePartitions, Set<Animal> canceledAnimals) {
+    private Board(PlacedTile[] placedTiles, int[] tileIndexes, ZonePartitions zonePartitions, Set<Animal> cancelledAnimals) {
         this.placedTiles = placedTiles;
         this.tileIndexes = tileIndexes;
         this.zonePartitions = zonePartitions;
-        this.canceledAnimals = canceledAnimals;
+        this.cancelledAnimals = cancelledAnimals;
     }
 
     /**
@@ -102,7 +102,7 @@ public final class Board {
      * @return a set of cancelled animals
      */
     public Set<Animal> cancelledAnimals() {
-        return Set.copyOf(canceledAnimals);
+        return Set.copyOf(cancelledAnimals);
     }
 
     /**
@@ -352,7 +352,7 @@ public final class Board {
                     builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
                 });
 
-        return new Board(myPlacedTiles, myTileIndexes, builder.build(), canceledAnimals);
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
     }
 
     /**
@@ -373,8 +373,8 @@ public final class Board {
             myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
 
-            return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
-        }
+            return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
+        } // TODO unmodifiable set ? tileIndexes, cancelledAnimals
 
         throw new IllegalArgumentException();
     }
@@ -393,7 +393,7 @@ public final class Board {
         myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
         builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
-        return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
+        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
     }
 
     /**
@@ -413,7 +413,7 @@ public final class Board {
         forests.forEach(builder::clearGatherers);
         rivers.forEach(builder::clearFishers);
 
-        return new Board(myPlacedTiles, tileIndexes, builder.build(), canceledAnimals);
+        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
     }
 
     private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {
@@ -439,9 +439,11 @@ public final class Board {
      * of cancelled animals
      */
     public Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
-        Set<Animal> myCanceledAnimals = new HashSet<>(canceledAnimals);
-        myCanceledAnimals.addAll(newlyCancelledAnimals);
-        return new Board(placedTiles, tileIndexes, zonePartitions, myCanceledAnimals);
+        Set<Animal> myCancelledAnimals = new HashSet<>(cancelledAnimals);
+        myCancelledAnimals.addAll(newlyCancelledAnimals);
+        myCancelledAnimals = Set.copyOf(myCancelledAnimals);
+        // TODO You could make the set unmodifiable when you re-create it
+        return new Board(placedTiles, tileIndexes, zonePartitions, myCancelledAnimals);
     }
 
     @Override
@@ -450,13 +452,13 @@ public final class Board {
             return  Arrays.equals(placedTiles, board.placedTiles) &&
                     Arrays.equals(tileIndexes, board.tileIndexes) &&
                     zonePartitions.equals(board.zonePartitions) &&
-                    canceledAnimals.equals(board.canceledAnimals);
+                    cancelledAnimals.equals(board.cancelledAnimals);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, canceledAnimals);
+        return Objects.hash(Arrays.hashCode(placedTiles), Arrays.hashCode(tileIndexes), zonePartitions, cancelledAnimals);
     }
 }

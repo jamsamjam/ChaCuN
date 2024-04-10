@@ -30,6 +30,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public Map<PlayerColor, Integer> points() {
         Map<PlayerColor, Integer> pointsMap = new HashMap<>();
+
         for (Message message : messages) {
             for (PlayerColor scorer : message.scorers()) {
                 pointsMap.put(scorer, pointsMap.getOrDefault(scorer, 0) + message.points());
@@ -235,7 +236,6 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public MessageBoard withWinners(Set<PlayerColor> winners, int points) {
         Message newMessage = new Message(textMaker.playersWon(winners, points), 0, Set.of(), Set.of());
-        // must pass 0 in this case, otherwise the points method will not return the correct values
 
         return update(newMessage);
     }
@@ -275,6 +275,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param tileIds the set of tile IDs associated with the message, which can be empty
      */
     public record Message(String text, int points, Set<PlayerColor> scorers, Set<Integer> tileIds) {
+
         /**
          * Constructs a Message object with the provided parameters.
          *

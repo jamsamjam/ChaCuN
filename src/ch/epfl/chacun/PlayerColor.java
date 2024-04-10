@@ -16,10 +16,8 @@ public enum PlayerColor {
     YELLOW,
     PURPLE;
 
-    private static final PlayerColor[] AllColors = values();
-
     /**
      * An immutable list containing all the values, in their order of definition.
      */
-    public static final List<PlayerColor> ALL = List.of(AllColors);
+    public static final List<PlayerColor> ALL = List.of(PlayerColor.values());
 }

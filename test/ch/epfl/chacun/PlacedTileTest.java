@@ -30,6 +30,7 @@ class PlacedTileTest {
         System.out.println(t42.potentialOccupants());
         //assertEquals(Set.of(Occupant.Kind.PAWN), );
     }
+
     @Test
     void placedTileConstructorThrowsWhenTileOrRotationOrPosIsNull() {
         var forestZone = new Zone.Forest(10, Zone.Forest.Kind.PLAIN);

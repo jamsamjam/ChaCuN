@@ -15,12 +15,10 @@ public enum Direction {
     S,
     W;
 
-    private static final Direction[] AllDirections = values();
-
     /**
      * List of all values of the enumerated type, in the order of definition.
      */
-    public static final List<Direction> ALL = List.of(AllDirections);
+    public static final List<Direction> ALL = List.of(Direction.values());
 
     /**
      * Contains the number of elements of the enumerated type (the length of the list ALL).

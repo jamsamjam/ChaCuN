@@ -15,12 +15,10 @@ public enum Rotation {
     HALF_TURN,
     LEFT;
 
-    private static final Rotation[] AllRotations = values();
-
     /**
      * List of all values of the enumerated type, in the order of definition
      */
-    public static final List<Rotation> ALL = List.of(AllRotations);
+    public static final List<Rotation> ALL = List.of(Rotation.values());
 
     /**
      * Contains the number of elements of the enumerated type (the length of the list ALL)
