@@ -269,9 +269,7 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 if (myBoard.lastPlacedTile().tile().kind() == NORMAL) {
                     myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
-
-                    if (myTileDecks.topTile(MENHIR) != null)
-                        canPlay2ndTurn = true;
+                    canPlay2ndTurn = myTileDecks.topTile(MENHIR) != null;
                 }
             }
         }
@@ -328,8 +326,6 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             }
 
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
-                int tigerCount = (int) Area.animals(meadow, myBoard.cancelledAnimals()).stream()
-                        .filter(a -> a.kind() == Animal.Kind.TIGER).count(); // TODO casting
                 List<Animal> deer = new ArrayList<>(Area.animals(meadow, myBoard.cancelledAnimals()).stream()
                         .filter(a -> a.kind() == Animal.Kind.DEER).toList());
 
@@ -348,6 +344,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 deer.sort(proximityComparator);
 
+                int tigerCount = (int) Area.animals(meadow, myBoard.cancelledAnimals()).stream()
+                        .filter(a -> a.kind() == Animal.Kind.TIGER).count();
                 Set<Animal> deadDeer = deer.stream().limit(tigerCount).collect(Collectors.toSet());
 
                 myBoard = myBoard.withMoreCancelledAnimals(deadDeer);

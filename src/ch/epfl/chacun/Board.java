@@ -365,6 +365,7 @@ public final class Board {
      */
     public Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
+        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
@@ -373,8 +374,8 @@ public final class Board {
             myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
 
-            return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
-        } // TODO unmodifiable set ? tileIndexes, cancelledAnimals
+            return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
+        }
 
         throw new IllegalArgumentException();
     }
@@ -385,15 +386,16 @@ public final class Board {
      * @param occupant the given occupant
      * @return an identical board to the receiver, but with the given occupant less
      */
-    public Board withoutOccupant(Occupant occupant) { // occupant is assumed to be a pawn
+    public Board withoutOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
+        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
         myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
         builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
-        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
     }
 
     /**
@@ -405,6 +407,7 @@ public final class Board {
      */
     public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
+        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
         clearOccupants(forests, myPlacedTiles);
@@ -413,7 +416,7 @@ public final class Board {
         forests.forEach(builder::clearGatherers);
         rivers.forEach(builder::clearFishers);
 
-        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
     }
 
     private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {
@@ -439,11 +442,13 @@ public final class Board {
      * of cancelled animals
      */
     public Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
+        PlacedTile[] myPlacedTiles = placedTiles.clone();
+        int[] myTileIndexes = tileIndexes.clone();
+
         Set<Animal> myCancelledAnimals = new HashSet<>(cancelledAnimals);
         myCancelledAnimals.addAll(newlyCancelledAnimals);
-        myCancelledAnimals = Set.copyOf(myCancelledAnimals);
-        // TODO You could make the set unmodifiable when you re-create it
-        return new Board(placedTiles, tileIndexes, zonePartitions, myCancelledAnimals);
+
+        return new Board(myPlacedTiles, myTileIndexes, zonePartitions, Set.copyOf(myCancelledAnimals));
     }
 
     @Override
