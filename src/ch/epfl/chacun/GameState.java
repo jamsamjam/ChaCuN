@@ -320,16 +320,16 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         MessageBoard myMessageBoard = messageBoard;
 
         for (var meadow : myBoard.meadowAreas()) {
+            List<Animal> deer = new ArrayList<>(Area.animals(meadow, myBoard.cancelledAnimals()).stream()
+                    .filter(a -> a.kind() == Animal.Kind.DEER).toList());
+
             if (meadow.zoneWithSpecialPower(WILD_FIRE) != null) {
                 myBoard = myBoard.withMoreCancelledAnimals(Area.animals(meadow, Set.of()).stream()
                         .filter(a -> a.kind() == Animal.Kind.TIGER).collect(Collectors.toSet()));
             }
 
             if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
-                List<Animal> deer = new ArrayList<>(Area.animals(meadow, myBoard.cancelledAnimals()).stream()
-                        .filter(a -> a.kind() == Animal.Kind.DEER).toList());
-
-                // deer that are not within its range (far deer) must be canceled first
+                // deer that are not within its range (far away) must be canceled first
                 Pos pitPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
 
                 Comparator<Animal> proximityComparator = (deer1, deer2) -> {
@@ -343,12 +343,16 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 };
 
                 deer.sort(proximityComparator);
+            } // TODO
 
                 int tigerCount = (int) Area.animals(meadow, myBoard.cancelledAnimals()).stream()
                         .filter(a -> a.kind() == Animal.Kind.TIGER).count();
                 Set<Animal> deadDeer = deer.stream().limit(tigerCount).collect(Collectors.toSet());
 
                 myBoard = myBoard.withMoreCancelledAnimals(deadDeer);
+
+            if (meadow.zoneWithSpecialPower(PIT_TRAP) != null) {
+                Pos pitPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
 
                 Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(pitPos, (Zone.Meadow) meadow.zoneWithSpecialPower(PIT_TRAP));
                 myMessageBoard = myMessageBoard.withScoredPitTrap(adjacentMeadow, myBoard.cancelledAnimals());
