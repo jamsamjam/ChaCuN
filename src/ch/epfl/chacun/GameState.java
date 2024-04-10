@@ -350,17 +350,20 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 Set<Animal> deadDeer = deer.stream().limit(tigerCount).collect(Collectors.toSet());
 
-                myBoard = myBoard.withMoreCancelledAnimals(deadDeer); // TODO
-                myMessageBoard = myMessageBoard.withScoredPitTrap(meadow, myBoard.cancelledAnimals());
+                myBoard = myBoard.withMoreCancelledAnimals(deadDeer);
+
+                Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(pitPos, (Zone.Meadow) meadow.zoneWithSpecialPower(PIT_TRAP));
+                myMessageBoard = myMessageBoard.withScoredPitTrap(adjacentMeadow, myBoard.cancelledAnimals());
             }
 
             myMessageBoard = myMessageBoard.withScoredMeadow(meadow, myBoard.cancelledAnimals());
         }
 
-        for (var rSystem : myBoard.riverSystemAreas()) {
-            if (rSystem.zoneWithSpecialPower(RAFT) != null) {
-                myMessageBoard = myMessageBoard.withScoredRaft(rSystem).withScoredRiverSystem(rSystem);
+        for (var riverSystem : myBoard.riverSystemAreas()) {
+            if (riverSystem.zoneWithSpecialPower(RAFT) != null) {
+                myMessageBoard = myMessageBoard.withScoredRaft(riverSystem);
             }
+            myMessageBoard = myMessageBoard.withScoredRiverSystem(riverSystem);
         }
 
         if (myMessageBoard.points().isEmpty()) { // TODO

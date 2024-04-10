@@ -207,19 +207,11 @@ class GameStateTest {
                 .withPlacedTile(placedTile1)
                 .withNewOccupant(new Occupant(Occupant.Kind.PAWN, 1_3)); // occupy forest
 
-        System.out.println(state.board().occupants());
-        System.out.println(state.board().forestsClosedByLastTile());
-
         assert state.tileToPlace().id() == 37;
         var placedTile37 = new PlacedTile(state.tileToPlace(), PlayerColor.BLUE, Rotation.NONE, new Pos(-1, 1));
         state = state
                 .withPlacedTile(placedTile37)
                 .withNewOccupant(null);
-
-        System.out.println(state.board().occupants());
-        System.out.println(state.board().forestsClosedByLastTile());
-        System.out.println(state.freeOccupantsCount(PlayerColor.RED, Occupant.Kind.PAWN));
-        System.out.println(state.board().occupantCount(PlayerColor.RED, Occupant.Kind.PAWN));
 
         var expectedForestMessage = new MessageBoard.Message(
                 "{RED}|4|0|2",
@@ -266,8 +258,6 @@ class GameStateTest {
                 12,
                 Set.of(PlayerColor.RED, PlayerColor.GREEN, PlayerColor.YELLOW),
                 Set.of(42, 56, 58, 47, 1, 28));
-
-        System.out.println(25 * (t42.pos().y() + 12) + (t42.pos().x() + 12)  );
 
         assertTrue(state.messageBoard().messages().contains(expectedForestMessage));
         for (PlayerColor playerColor : PlayerColor.values()) {
@@ -996,7 +986,8 @@ class GameStateTest {
             return String.join("|",
                     scorers(scorers),
                     String.valueOf(points),
-                    animals(animals));
+                    animals(animals),
+                    "pittrap");
         }
 
         @Override
