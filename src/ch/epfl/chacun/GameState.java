@@ -332,17 +332,19 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                 // deer that are not within its range (far away) must be canceled first
                 Pos pitPos = myBoard.tileWithId(meadow.zoneWithSpecialPower(PIT_TRAP).tileId()).pos();
 
-                Comparator<Animal> proximityComparator = (deer1, deer2) -> {
-                    Pos pos1 = board.tileWithId(deer1.tileId()).pos();
-                    Pos pos2 = board.tileWithId(deer2.tileId()).pos();
+                deer.sort(new Comparator <Animal>() {
+                    @Override
+                    public int compare(Animal deer1, Animal deer2) {
+                        Pos pos1 = board.tileWithId(deer1.tileId()).pos();
+                        Pos pos2 = board.tileWithId(deer2.tileId()).pos();
 
-                    boolean closeToPitTrap1 = Math.abs(pos1.x() - pitPos.x()) < 2 && Math.abs(pos1.y() - pitPos.y()) < 2;
-                    boolean closeToPitTrap2 = Math.abs(pos2.x() - pitPos.x()) < 2 && Math.abs(pos2.y() - pitPos.y()) < 2;
+                        boolean closeToPitTrap1 = Math.abs(pos1.x() - pitPos.x()) < 2 && Math.abs(pos1.y() - pitPos.y()) < 2;
+                        boolean closeToPitTrap2 = Math.abs(pos2.x() - pitPos.x()) < 2 && Math.abs(pos2.y() - pitPos.y()) < 2;
 
-                    return Boolean.compare(closeToPitTrap1, closeToPitTrap2);
-                };
+                        return Boolean.compare(closeToPitTrap1, closeToPitTrap2);
+                    }
+                });
 
-                deer.sort(proximityComparator);
             } // TODO
 
                 int tigerCount = (int) Area.animals(meadow, myBoard.cancelledAnimals()).stream()
