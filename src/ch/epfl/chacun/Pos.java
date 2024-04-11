@@ -1,12 +1,14 @@
 package ch.epfl.chacun;
 
 /**
- * Represents a position with x & y coordinates.
+ * Represents a position.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ *
+ * @param x the x coordinate
+ * @param y the y coordinate
  */
-
 public record Pos(int x, int y) {
     /**
      * The origin position.

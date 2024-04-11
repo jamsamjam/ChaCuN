@@ -18,9 +18,7 @@ import java.util.stream.Collectors;
  * @param s the south side of the tile
  * @param w the west side of the tile
  */
-
 public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSide w) {
-
     /**
      * Returns the list of the four sides of the tile, in the order n, e, s, w.
      *

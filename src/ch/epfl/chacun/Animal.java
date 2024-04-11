@@ -2,12 +2,13 @@ package ch.epfl.chacun;
 
 /**
  * Represents an animal.
- * Each animal has an identifier and a kind.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ *
+ * @param id the identifier of animal
+ * @param kind the kind of animal
  */
-
 public record Animal(int id, Kind kind) {
 
     /**

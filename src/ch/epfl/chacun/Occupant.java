@@ -5,18 +5,17 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
  * Represents an occupant (pawn or hut) of a zone.
- * Each occupant has a kind and a zone ID.
  *
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ *
+ * @param kind the type of occupant
+ * @param zoneId the identifier of the zone in which the occupant is located
  */
-
 public record Occupant(Kind kind, int zoneId) {
     /**
      * Constructor of Occupant.
      *
-     * @param kind the type of occupant
-     * @param zoneId the identifier of the zone in which the occupant is located
      * @throws NullPointerException if kind is null
      * @throws IllegalArgumentException if zoneId is strictly negative
      */

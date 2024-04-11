@@ -8,7 +8,6 @@ import java.util.List;
  * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
  */
-
 public enum PlayerColor {
     RED,
     BLUE,
