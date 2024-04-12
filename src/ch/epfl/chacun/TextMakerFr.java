@@ -50,8 +50,8 @@ public final class TextMakerFr implements TextMaker { // TODO test!
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
-        String mushroom = fishCount > 0 ? "." : STR." et contenant \{fishCount} poissons";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fishCount}";
+        String fish = fishCount > 0 ? "." : STR." et contenant \{fishCount} poissons";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}";
     }
 
     @Override
@@ -117,11 +117,11 @@ public final class TextMakerFr implements TextMaker { // TODO test!
             return STR."\{names.get(0)} et \{names.get(1)}";
         else {
             StringBuilder sb = new StringBuilder();
-            sb.append(names.get(0));
+            sb.append(names.getFirst());
             for (int i = 1; i < names.size() - 1; i++) {
                 sb.append(", ").append(names.get(i));
             }
-            sb.append(" et ").append(names.get(names.size() - 1));
+            sb.append(" et ").append(names.getLast());
             return sb.toString();
         }
     }
@@ -144,18 +144,29 @@ public final class TextMakerFr implements TextMaker { // TODO test!
 
         // get the indexes of non-zero animal
         List<Integer> index = new ArrayList<>();
-        for (var count : counts) {
-            if (count != 0) index.add(count);
+        for (int i = 0; i < counts.size(); i++) {
+            if (counts.get(i) != 0) index.add(i);
         }
 
-        if (index.isEmpty())
-            return null;
-        else if (index.size() == 1)
-            return STR."\{counts.get(index.get(0))} \{kinds.get(index.get(0))}";
-        else if (index.size() == 2)
-            return STR."\{counts.get(index.get(0))} \{kinds.get(index.get(0))} et \{counts.get(index.get(1))} \{kinds.get(index.get(1))}";
-        else {
-            return STR."\{counts.get(index.get(0))} \{kinds.get(index.get(0))}, \{counts.get(index.get(1))} \{kinds.get(index.get(1))} et \{counts.get(index.get(2))} \{kinds.get(index.get(2))}";
+        StringBuilder sb = getStringBuilder(index, counts, kinds);
+
+        return sb.toString();
+    }
+
+    private StringBuilder getStringBuilder(List<Integer> index, List<Integer> counts, List<String> kinds) { // TODO static
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < index.size(); i++) {
+            sb.append(STR."\{counts.get(index.get(i))} \{kinds.get(index.get(i))}");
+            if ((counts.get(index.get(i)) > 1) && !kinds.get(index.get(i)).equals("aurochs")) sb.append("s");
+
+            if (index.size() == 2 && i == 0)
+                sb.append(" et ");
+            else if (i < index.size() - 2)
+                sb.append(", ");
+            else if (i == index.size() - 2)
+                sb.append(" et ");
         }
+        return sb;
     }
 }
