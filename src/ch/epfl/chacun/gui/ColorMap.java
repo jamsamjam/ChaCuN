@@ -16,8 +16,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 public class ColorMap {
     private ColorMap() {}
 
-    // https://openjfx.io/javadoc/22/javafx.graphics/javafx/scene/paint/Color.html
-
     /**
      * Returns the color to fill, among other things, the occupants of the given player.
      *

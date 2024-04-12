@@ -11,7 +11,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Sam Lee (375535)
  * @author Gehna Yadav (379155)
  */
-public final class TextMakerFr implements TextMaker {
+public final class TextMakerFr implements TextMaker { // TODO test!
     Map<String, PlayerColor> nameColorMap;
 
     public TextMakerFr(Map<String, PlayerColor> nameColorMap) {
@@ -31,7 +31,8 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String points(int points) {
-        return "points";
+        checkArgument(points > 0); // TODO
+        return points == 1 ? "1 point" : STR."\{points} points";
     }
 
     @Override
@@ -44,13 +45,13 @@ public final class TextMakerFr implements TextMaker {
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
         String mushroom = mushroomGroupCount > 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points} points en tantqu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tantqu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}";
     }
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
         String mushroom = fishCount > 0 ? "." : STR." et contenant \{fishCount} poissons";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points} points en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fishCount}";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fishCount}";
     }
 
     @Override
@@ -65,37 +66,37 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredMeadow(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return null;
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
-        return null;
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fishCount} poissons";
     }
 
     @Override
     public String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return null;
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}";
     }
 
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
-        return null;
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
     }
 
     @Override
     public String playersWon(Set<PlayerColor> winners, int points) {
-        return null;
+        return STR."\{name(winners)} \{verb(winners)} remporté la partie avec \{points(points)}!";
     }
 
     @Override
     public String clickToOccupy() {
-        return null;
+        return "Cliquez sur le pion ou la hutte que vous désirez placer, ou ici pour ne pas en placer.";
     }
 
     @Override
     public String clickToUnoccupy() {
-        return null;
+        return "Cliquez sur le pion que vous désirez reprendre, ou ici pour ne pas en reprendre.";
     }
 
     private List<String> playerNames(Set<PlayerColor> scorers) {
