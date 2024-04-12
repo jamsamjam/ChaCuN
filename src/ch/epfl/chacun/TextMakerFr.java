@@ -1,6 +1,5 @@
 package ch.epfl.chacun;
 
-import java.sql.Array;
 import java.util.*;
 
 import static ch.epfl.chacun.Animal.Kind.*;
