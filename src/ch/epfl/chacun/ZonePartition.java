@@ -130,9 +130,7 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
 
             areas.add(area1.connectTo(area2));
             areas.remove(area1);
-            if (!area1.equals(area2)) {
-                areas.remove(area2);
-            }
+            if (!area1.equals(area2)) areas.remove(area2);
         }
 
         /**

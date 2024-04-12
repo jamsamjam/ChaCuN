@@ -196,8 +196,10 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
          * @return the group of four partitions currently being constructed
          */
         public ZonePartitions build() {
-            return new ZonePartitions(forestBuilder.build(), meadowBuilder.build(),
-                    riverBuilder.build(), riverSystemBuilder.build());
+            return new ZonePartitions(forestBuilder.build(),
+                    meadowBuilder.build(),
+                    riverBuilder.build(),
+                    riverSystemBuilder.build());
         }
     }
 }

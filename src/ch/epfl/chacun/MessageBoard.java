@@ -31,11 +31,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     public Map<PlayerColor, Integer> points() {
         Map<PlayerColor, Integer> pointsMap = new HashMap<>();
 
-        for (Message message : messages) {
-            for (PlayerColor scorer : message.scorers()) {
-                pointsMap.put(scorer, pointsMap.getOrDefault(scorer, 0) + message.points());
-            }
-        }
+        for (Message message : messages)
+            message.scorers().forEach(scorer -> pointsMap.merge(scorer, message.points(), Integer::sum));
+
         return pointsMap;
     }
 
@@ -268,10 +266,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
         Set<Animal> animalSet = Area.animals(meadow, cancelledAnimals);
         Map<Animal.Kind, Integer> animalMap = new HashMap<>();
-
-        for (Animal animal : animalSet) {
-            animalMap.put(animal.kind(), animalMap.getOrDefault(animal.kind(), 0) + 1);
-        }
+        animalSet.forEach(a -> animalMap.merge(a.kind(), 1, Integer::sum));
 
         return animalMap;
     }

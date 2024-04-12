@@ -223,8 +223,10 @@ public final class Board {
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
         for (int i : tileIndexes) {
-            if (placedTiles[i] != null && placedTiles[i].occupant() != null
-                    && placedTiles[i].placer() == player && placedTiles[i].occupant().kind() == occupantKind)
+            if (placedTiles[i] != null
+                    && placedTiles[i].occupant() != null
+                    && placedTiles[i].placer() == player
+                    && placedTiles[i].occupant().kind() == occupantKind)
                 count++;
         }
         return count;
@@ -306,7 +308,8 @@ public final class Board {
         return Direction.ALL.stream()
                 .allMatch(direction -> {
                     PlacedTile neighborTile = tileAt(tile.pos().neighbor(direction));
-                    return (neighborTile == null) || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
+                    return (neighborTile == null)
+                            || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
                 });
     }
 
@@ -348,9 +351,8 @@ public final class Board {
 
         Direction.ALL.stream()
                 .filter(direction -> tileAt(tile.pos().neighbor(direction)) != null)
-                .forEach(direction -> {
-                    builder.connectSides(tile.side(direction), tileAt(tile.pos().neighbor(direction)).side(direction.opposite()));
-                });
+                .forEach(direction -> builder.connectSides(tile.side(direction),
+                            tileAt(tile.pos().neighbor(direction)).side(direction.opposite())));
 
         return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
     }
@@ -365,7 +367,6 @@ public final class Board {
      */
     public Board withOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
@@ -374,7 +375,7 @@ public final class Board {
             myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
 
-            return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
+            return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
         }
 
         throw new IllegalArgumentException();
@@ -388,14 +389,13 @@ public final class Board {
      */
     public Board withoutOccupant(Occupant occupant) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
         myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
         builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
-        return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
     }
 
     /**
@@ -407,7 +407,6 @@ public final class Board {
      */
     public Board withoutGatherersOrFishersIn(Set<Area<Zone.Forest>> forests, Set<Area<Zone.River>> rivers) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = tileIndexes.clone();
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
 
         clearOccupants(forests, myPlacedTiles);
@@ -416,7 +415,7 @@ public final class Board {
         forests.forEach(builder::clearGatherers);
         rivers.forEach(builder::clearFishers);
 
-        return new Board(myPlacedTiles, myTileIndexes, builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
     }
 
     private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {

@@ -24,9 +24,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         checkArgument(openConnections >= 0);
 
         zones = Set.copyOf(zones);
-        occupants = List.copyOf(occupants);
 
-        // Sort the received list of occupants by color.
         List<PlayerColor> sortedOccupants = new ArrayList<>(occupants);
         Collections.sort(sortedOccupants);
         occupants = List.copyOf(sortedOccupants);
@@ -186,19 +184,19 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return the area resulting from connecting the receiver (this) to the given area (that)
      */
     public Area<Z> connectTo(Area<Z> that) {
-        Set<Z> newZones = new HashSet<>(zones);
-        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
-        int newOpenConnections;
+        Set<Z> myZones = new HashSet<>(zones);
+        List<PlayerColor> myOccupants = new ArrayList<>(occupants);
+        int myOpenConnections;
 
         if (this.equals(that)) {
-            newOpenConnections = openConnections - 2;
+            myOpenConnections = openConnections - 2;
         } else {
-            newZones.addAll(that.zones);
-            newOccupants.addAll(that.occupants);
-            newOpenConnections = this.openConnections + that.openConnections - 2;
+            myZones.addAll(that.zones);
+            myOccupants.addAll(that.occupants);
+            myOpenConnections = this.openConnections + that.openConnections - 2;
         }
 
-        return new Area<>(newZones, newOccupants, newOpenConnections);
+        return new Area<>(myZones, myOccupants, myOpenConnections);
     }
 
     /**
@@ -223,12 +221,12 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @throws IllegalArgumentException if the receiver contains no occupant of the given color
      */
     public Area<Z> withoutOccupant(PlayerColor occupant) {
-        List<PlayerColor> newOccupants = new ArrayList<>(occupants);
+        List<PlayerColor> myOccupants = new ArrayList<>(occupants);
 
         for (PlayerColor color : occupants) {
             if (color.equals(occupant)) {
-                newOccupants.remove(color);
-                return new Area<>(zones, newOccupants, openConnections);
+                myOccupants.remove(color);
+                return new Area<>(zones, myOccupants, openConnections);
             }
         }
         throw new IllegalArgumentException();
