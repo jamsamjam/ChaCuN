@@ -102,17 +102,17 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         for (var occ : board.lastPlacedTile().potentialOccupants())
             if (freeOccupantsCount(currentPlayer(), occ.kind()) > 0)
                 switch (board.lastPlacedTile().zoneWithId(occ.zoneId())) {
-                    case Zone.Forest f -> {
-                        if (!board.forestArea(f).isOccupied()) occupants.add(occ);
+                    case Zone.Forest forest -> {
+                        if (!board.forestArea(forest).isOccupied()) occupants.add(occ);
                     }
-                    case Zone.Meadow m -> {
-                        if (!board.meadowArea(m).isOccupied()) occupants.add(occ);
+                    case Zone.Meadow meadow -> {
+                        if (!board.meadowArea(meadow).isOccupied()) occupants.add(occ);
                     }
-                    case Zone.River r -> { // TODO Zone.Lake Zone.River
-                        if (!board.riverArea(r).isOccupied()) occupants.add(occ);
+                    case Zone.River river when occ.kind() == PAWN -> {
+                        if (!board.riverArea(river).isOccupied()) occupants.add(occ);
                     }
-                    case Zone.Water l -> {
-                        if (!board.riverSystemArea(l).isOccupied()) occupants.add(occ);
+                    case Zone.Water water -> {
+                        if (!board.riverSystemArea(water).isOccupied()) occupants.add(occ);
                     }
                 }
         return occupants;
@@ -161,36 +161,37 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Board myBoard = board.withNewTile(tile);
         MessageBoard myMessageBoard = messageBoard;
 
-        if (tile.kind() == MENHIR)
+        if (tile.kind() == MENHIR) {
             switch (tile.specialPowerZone()) {
-            case Zone.Water water when water.specialPower() == LOGBOAT ->
-                    myMessageBoard = myMessageBoard.withScoredLogboat(currentPlayer(), myBoard.riverSystemArea(water));
+                case Zone.Water water when water.specialPower() == LOGBOAT ->
+                        myMessageBoard = myMessageBoard.withScoredLogboat(currentPlayer(), myBoard.riverSystemArea(water));
 
-            case Zone.Meadow meadow when meadow.specialPower() == HUNTING_TRAP -> {
-                Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), meadow);
+                case Zone.Meadow meadow when meadow.specialPower() == HUNTING_TRAP -> {
+                    Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), meadow);
 
-                int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream()
-                        .filter(a -> a.kind() == Animal.Kind.TIGER).count();
-                Set<Animal> deadDear = Area.animals(adjacentMeadow, Set.of()).stream()
-                        .filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount)
-                        .collect(Collectors.toSet());
+                    int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream()
+                            .filter(a -> a.kind() == Animal.Kind.TIGER).count();
+                    Set<Animal> deadDear = Area.animals(adjacentMeadow, Set.of()).stream()
+                            .filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount)
+                            .collect(Collectors.toSet());
 
-                myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
-                // later deadDear should be passed to withScoredHuntingTrap
-                myBoard = myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
+                    myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
+                    // later deadDear should be passed to withScoredHuntingTrap
+                    myBoard = myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
+                }
+
+                case Zone.Meadow meadow when meadow.specialPower() == SHAMAN -> {
+                    if (myBoard.occupantCount(currentPlayer(), PAWN) > 0)
+                        return new GameState(players,
+                                tileDecks,
+                                null,
+                                myBoard,
+                                Action.RETAKE_PAWN,
+                                myMessageBoard);
+                }
+
+                case null, default -> {}
             }
-
-            case Zone.Meadow meadow when meadow.specialPower() == SHAMAN -> {
-                if (myBoard.occupantCount(currentPlayer(), PAWN) > 0)
-                    return new GameState(players,
-                            tileDecks,
-                            null,
-                            myBoard,
-                            Action.RETAKE_PAWN,
-                            myMessageBoard);
-            }
-
-            case null, default -> {}
         }
         return new GameState(players,
                 tileDecks,
@@ -332,7 +333,8 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(pitPos, pitTrapZone);
                     myMessageBoard = myMessageBoard.withScoredPitTrap(adjacentMeadow, myBoard.cancelledAnimals());
                 }
-            } else myBoard = cancelDeer(meadow, myBoard, deer);
+            } else
+                myBoard = cancelDeer(meadow, myBoard, deer);
 
             myMessageBoard = myMessageBoard.withScoredMeadow(meadow, myBoard.cancelledAnimals());
         }

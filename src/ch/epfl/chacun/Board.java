@@ -189,15 +189,16 @@ public final class Board {
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
-        for (int i = -1; i <= 1; i++)
-            for (int j = -1; j <= 1; j++)
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
                 if (tileAt(pos.translated(i, j)) != null)
                     adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones());
+            }
+        }
 
         Set<Zone.Meadow> myMeadows = new HashSet<>();
         for (var zone : adjacentMeadows)
-            if (meadowArea(meadowZone).zones().contains(zone))
-                myMeadows.add(zone);
+            if (meadowArea(meadowZone).zones().contains(zone)) myMeadows.add(zone);
 
         return new Area<>(myMeadows, meadowArea(meadowZone).occupants(), 0);
     }
@@ -211,12 +212,13 @@ public final class Board {
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
-        for (int i : tileIndexes)
+        for (int i : tileIndexes) {
             if (placedTiles[i] != null
                     && placedTiles[i].occupant() != null
                     && placedTiles[i].placer() == player
                     && placedTiles[i].occupant().kind() == occupantKind)
                 count++;
+        }
         return count;
     }
 
@@ -353,7 +355,8 @@ public final class Board {
         ZonePartitions.Builder builder = new ZonePartitions.Builder(zonePartitions);
         PlacedTile myTile = tileWithId(Zone.tileId(occupant.zoneId()));
 
-        if (myTile != null && myTile.potentialOccupants().contains(occupant)
+        if (myTile != null
+                && myTile.potentialOccupants().contains(occupant)
                 && myTile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
             myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));

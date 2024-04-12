@@ -102,8 +102,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     public Set<Zone.Forest> forestZones() {
         Set<Zone.Forest> forests = new HashSet<>();
         for (Zone zone : tile.zones())
-            if (zone instanceof Zone.Forest forest)
-                forests.add(forest);
+            if (zone instanceof Zone.Forest forest) forests.add(forest);
         return forests;
     }
 
@@ -115,8 +114,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     public Set<Zone.Meadow> meadowZones() {
         Set<Zone.Meadow> meadows = new HashSet<>();
         for (Zone zone : tile.zones())
-            if (zone instanceof Zone.Meadow meadow)
-                meadows.add(meadow);
+            if (zone instanceof Zone.Meadow meadow) meadows.add(meadow);
         return meadows;
     }
 
@@ -128,8 +126,7 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
     public Set<Zone.River> riverZones() {
         Set<Zone.River> rivers = new HashSet<>();
         for (Zone zone : tile.zones())
-            if (zone instanceof Zone.River river)
-                rivers.add(river);
+            if (zone instanceof Zone.River river) rivers.add(river);
         return rivers;
     }
 
@@ -145,13 +142,15 @@ public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos p
         if (placer == null)
             return potentialOccupants;
 
-        for (Zone zone : tile.zones())
+        for (Zone zone : tile.zones()) {
             if (zone instanceof Zone.Lake)
                 potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
             else if (zone instanceof Zone.River r && !r.hasLake()) {
                 potentialOccupants.add(new Occupant(Occupant.Kind.HUT, zone.id()));
                 potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
-            } else potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
+            } else
+                potentialOccupants.add(new Occupant(Occupant.Kind.PAWN, zone.id()));
+        }
 
         return potentialOccupants;
     }

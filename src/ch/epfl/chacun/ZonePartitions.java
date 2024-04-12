@@ -71,15 +71,15 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
             for (Zone zone : tile.zones()) {
                 int openConnectionCount = openConnections[zone.localId()];
 
-                switch (zone) { // TODO Zone.Water
+                switch (zone) {
                     case Zone.Forest forest ->
                             forestBuilder.addSingleton(forest, openConnectionCount);
                     case Zone.Meadow meadow ->
                             meadowBuilder.addSingleton(meadow, openConnectionCount);
                     case Zone.River river -> {
                         riverSystemBuilder.addSingleton(river, openConnectionCount);
-                        riverBuilder.addSingleton(river, river.hasLake() ? openConnectionCount -1 :
-                                openConnectionCount);
+                        riverBuilder.addSingleton(river,
+                                river.hasLake() ? openConnectionCount -1 : openConnectionCount);
                         // adjust open connection count if river is connected to a lake
                     }
                     case Zone.Lake lake ->
@@ -109,8 +109,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         when s2 instanceof TileSide.Meadow(Zone.Meadow m2) ->
                         meadowBuilder.union(m1, m2);
                 case TileSide.River(Zone.Meadow m1, Zone.River r1, Zone.Meadow m2)
-                        when s2 instanceof TileSide.River(Zone.Meadow z1, Zone.River r2,
-                                                          Zone.Meadow z2) -> {
+                        when s2 instanceof TileSide.River(Zone.Meadow z1, Zone.River r2, Zone.Meadow z2) -> {
                         riverBuilder.union(r1, r2);
                         riverSystemBuilder.union(r1, r2);
                         meadowBuilder.union(m1, z2);
@@ -130,9 +129,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
          * @throws IllegalArgumentException if the given sort of occupant cannot occupy an area of
          *                                  the given kind.
          */
-        public void addInitialOccupant(PlayerColor player, Occupant.Kind occupantKind,
-                                       Zone occupiedZone) {
-            // assumes that adding the given occupant is valid (we don't try to add a hut to a river connected to a lake)
+        public void addInitialOccupant(PlayerColor player, Occupant.Kind occupantKind, Zone occupiedZone) {
             switch (occupiedZone) {
                 case Zone.Forest forest
                         when occupantKind.equals(Occupant.Kind.PAWN) ->

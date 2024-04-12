@@ -168,9 +168,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         List<PlayerColor> myOccupants = new ArrayList<>(occupants);
         int myOpenConnections;
 
-        if (this.equals(that)) {
+        if (this.equals(that))
             myOpenConnections = openConnections - 2;
-        } else {
+        else {
             myZones.addAll(that.zones);
             myOccupants.addAll(that.occupants);
             myOpenConnections = this.openConnections + that.openConnections - 2;
@@ -203,11 +203,12 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Area<Z> withoutOccupant(PlayerColor occupant) {
         List<PlayerColor> myOccupants = new ArrayList<>(occupants);
 
-        for (PlayerColor color : occupants)
+        for (PlayerColor color : occupants) {
             if (color.equals(occupant)) {
                 myOccupants.remove(color);
                 return new Area<>(zones, myOccupants, openConnections);
             }
+        }
         throw new IllegalArgumentException();
     }
 

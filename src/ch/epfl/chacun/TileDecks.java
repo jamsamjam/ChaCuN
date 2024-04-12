@@ -64,11 +64,14 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
         checkArgument(deckSize(kind) != 0);
 
         return switch (kind) {
-            case START ->  new TileDecks(startTiles.subList(1, startTiles.size()), normalTiles,
+            case START ->  new TileDecks(startTiles.subList(1, startTiles.size()),
+                    normalTiles,
                     menhirTiles);
-            case NORMAL -> new TileDecks(startTiles, normalTiles.subList(1, normalTiles.size()),
+            case NORMAL -> new TileDecks(startTiles,
+                    normalTiles.subList(1, normalTiles.size()),
                     menhirTiles);
-            case MENHIR -> new TileDecks(startTiles, normalTiles,
+            case MENHIR -> new TileDecks(startTiles,
+                    normalTiles,
                     menhirTiles.subList(1, menhirTiles.size()));
         };
     }
@@ -84,10 +87,15 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
     public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
         return switch (kind) {
             case START -> new TileDecks(startTiles.subList(nextIndex(startTiles, predicate),
-                    startTiles.size()), normalTiles, menhirTiles);
+                    startTiles.size()),
+                    normalTiles,
+                    menhirTiles);
             case NORMAL -> new TileDecks(startTiles, normalTiles.subList(nextIndex(normalTiles,
-                    predicate), normalTiles.size()), menhirTiles);
-            case MENHIR -> new TileDecks(startTiles, normalTiles,
+                    predicate),
+                    normalTiles.size()),
+                    menhirTiles);
+            case MENHIR -> new TileDecks(startTiles,
+                    normalTiles,
                     menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
         };
     }
