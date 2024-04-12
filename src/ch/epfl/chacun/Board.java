@@ -194,7 +194,6 @@ public final class Board {
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
-
         for (int i = -1; i <= 1; i++) {
             for(int j = -1; j <= 1; j++) {
                 if (tileAt(pos.translated(i, j)) != null)
@@ -203,7 +202,6 @@ public final class Board {
         }
 
         Set<Zone.Meadow> myMeadows = new HashSet<>();
-
         for (var zone : adjacentMeadows) {
             if (meadowArea(meadowZone).zones().contains(zone)) {
                 myMeadows.add(zone);
@@ -241,15 +239,14 @@ public final class Board {
         Set<Pos> positions = new HashSet<>();
 
         for (int i : tileIndexes) {
-            for (Direction d : Direction.ALL) {
+            Direction.ALL.forEach(d -> {
                 Pos pos = placedTiles[i].pos();
-
                 if (tileAt(pos.neighbor(d)) == null
                         && Math.abs(pos.neighbor(d).x()) <= REACH
                         && Math.abs(pos.neighbor(d).y()) <= REACH) {
                     positions.add(pos.neighbor(d));
                 }
-            }
+            });
         }
         return positions;
     }

@@ -34,12 +34,6 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of border zones of the tile (except lakes)
      */
     public Set<Zone> sideZones() {
-        /*Set<Zone> sideZones = new HashSet<>();
-        for (TileSide side : sides()) {
-            sideZones.addAll(side.zones());
-        }
-        return sideZones;*/
-
         return sides().stream()
                 .flatMap(side -> side.zones().stream())
                 .collect(Collectors.toSet());
@@ -51,13 +45,6 @@ public record Tile(int id, Kind kind, TileSide n, TileSide e, TileSide s, TileSi
      * @return the set of all zones of the tile (including lakes)
      */
     public Set<Zone> zones() {
-        /*Set<Zone> lakes = new HashSet<>();
-        for (Zone zone : zones) {
-            if (zone instanceof Zone.River river && river.hasLake()) {
-                lakes.add(river.lake());
-            }
-        }*/
-
         Set<Zone> zones = new HashSet<>(sideZones());
         Set<Zone> lakes = zones.stream()
                 .filter(zone -> zone instanceof Zone.River r1 && r1.hasLake())

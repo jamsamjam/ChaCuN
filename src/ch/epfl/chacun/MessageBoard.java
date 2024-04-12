@@ -30,7 +30,6 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      */
     public Map<PlayerColor, Integer> points() {
         Map<PlayerColor, Integer> pointsMap = new HashMap<>();
-
         for (Message message : messages)
             message.scorers().forEach(scorer -> pointsMap.merge(scorer, message.points(), Integer::sum));
 
