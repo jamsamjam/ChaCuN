@@ -99,7 +99,7 @@ public final class Board {
      * @return a set of cancelled animals
      */
     public Set<Animal> cancelledAnimals() {
-        return cancelledAnimals;
+        return Set.copyOf(cancelledAnimals);
     }
 
     /**
