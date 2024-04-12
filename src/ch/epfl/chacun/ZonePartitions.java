@@ -58,7 +58,7 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
             // the number of times one of its zones appears on one of the edges of the tile
             int[] openConnections = new int[10];
 
-            for (TileSide side : tile.sides()) {
+            for (TileSide side : tile.sides())
                 for (Zone zone : side.zones()) {
                     openConnections[zone.localId()]++;
                     if (zone instanceof Zone.River river && river.hasLake()) {
@@ -66,13 +66,12 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                         openConnections[river.lake().localId()]++;
                     }
                 }
-            }
 
             // Add all the zones to the different partitions
             for (Zone zone : tile.zones()) {
                 int openConnectionCount = openConnections[zone.localId()];
 
-                switch (zone) {
+                switch (zone) { // TODO Zone.Water
                     case Zone.Forest forest ->
                             forestBuilder.addSingleton(forest, openConnectionCount);
                     case Zone.Meadow meadow ->
@@ -89,11 +88,9 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
             }
 
             // go through the rivers with lake and connect them with lakes
-            for (Zone zone : tile.zones()) {
-                if (zone instanceof Zone.River river && river.hasLake()) {
+            for (Zone zone : tile.zones())
+                if (zone instanceof Zone.River river && river.hasLake())
                     riverSystemBuilder.union(river, river.lake());
-                }
-            }
         }
 
         /**

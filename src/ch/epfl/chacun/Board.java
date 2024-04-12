@@ -64,9 +64,8 @@ public final class Board {
      * @return the placed tile at the specified position, or null if no tile is present
      */
     public PlacedTile tileAt(Pos pos) {
-        if (Math.abs(pos.x()) <= REACH && Math.abs(pos.y()) <= REACH) {
+        if (Math.abs(pos.x()) <= REACH && Math.abs(pos.y()) <= REACH)
             return placedTiles[indexOf(pos)];
-        }
         return null;
     }
 
@@ -88,11 +87,9 @@ public final class Board {
      * @throws IllegalArgumentException if no tile with the given ID is found
      */
     public PlacedTile tileWithId(int tileId) {
-       for (int i : tileIndexes) {
-           if (placedTiles[i].tile().id() == tileId) {
+       for (int i : tileIndexes)
+           if (placedTiles[i].tile().id() == tileId)
                return placedTiles[i];
-           }
-       }
        throw new IllegalArgumentException();
     }
 
@@ -112,11 +109,9 @@ public final class Board {
      */
     public Set<Occupant> occupants() {
         Set<Occupant> allOccupants = new HashSet<>();
-        for (int i : tileIndexes) {
-            if (placedTiles[i].occupant() != null){
+        for (int i : tileIndexes)
+            if (placedTiles[i].occupant() != null)
                 allOccupants.add(placedTiles[i].occupant());
-            }
-        }
         return allOccupants;
     }
 
@@ -194,19 +189,15 @@ public final class Board {
      */
     public Area<Zone.Meadow> adjacentMeadow(Pos pos, Zone.Meadow meadowZone) {
         Set<Zone.Meadow> adjacentMeadows = new HashSet<>();
-        for (int i = -1; i <= 1; i++) {
-            for(int j = -1; j <= 1; j++) {
+        for (int i = -1; i <= 1; i++)
+            for (int j = -1; j <= 1; j++)
                 if (tileAt(pos.translated(i, j)) != null)
                     adjacentMeadows.addAll(tileAt(pos.translated(i, j)).meadowZones());
-            }
-        }
 
         Set<Zone.Meadow> myMeadows = new HashSet<>();
-        for (var zone : adjacentMeadows) {
-            if (meadowArea(meadowZone).zones().contains(zone)) {
+        for (var zone : adjacentMeadows)
+            if (meadowArea(meadowZone).zones().contains(zone))
                 myMeadows.add(zone);
-            }
-        }
 
         return new Area<>(myMeadows, meadowArea(meadowZone).occupants(), 0);
     }
@@ -220,13 +211,12 @@ public final class Board {
      */
     public int occupantCount(PlayerColor player, Occupant.Kind occupantKind) {
         int count = 0;
-        for (int i : tileIndexes) {
+        for (int i : tileIndexes)
             if (placedTiles[i] != null
                     && placedTiles[i].occupant() != null
                     && placedTiles[i].placer() == player
                     && placedTiles[i].occupant().kind() == occupantKind)
                 count++;
-        }
         return count;
     }
 
@@ -238,16 +228,14 @@ public final class Board {
     public Set<Pos> insertionPositions() {
         Set<Pos> positions = new HashSet<>();
 
-        for (int i : tileIndexes) {
+        for (int i : tileIndexes)
             Direction.ALL.forEach(d -> {
                 Pos pos = placedTiles[i].pos();
                 if (tileAt(pos.neighbor(d)) == null
                         && Math.abs(pos.neighbor(d).x()) <= REACH
-                        && Math.abs(pos.neighbor(d).y()) <= REACH) {
+                        && Math.abs(pos.neighbor(d).y()) <= REACH)
                     positions.add(pos.neighbor(d));
-                }
             });
-        }
         return positions;
     }
 
@@ -257,9 +245,8 @@ public final class Board {
      * @return the last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
-        if (tileIndexes.length != 0) {
+        if (tileIndexes.length != 0)
             return placedTiles[tileIndexes[tileIndexes.length - 1]];
-        }
         return null;
     }
 
@@ -298,14 +285,13 @@ public final class Board {
      * @return true iff the given placed tile could be added to the board
      */
     public boolean canAddTile(PlacedTile tile) {
-        if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null) {
+        if (!insertionPositions().contains(tile.pos()) || tileAt(tile.pos()) != null)
             return false;
-        }
 
         return Direction.ALL.stream()
                 .allMatch(direction -> {
                     PlacedTile neighborTile = tileAt(tile.pos().neighbor(direction));
-                    return (neighborTile == null)
+                    return neighborTile == null
                             || tile.side(direction).isSameKindAs(neighborTile.side(direction.opposite()));
                 });
     }

@@ -37,11 +37,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return true if and only if the given forest contains at least one menhir
      */
     public static boolean hasMenhir(Area<Zone.Forest> forest) {
-        for (Zone.Forest f : forest.zones()) {
-            if (f.kind() == Zone.Forest.Kind.WITH_MENHIR) {
+        for (Zone.Forest f : forest.zones())
+            if (f.kind() == Zone.Forest.Kind.WITH_MENHIR)
                 return true;
-            }
-        }
         return false;
     }
 
@@ -53,11 +51,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public static int mushroomGroupCount(Area<Zone.Forest> forest) {
         int count = 0;
-        for (Zone.Forest f : forest.zones()) {
-            if (f.kind() == Zone.Forest.Kind.WITH_MUSHROOMS) {
-                count++;
-            }
-        }
+        for (Zone.Forest f : forest.zones())
+            if (f.kind() == Zone.Forest.Kind.WITH_MUSHROOMS) count++;
         return count;
     }
 
@@ -72,9 +67,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public static Set<Animal> animals(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
         Set<Animal> availableAnimals = new HashSet<>();
-        for (Zone.Meadow zone : meadow.zones()) {
-            availableAnimals.addAll(zone.animals());
-        }
+        for (Zone.Meadow zone : meadow.zones()) availableAnimals.addAll(zone.animals());
         availableAnimals.removeAll(cancelledAnimals);
         return availableAnimals;
     }
@@ -94,9 +87,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
             count += zone.fishCount();
             // The fish in a given lake should only be counted once even in the case where a single
             // lake ends the river at both ends
-            if (zone.hasLake() && encounteredLakes.add(zone.lake())) {
+            if (zone.hasLake() && encounteredLakes.add(zone.lake()))
                 count += zone.lake().fishCount();
-            }
         }
         return count;
     }
@@ -109,9 +101,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public static int riverSystemFishCount(Area<Zone.Water> riverSystem) {
         int count = 0;
-        for (Zone.Water zone : riverSystem.zones()) {
-            count += zone.fishCount();
-        }
+        for (Zone.Water zone : riverSystem.zones()) count += zone.fishCount();
         return count;
     }
 
@@ -123,11 +113,8 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public static int lakeCount(Area<Zone.Water> riverSystem) {
         int count = 0;
-        for (Zone.Water zone : riverSystem.zones()) {
-            if (zone instanceof Zone.Lake) {
-                count++;
-            }
-        }
+        for (Zone.Water zone : riverSystem.zones())
+            if (zone instanceof Zone.Lake) count++;
         return count;
     }
 
@@ -160,20 +147,13 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         int max = colorCounts[0];
         for (PlayerColor color : occupants) {
             colorCounts[color.ordinal()]++;
-
-            if (colorCounts[color.ordinal()] > max) {
-                max = colorCounts[color.ordinal()];
-            }
+            if (colorCounts[color.ordinal()] > max) max = colorCounts[color.ordinal()];
         }
 
         Set<PlayerColor> majorityOccupants = new HashSet<>();
-        if (max > 0) {
-            for (PlayerColor color : PlayerColor.ALL) {
-                if (colorCounts[color.ordinal()] == max) {
-                    majorityOccupants.add(color);
-                }
-            }
-        }
+        if (max > 0)
+            for (PlayerColor color : PlayerColor.ALL)
+                if (colorCounts[color.ordinal()] == max) majorityOccupants.add(color);
         return majorityOccupants;
     }
 
@@ -223,12 +203,11 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Area<Z> withoutOccupant(PlayerColor occupant) {
         List<PlayerColor> myOccupants = new ArrayList<>(occupants);
 
-        for (PlayerColor color : occupants) {
+        for (PlayerColor color : occupants)
             if (color.equals(occupant)) {
                 myOccupants.remove(color);
                 return new Area<>(zones, myOccupants, openConnections);
             }
-        }
         throw new IllegalArgumentException();
     }
 
@@ -248,9 +227,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public Set<Integer> tileIds() {
         Set<Integer> tileIds = new HashSet<>();
-        for (var zone : zones) {
-            tileIds.add(zone.tileId());
-        }
+        for (var zone : zones) tileIds.add(zone.tileId());
         return tileIds;
     }
 
@@ -261,11 +238,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @return the zone of the area that has the given special power, or null if none exists
      */
     public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {
-        for (Zone zone : zones) {
-            if (zone.specialPower() != null && zone.specialPower().equals(specialPower)) {
+        for (Zone zone : zones)
+            if (zone.specialPower() != null && zone.specialPower().equals(specialPower))
                 return zone;
-            }
-        }
         return null;
     }
 }

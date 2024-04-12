@@ -41,11 +41,10 @@ public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
     }
 
     private static <Z extends Zone> Area<Z> areaContaining(Z zone, Set<Area<Z>> areas) {
-        for (Area<Z> area : areas) {
-            if (area.zones().contains(zone)) {
+        for (Area<Z> area : areas)
+            if (area.zones().contains(zone))
                 return area;
-            }
-        }
+
         throw new IllegalArgumentException();
     }
 

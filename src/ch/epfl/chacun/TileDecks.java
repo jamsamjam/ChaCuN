@@ -102,11 +102,9 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * or the size of the list
      */
     private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
-        for (int i = 0; i < tiles.size(); i++) {
-            if (predicate.test(tiles.get(i))) {
+        for (int i = 0; i < tiles.size(); i++)
+            if (predicate.test(tiles.get(i)))
                 return i;
-            }
-        }
         return tiles.size();
     }
 }
