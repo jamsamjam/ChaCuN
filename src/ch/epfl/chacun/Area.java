@@ -154,6 +154,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
         if (max > 0)
             for (PlayerColor color : PlayerColor.ALL)
                 if (colorCounts[color.ordinal()] == max) majorityOccupants.add(color);
+
         return majorityOccupants;
     }
 
