@@ -99,20 +99,20 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         checkArgument(board.lastPlacedTile() != null);
         Set<Occupant> occupants = new HashSet<>();
 
-        for (var occ : board.lastPlacedTile().potentialOccupants())
-            if (freeOccupantsCount(currentPlayer(), occ.kind()) > 0)
-                switch (board.lastPlacedTile().zoneWithId(occ.zoneId())) {
+        for (var occupant : board.lastPlacedTile().potentialOccupants())
+            if (freeOccupantsCount(currentPlayer(), occupant.kind()) > 0)
+                switch (board.lastPlacedTile().zoneWithId(occupant.zoneId())) {
                     case Zone.Forest forest -> {
-                        if (!board.forestArea(forest).isOccupied()) occupants.add(occ);
+                        if (!board.forestArea(forest).isOccupied()) occupants.add(occupant);
                     }
                     case Zone.Meadow meadow -> {
-                        if (!board.meadowArea(meadow).isOccupied()) occupants.add(occ);
+                        if (!board.meadowArea(meadow).isOccupied()) occupants.add(occupant);
                     }
-                    case Zone.River river when occ.kind() == PAWN -> {
-                        if (!board.riverArea(river).isOccupied()) occupants.add(occ);
+                    case Zone.River river when occupant.kind() == PAWN -> {
+                        if (!board.riverArea(river).isOccupied()) occupants.add(occupant);
                     }
                     case Zone.Water water -> {
-                        if (!board.riverSystemArea(water).isOccupied()) occupants.add(occ);
+                        if (!board.riverSystemArea(water).isOccupied()) occupants.add(occupant);
                     }
                 }
         return occupants;
