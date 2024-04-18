@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 /**
  * Represents a tile that has not yet been placed.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  *
  * @param id the tile identifier
  * @param kind the type of tile

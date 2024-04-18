@@ -13,8 +13,8 @@ import static ch.epfl.chacun.Zone.SpecialPower.*;
 /**
  * Represents the complete state of a part of ChaCuN, with all the information related to a current game.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  *
  * @param players the list of all players in the game, in the order in which they must play
  *                — so with the current player at the top of the list
@@ -246,11 +246,12 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
      * @return an updated game state
      */
     private GameState withTurnFinishedIfOccupationImpossible() {
-        return lastTilePotentialOccupants().isEmpty() ? this.withTurnFinished() : this;
+        return lastTilePotentialOccupants().isEmpty() ? withTurnFinished() : this;
+        // TODO : this.withTurnFinished() vs. withTurnFinished()
     }
 
     private GameState withTurnFinished() {
-        List<PlayerColor> myPlayers = new ArrayList<>(players());
+        List<PlayerColor> myPlayers = new ArrayList<>(players);
         Board myBoard = board;
         TileDecks myTileDecks = tileDecks;
         MessageBoard myMessageBoard = messageBoard;

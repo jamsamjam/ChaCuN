@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Generates all the French text necessary for the ChaCuN graphical interface.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public final class TextMakerFr implements TextMaker { // TODO test!
     Map<String, PlayerColor> nameColorMap;
@@ -31,7 +30,7 @@ public final class TextMakerFr implements TextMaker { // TODO test!
 
     @Override
     public String points(int points) {
-        checkArgument(points > 0); // TODO
+        checkArgument(points > 0);
         return points == 1 ? "1 point" : STR."\{points} points";
     }
 

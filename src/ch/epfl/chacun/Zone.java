@@ -6,8 +6,8 @@ import java.util.List;
  * Represents a zone in the game.
  * Zones can have various properties and special powers.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public sealed interface Zone {
     /**

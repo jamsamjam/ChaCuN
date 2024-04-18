@@ -3,8 +3,8 @@ package ch.epfl.chacun;
 /**
  * Requires that the arguments satisfy certain conditions.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public final class Preconditions {
     private Preconditions() {}

@@ -14,6 +14,6 @@ class MyTextMakerFrTest {
         animals.put(Animal.Kind.DEER, 1);
         animals.put(Animal.Kind.AUROCHS, 5);
 
-        System.out.println(TextMakerFr.animal(animals));
+        //System.out.println(TextMakerFr.animal(animals));
     }
 }

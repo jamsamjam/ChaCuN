@@ -3,8 +3,8 @@ package ch.epfl.chacun;
 /**
  * Represents a position.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  *
  * @param x the x coordinate
  * @param y the y coordinate

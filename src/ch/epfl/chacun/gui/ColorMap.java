@@ -11,7 +11,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * that exist in ChaCuN on screen.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public class ColorMap {
     private ColorMap() {}

@@ -7,9 +7,9 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
  * Represents the contents of a bulletin board.
-
- * @author Gehna Yadav (379155)
+ *
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  *
  * @param textMaker the TextMaker object providing text for messages
  * @param messages the list of messages to be displayed on the board

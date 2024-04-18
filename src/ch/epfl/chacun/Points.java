@@ -5,8 +5,8 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 /**
  * Calculates points obtained in different situations.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public final class Points {
     /**

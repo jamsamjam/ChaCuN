@@ -3,8 +3,8 @@ package ch.epfl.chacun;
 /**
  * Represents an animal.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  *
  * @param id the identifier of animal
  * @param kind the kind of animal

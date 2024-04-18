@@ -11,6 +11,8 @@ import static ch.epfl.chacun.gui.ColorMap.strokeColor;
 
 /**
  * Returns new JavaFX elements (nodes) representing the occupants of the different players.
+ *
+ * @author Sam Lee (375535)
  */
 public class Icon {
     private Icon() {}
@@ -22,7 +24,7 @@ public class Icon {
      * @param kind the given kind
      * @return a SVGPath representing the corresponding occupant
      */
-    public Node newFor(PlayerColor playerColor, Occupant.Kind kind) {
+    public static Node newFor(PlayerColor playerColor, Occupant.Kind kind) {
         checkArgument(PlayerColor.ALL.contains(playerColor));
         checkArgument(kind == Occupant.Kind.PAWN || kind == Occupant.Kind.HUT);
 
@@ -33,7 +35,7 @@ public class Icon {
                 : "M -8 10 H 8 V 2 H 12 L 0 -10 L -12 2 H -8 Z";
 
         svgPath.setContent(value);
-        svgPath.setFill(fillColor(playerColor)); // TODO 한줄에는 왜 안되는지 ?
+        svgPath.setFill(fillColor(playerColor));
         svgPath.setStroke(strokeColor(playerColor));
 
         return svgPath;

@@ -7,8 +7,8 @@ import java.util.Set;
  * Implemented by classes capable of generating all the text which appears in the graphical
  * interface - mainly the messages, but also the number of points of each player, their name, etc.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public interface TextMaker {
     /**

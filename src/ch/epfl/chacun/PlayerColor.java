@@ -5,8 +5,8 @@ import java.util.List;
 /**
  * Lists the colors associated with the players.
  *
- * @author Gehna Yadav (379155)
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public enum PlayerColor {
     RED,

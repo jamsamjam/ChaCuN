@@ -4,9 +4,9 @@ import java.util.List;
 
 /**
  * Lists the directions corresponding to the four cardinal points.
- *
- * @author Gehna Yadav (379155)
+
  * @author Sam Lee (375535)
+ * @author Gehna Yadav (379155)
  */
 public enum Direction {
     N,
