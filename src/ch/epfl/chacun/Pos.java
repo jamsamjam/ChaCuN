@@ -11,7 +11,7 @@ package ch.epfl.chacun;
  */
 public record Pos(int x, int y) {
     /**
-     * The origin position.
+     * The origin position, the central square of the game board, which contains the starting tile.
      */
     public static final Pos ORIGIN = new Pos(0, 0);
 

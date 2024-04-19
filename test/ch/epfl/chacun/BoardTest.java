@@ -947,7 +947,7 @@ class BoardTest {
         assertEquals(board1.hashCode(), board2.hashCode());
     }
 
-    //<editor-fold desc="Tiles">
+    //<editor-fold desc="Tiles.java">
     private static List<Tile> allTiles() {
         ArrayList<Tile> tiles = new ArrayList<>();
         {   // Tile 0

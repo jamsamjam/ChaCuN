@@ -58,6 +58,6 @@ public enum Rotation {
      * @return the angle corresponding to the receiver
      */
     public int degreesCW() {
-        return this.ordinal() * 90;
+        return quarterTurnsCW() * 90;
     }
 }

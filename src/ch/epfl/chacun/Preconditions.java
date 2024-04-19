@@ -7,6 +7,7 @@ package ch.epfl.chacun;
  * @author Gehna Yadav (379155)
  */
 public final class Preconditions {
+    // non-instantiable
     private Preconditions() {}
 
     /**

@@ -348,11 +348,14 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
         Integer maxPoint = Collections.max(myMessageBoard.points().values());
 
-        Set<PlayerColor> winners = myMessageBoard.points().entrySet()
+        Set<PlayerColor> winners = new HashSet<>(); // TODO
+
+        myMessageBoard.points().entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().equals(maxPoint))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+                .filter(e -> e.getValue().equals(maxPoint))
+                .forEach(e -> winners.add(e.getKey()));
+//                .map(Map.Entry::getKey)
+//                .collect(Collectors.toSet());
 
         return new GameState(players,
                 tileDecks,

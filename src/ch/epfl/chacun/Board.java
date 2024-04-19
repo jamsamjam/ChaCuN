@@ -51,6 +51,7 @@ public final class Board {
      * Represents the range of the board.
      */
     public static final int REACH = 12;
+    private static final int LENGTH = REACH * 2 + 1;
 
     /**
      * Empty board instance.
@@ -76,7 +77,7 @@ public final class Board {
      * @return the index of the given position (without checking if it's in the scope)
      */
     private int indexOf(Pos pos) {
-        return (REACH * 2 + 1) * (pos.y() + REACH) + (pos.x() + REACH);
+        return LENGTH * (pos.y() + REACH) + (pos.x() + REACH);
     }
 
     /**

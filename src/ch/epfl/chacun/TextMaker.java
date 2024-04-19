@@ -15,7 +15,7 @@ public interface TextMaker {
      * Returns the name of the player with the given color.
      *
      * @param playerColor the color of the player
-     * @return player name
+     * @return player name, null if the player is not participating in the game.
      */
     String playerName(PlayerColor playerColor);
 

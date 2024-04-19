@@ -10,22 +10,22 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker { // TODO test!
-    Map<String, PlayerColor> nameColorMap;
+public final class TextMakerFr implements TextMaker {
+    Map<PlayerColor, String> nameColorMap;
 
-    public TextMakerFr(Map<String, PlayerColor> nameColorMap) {
+    public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
         this.nameColorMap = Map.copyOf(nameColorMap);
     }
 
     @Override
     public String playerName(PlayerColor playerColor) {
-        checkArgument(PlayerColor.ALL.contains(playerColor));
+        for (Map.Entry<PlayerColor, String> entry : nameColorMap.entrySet()) {
+            if (entry.getKey().equals(playerColor)) {
+                return entry.getValue();
+            }
+        }
 
-        return nameColorMap.entrySet().stream()
-                .filter(entry -> entry.getValue().equals(playerColor))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .get();
+        return null;
     }
 
     @Override
@@ -151,8 +151,8 @@ public final class TextMakerFr implements TextMaker { // TODO test!
 
         return sb.toString();
     }
-
-    private StringBuilder getStringBuilder(List<Integer> index, List<Integer> counts, List<String> kinds) { // TODO static
+    // TODO private vs. private static
+    private StringBuilder getStringBuilder(List<Integer> index, List<Integer> counts, List<String> kinds) {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < index.size(); i++) {
