@@ -52,11 +52,12 @@ public class PlayersUI  {
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
                         if (point > 0)
-                            return STR."\{tm.playerName(player)} : \{tm.points(point)}";
+                            return STR."\{tm.playerName(player)} : \{tm.points(m.get(player))}";
                         return "";
                     });
             Text text = new Text();
             text.textProperty().bind(pointsText);
+            textFlow.getChildren().addAll(circle, text);
 
             // occupants
             for (int i = 0; i < 3; i++) {
@@ -82,6 +83,7 @@ public class PlayersUI  {
                     myGameState.map(GameState::currentPlayer);
             currentPlayer.addListener((o, oP, nP) -> textFlow.getStyleClass().add("current"));
             // TODO removed from those of the other nodes TextFlow
+            vBox.getChildren().add(textFlow);
         }
 
         // TODO
