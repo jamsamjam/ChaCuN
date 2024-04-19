@@ -59,5 +59,7 @@ public class MessageBoardUI {
         });
 
         scrollPane.setContent(messageBox);
+
+        return scrollPane;
     }
 }
