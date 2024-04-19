@@ -12,8 +12,7 @@ import javafx.scene.text.Text;
 
 import java.util.function.Consumer;
 
-import static ch.epfl.chacun.gui.ImageLoader.LARGE_TILE_FIT_SIZE;
-import static ch.epfl.chacun.gui.ImageLoader.largeImageForTile;
+import static ch.epfl.chacun.gui.ImageLoader.*;
 
 /**
  * Contains the code for creating the part of the graphical interface which displays the piles of
@@ -25,6 +24,8 @@ public class DecksUI {
     private DecksUI() {}
 
     /**
+     * Creates the part of the graphical interface which displays the piles of tiles as well as the
+     * tile to be placed.
      *
      * @param tile the observable version of the tile to be placed
      * @param normalTileCount the observable version of the number of tiles remaining in the pile
@@ -34,15 +35,14 @@ public class DecksUI {
      * @param text the observable version of the text to display in place of the tile to place
      * @param eventHandler an event handler intended to be called when the current player signals
      *                     that he does not wish to place or pick up an occupant, by clicking on the text displayed in place of the next tile
-     * @return
+     * @return the graphical interface
      */
     public static Node create(ObservableValue<Tile> tile,
                               ObservableValue<Integer> normalTileCount,
                               ObservableValue<Integer> menhirTileCount,
                               ObservableValue<String> text,
                               Consumer<Occupant> eventHandler) {
-        // the rest of the program is informed that the player does not wish to place (or pick up)
-        // an occupant
+        // inform the rest of the program that the player does not wish to place (or pick up) an occupant
         if (!text.getValue().isEmpty()) {
             eventHandler.accept(null);
             // it is necessary to link, by means of bind, its property visible Property to an
@@ -56,24 +56,34 @@ public class DecksUI {
         StackPane nextTile = new StackPane();
         nextTile.setId("next-tile");
 
-        ImageView imageView = new ImageView(largeImageForTile(tile.getValue().id()));
-        imageView.setFitWidth(LARGE_TILE_FIT_SIZE * 0.5);
-        imageView.setFitHeight(LARGE_TILE_FIT_SIZE * 0.5);
+        ImageView nextTileImage = new ImageView(largeImageForTile(tile.getValue().id()));
+        nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE * 0.5);
+        nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE * 0.5);
 
-        Text text1 = new Text();
-        text1.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
+        Text text0 = new Text();
+        text0.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
 
-        nextTile.getChildren().addAll(imageView, text1);
-
+        nextTile.getChildren().addAll(nextTileImage, text0);
 
         HBox hBox = new HBox();
         hBox.setId("decks");
 
-        StackPane normalTiles = new StackPane();
+        StackPane normalStack = new StackPane();
+        ImageView normalTileImage = new ImageView("/256/NORMAL.jpg");
+        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE * 0.5);
+        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE * 0.5);
+        Text text1 = new Text(String.valueOf(normalTileCount.getValue()));
+        normalStack.getChildren().addAll(normalTileImage, text1);
 
+        StackPane menhirStack = new StackPane();
+        ImageView menhirTileImage = new ImageView("/256/MENHIR.jpg");
+        menhirTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE * 0.5);
+        menhirTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE * 0.5);
+        Text text2 = new Text(String.valueOf(menhirTileCount.getValue()));
+        normalStack.getChildren().addAll(menhirTileImage, text2);
 
-        StackPane menhirTiles = new StackPane();
-
+        hBox.getChildren().addAll(normalStack, menhirStack);
+        vBox.getChildren().addAll(nextTile, hBox);
 
         return vBox;
     }

@@ -3,6 +3,7 @@ package ch.epfl.chacun.gui;
 import ch.epfl.chacun.MessageBoard;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -27,8 +28,9 @@ public class MessageBoardUI {
      * @param messages the observable version of messages displayed on the bulletin board
      * @param tileIds a JavaFX property containing all the identities of the tiles to be
      *                highlighted on the board
+     * @return the graphical interface
      */
-    public static void create(ObservableValue<List<MessageBoard.Message>> messages,
+    public static Node create(ObservableValue<List<MessageBoard.Message>> messages,
                               ObjectProperty<Set<Integer>> tileIds) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("message-board");
