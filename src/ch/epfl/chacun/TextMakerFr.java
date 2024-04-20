@@ -19,19 +19,13 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playerName(PlayerColor playerColor) {
-        for (Map.Entry<PlayerColor, String> entry : nameColorMap.entrySet()) {
-            if (entry.getKey().equals(playerColor)) {
-                return entry.getValue();
-            }
-        }
-
-        return null;
+        return nameColorMap.get(playerColor);
     }
 
     @Override
     public String points(int points) {
-        checkArgument(points > 0);
-        return points == 1 ? "1 point" : STR."\{points} points";
+        checkArgument(points >= 0);
+        return points == 0 || points == 1 ? STR."\{points} point" : STR."\{points} points";
     }
 
     @Override

@@ -28,18 +28,23 @@ public class PlayersUI  {
      * @param tm
      */
     public static Node create(ObservableValue<GameState> myGameState, TextMaker tm) {
+        System.out.println("Creating PlayersUI...");
         VBox vBox = new VBox();
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
+        System.out.println("CSS styles added: " + vBox.getStylesheets());
 
         Set<PlayerColor> participants = PlayerColor.ALL.stream()
                 .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
+        System.out.println("participants size is : "+ participants.size());
+        participants.stream().forEach(System.out::println);
 
         // player points
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
                 myGameState.map(gs -> gs.messageBoard().points());
 
         for (var player : participants) {
+            System.out.println("Creating TextFlow for player: " + player);
             TextFlow textFlow = new TextFlow();
             textFlow.getStyleClass().add("player");
 
@@ -51,12 +56,11 @@ public class PlayersUI  {
             ObservableValue<String> pointsText =
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
-                        if (point > 0)
-                            return STR."\{tm.playerName(player)} : \{tm.points(m.get(player))}";
-                        return "";
+                        return STR." \{tm.playerName(player)} : \{tm.points(point)}\n";
                     });
             Text text = new Text();
             text.textProperty().bind(pointsText);
+            System.out.println("Text bound to pointsText: " + text.getText());
             textFlow.getChildren().addAll(circle, text);
 
             // occupants
@@ -86,9 +90,10 @@ public class PlayersUI  {
             vBox.getChildren().add(textFlow);
         }
 
-        // TODO
+        // TODO opacity
         // https://cs108.epfl.ch/p/08_ui.html#orgf1fb3ab:~:text=classes%20TextFlow.-,Occupants,-placed
 
+        System.out.println("PlayersUI created successfully.");
         return vBox;
     }
 }
