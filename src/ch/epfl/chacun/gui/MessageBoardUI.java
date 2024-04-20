@@ -11,7 +11,7 @@ import javafx.scene.text.Text;
 import java.util.List;
 import java.util.Set;
 
-import static ch.epfl.chacun.gui.ImageLoader.LARGE_TILE_FIT_SIZE;
+import static ch.epfl.chacun.gui.ImageLoader.*;
 import static javafx.application.Platform.runLater;
 
 /**

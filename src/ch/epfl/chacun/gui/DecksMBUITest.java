@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class DecksUITest extends Application {
+public class DecksMBUITest extends Application {
 
     public static void main(String[] args) { launch(args); }
 
@@ -71,5 +71,6 @@ public class DecksUITest extends Application {
 
         primaryStage.setTitle("ChaCuN test :)");
         primaryStage.show();
+        // TODO add message board
     }
 }
