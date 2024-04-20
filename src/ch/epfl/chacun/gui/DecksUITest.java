@@ -4,19 +4,19 @@ import ch.epfl.chacun.*;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class PlayersUITest extends Application {
+public class DecksUITest extends Application {
+
     public static void main(String[] args) { launch(args); }
 
     @Override
     public void start(Stage primaryStage) {
-//        var playerNames = Map.of(PlayerColor.RED, "Rose",
-//                PlayerColor.BLUE, "Bernard");
         var playerNames = Map.of(PlayerColor.RED, "Rose",
                 PlayerColor.BLUE, "Bernard",
                 PlayerColor.GREEN, "Sam",
@@ -40,13 +40,36 @@ public final class PlayersUITest extends Application {
                         tileDecks,
                         textMaker);
 
+        var tile1 = tileDecks.topTile(Tile.Kind.START);
+        var normalCount = tileDecks.normalTiles().size();
+        var menhirCount = tileDecks.menhirTiles().size();
+        var text1 = "test running..";
+
         var gameStateO = new SimpleObjectProperty<>(gameState);
 
-        var playersNode = PlayersUI.create(gameStateO, textMaker);
-        var rootNode = new BorderPane(playersNode);
+        var tile0 = new SimpleObjectProperty<>(tile1);
+        var normalCount0 = new SimpleObjectProperty<>(normalCount);
+        var menhirCount0 = new SimpleObjectProperty<>(menhirCount);
+        var text0 = new SimpleObjectProperty<>(text1);
+        var ehandler = new Consumer<Occupant>() {
+            @Override
+            public void accept(Occupant occupant) {
+
+            }
+        };
+
+        var decksNode = DecksUI.create(tile0,
+                normalCount0,
+                menhirCount0,
+                text0,
+                ehandler);
+
+        //var playersNode = PlayersUI.create(gameStateO, textMaker);
+        //var rootNode = new BorderPane(playersNode);
+        var rootNode = new StackPane(decksNode);
         primaryStage.setScene(new Scene(rootNode));
 
-        primaryStage.setTitle("ChaCuN test");
+        primaryStage.setTitle("ChaCuN test :)");
         primaryStage.show();
     }
 }

@@ -28,23 +28,18 @@ public class PlayersUI  {
      * @param tm
      */
     public static Node create(ObservableValue<GameState> myGameState, TextMaker tm) {
-        System.out.println("Creating PlayersUI...");
         VBox vBox = new VBox();
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
-        System.out.println("CSS styles added: " + vBox.getStylesheets());
 
         Set<PlayerColor> participants = PlayerColor.ALL.stream()
                 .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
-        System.out.println("participants size is : "+ participants.size());
-        participants.stream().forEach(System.out::println);
 
-        // player points
+        // player's points
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
                 myGameState.map(gs -> gs.messageBoard().points());
 
         for (var player : participants) {
-            System.out.println("Creating TextFlow for player: " + player);
             TextFlow textFlow = new TextFlow();
             textFlow.getStyleClass().add("player");
 
@@ -52,7 +47,7 @@ public class PlayersUI  {
             Circle circle = new Circle(5);
             circle.setFill(fillColor(player));
 
-            // text TODO map 쓰는곳들 다시 체크하기, 여기 point>0
+            // text TODO map 쓰는곳들 다시 체크하기,
             ObservableValue<String> pointsText =
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
@@ -60,7 +55,6 @@ public class PlayersUI  {
                     });
             Text text = new Text();
             text.textProperty().bind(pointsText);
-            System.out.println("Text bound to pointsText: " + text.getText());
             textFlow.getChildren().addAll(circle, text);
 
             // occupants
@@ -93,7 +87,6 @@ public class PlayersUI  {
         // TODO opacity
         // https://cs108.epfl.ch/p/08_ui.html#orgf1fb3ab:~:text=classes%20TextFlow.-,Occupants,-placed
 
-        System.out.println("PlayersUI created successfully.");
         return vBox;
     }
 }

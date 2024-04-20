@@ -3,9 +3,11 @@ package ch.epfl.chacun.gui;
 import ch.epfl.chacun.Occupant;
 import ch.epfl.chacun.Tile;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -50,40 +52,36 @@ public class DecksUI {
             // obtained using the method map. TODO
         }
 
-        VBox vBox = new VBox();
-        vBox.getStylesheets().add("/decks.css");
-
-        StackPane nextTile = new StackPane();
-        nextTile.setId("next-tile");
-
+        // next tile to place
         ImageView nextTileImage = new ImageView(largeImageForTile(tile.getValue().id()));
-        nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE * 0.5);
-        nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE * 0.5);
+        nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE);
+        nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE);
 
         Text text0 = new Text();
         text0.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
 
-        nextTile.getChildren().addAll(nextTileImage, text0);
+        StackPane nextTile = new StackPane(nextTileImage, text0);
+        nextTile.setId("next-tile");
 
-        HBox hBox = new HBox();
+        // normal tiles deck
+        ImageView normalTileImage = new ImageView("/256/NORMAL.jpg");
+        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
+        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
+        Text text1 = new Text(String.valueOf(normalTileCount.getValue()));
+        StackPane normalStack = new StackPane(normalTileImage, text1);
+
+        // menhir tiles deck
+        ImageView menhirTileImage = new ImageView("/256/MENHIR.jpg");
+        menhirTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
+        menhirTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
+        Text text2 = new Text(String.valueOf(menhirTileCount.getValue()));
+        StackPane menhirStack = new StackPane(menhirTileImage, text2);
+
+        HBox hBox = new HBox(normalStack, menhirStack);
         hBox.setId("decks");
 
-        StackPane normalStack = new StackPane();
-        ImageView normalTileImage = new ImageView("/256/NORMAL.jpg");
-        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE * 0.5);
-        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE * 0.5);
-        Text text1 = new Text(String.valueOf(normalTileCount.getValue()));
-        normalStack.getChildren().addAll(normalTileImage, text1);
-
-        StackPane menhirStack = new StackPane();
-        ImageView menhirTileImage = new ImageView("/256/MENHIR.jpg");
-        menhirTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE * 0.5);
-        menhirTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE * 0.5);
-        Text text2 = new Text(String.valueOf(menhirTileCount.getValue()));
-        normalStack.getChildren().addAll(menhirTileImage, text2);
-
-        hBox.getChildren().addAll(normalStack, menhirStack);
-        vBox.getChildren().addAll(nextTile, hBox);
+        VBox vBox = new VBox(hBox, nextTile);
+        vBox.getStylesheets().add("/decks.css");
 
         return vBox;
     }
