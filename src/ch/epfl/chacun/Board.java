@@ -248,8 +248,10 @@ public final class Board {
      * @return the last placed tile, or null if the board is empty
      */
     public PlacedTile lastPlacedTile() {
-        if (tileIndexes.length != 0)
-            return placedTiles[tileIndexes[tileIndexes.length - 1]];
+        if (tileIndexes.length != 0) {
+            int lastIndex = tileIndexes[tileIndexes.length - 1];
+            return placedTiles[lastIndex];
+        }
         return null;
     }
 

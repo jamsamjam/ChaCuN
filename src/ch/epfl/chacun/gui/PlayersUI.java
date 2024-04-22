@@ -15,7 +15,7 @@ import static ch.epfl.chacun.gui.ColorMap.fillColor;
 import static ch.epfl.chacun.gui.Icon.newFor;
 
 /**
- * Contains the code for creating the part of the GUI that displays player information.
+ * Creates the part of the graphical interface that displays player information.
  *
  * @author Sam Lee (375535)
  */
@@ -23,11 +23,13 @@ public class PlayersUI  {
     private PlayersUI() {}
 
     /**
+     * Creates the part of the graphical interface that displays player information.
      *
-     * @param myGameState
-     * @param tm
+     * @param gameState the observable version of the current game state
+     * @param tm a text maker
+     * @return the part of the graphical interface
      */
-    public static Node create(ObservableValue<GameState> myGameState, TextMaker tm) {
+    public static Node create(ObservableValue<GameState> gameState, TextMaker tm) {
         VBox vBox = new VBox();
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
@@ -37,7 +39,7 @@ public class PlayersUI  {
 
         // player's points
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
-                myGameState.map(gs -> gs.messageBoard().points());
+                gameState.map(gs -> gs.messageBoard().points());
 
         for (var player : participants) {
             TextFlow textFlow = new TextFlow();
@@ -47,7 +49,7 @@ public class PlayersUI  {
             Circle circle = new Circle(5);
             circle.setFill(fillColor(player));
 
-            // text TODO map 쓰는곳들 다시 체크하기,
+            // text
             ObservableValue<String> pointsText =
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
@@ -57,9 +59,14 @@ public class PlayersUI  {
             text.textProperty().bind(pointsText);
             textFlow.getChildren().addAll(circle, text);
 
-            // occupants
+            // occupants (the already placed ones should appear transparent)
             for (int i = 0; i < 3; i++) {
                 Node hut = newFor(player, Occupant.Kind.HUT);
+
+                ObservableValue<Integer> freeCount =
+                        gameState.map(gs -> gs.freeOccupantsCount(player, Occupant.Kind.HUT));
+                hut.opacityProperty().set((i < freeCount.getValue()) ? 1.0 : 0.1);
+
                 textFlow.getChildren().add(hut);
             }
 
@@ -68,24 +75,22 @@ public class PlayersUI  {
 
             for (int i = 0; i < 5; i++) {
                 Node pawn = newFor(player, Occupant.Kind.PAWN);
+
+                ObservableValue<Integer> freeCount =
+                        gameState.map(gs -> gs.freeOccupantsCount(player, Occupant.Kind.PAWN));
+                pawn.opacityProperty().set((i < freeCount.getValue()) ? 1.0 : 0.1);
+
                 textFlow.getChildren().add(pawn);
             }
 
             // current player is surrounded by a gray frame
-            if (player == myGameState.getValue().currentPlayer())
-                textFlow.getStyleClass().add("current");
-            else
-                textFlow.getStyleClass().remove("current");
-
             ObservableValue<PlayerColor> currentPlayer =
-                    myGameState.map(GameState::currentPlayer);
-            currentPlayer.addListener((o, oP, nP) -> textFlow.getStyleClass().add("current"));
+                    gameState.map(GameState::currentPlayer);
+            currentPlayer.addListener((o, oV, nV) -> textFlow.getStyleClass().add("current"));
             // TODO removed from those of the other nodes TextFlow
+
             vBox.getChildren().add(textFlow);
         }
-
-        // TODO opacity
-        // https://cs108.epfl.ch/p/08_ui.html#orgf1fb3ab:~:text=classes%20TextFlow.-,Occupants,-placed
 
         return vBox;
     }

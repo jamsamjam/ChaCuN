@@ -3,11 +3,9 @@ package ch.epfl.chacun.gui;
 import ch.epfl.chacun.Occupant;
 import ch.epfl.chacun.Tile;
 import javafx.beans.value.ObservableValue;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -17,17 +15,16 @@ import java.util.function.Consumer;
 import static ch.epfl.chacun.gui.ImageLoader.*;
 
 /**
- * Contains the code for creating the part of the graphical interface which displays the piles of
- * tiles as well as the tile to be placed.
+ * Creates the part of the graphical interface which displays the tile decks and the tile to be placed.
  *
  * @author Sam Lee (375535)
  */
 public class DecksUI {
-    private DecksUI() {}
+    private DecksUI() {
+    }
 
     /**
-     * Creates the part of the graphical interface which displays the piles of tiles as well as the
-     * tile to be placed.
+     * Creates the part of the graphical interface which displays the tile decks and the tile to be placed.
      *
      * @param tile the observable version of the tile to be placed
      * @param normalTileCount the observable version of the number of tiles remaining in the pile
@@ -36,8 +33,8 @@ public class DecksUI {
      *                        of menhir tiles
      * @param text the observable version of the text to display in place of the tile to place
      * @param eventHandler an event handler intended to be called when the current player signals
-     *                     that he does not wish to place or pick up an occupant, by clicking on the text displayed in place of the next tile
-     * @return the graphical interface
+     *                        that he does not wish to place or pick up an occupant, by clicking on the text displayed in place of the next tile
+     * @return the part of the graphical interface
      */
     public static Node create(ObservableValue<Tile> tile,
                               ObservableValue<Integer> normalTileCount,

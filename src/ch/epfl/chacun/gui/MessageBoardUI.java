@@ -15,7 +15,7 @@ import static ch.epfl.chacun.gui.ImageLoader.LARGE_TILE_FIT_SIZE;
 import static javafx.application.Platform.runLater;
 
 /**
- * Contains the code for creating the graphical interface of the bulletin board.
+ * Creates the part of the graphical interface of the message board.
  *
  * @author Sam Lee (375535)
  */
@@ -23,12 +23,12 @@ public class MessageBoardUI {
     private MessageBoardUI() {}
 
     /**
-     * Creates the graphical interface of the bulletin board.
+     * Creates the part of the graphical interface of the message board.
      *
      * @param messages the observable version of messages displayed on the bulletin board
      * @param tileIds a JavaFX property containing all the identities of the tiles to be
      *                highlighted on the board
-     * @return the graphical interface
+     * @return the part of the graphical interface
      */
     public static Node create(ObservableValue<List<MessageBoard.Message>> messages,
                               ObjectProperty<Set<Integer>> tileIds) {
