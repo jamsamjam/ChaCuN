@@ -71,6 +71,6 @@ public class DecksMBUITest extends Application {
 
         primaryStage.setTitle("ChaCuN test :)");
         primaryStage.show();
-        // TODO add message board
+        // add message board
     }
 }

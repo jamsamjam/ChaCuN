@@ -145,7 +145,7 @@ public final class TextMakerFr implements TextMaker {
 
         return sb.toString();
     }
-    // TODO private vs. private static
+
     private StringBuilder getStringBuilder(List<Integer> index, List<Integer> counts, List<String> kinds) {
         StringBuilder sb = new StringBuilder();
 

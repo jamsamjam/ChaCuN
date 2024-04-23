@@ -41,15 +41,9 @@ public class DecksUI {
                               ObservableValue<Integer> menhirTileCount,
                               ObservableValue<String> text,
                               Consumer<Occupant> eventHandler) {
-        // inform the rest of the program that the player does not wish to place (or pick up) an occupant
-        if (!text.getValue().isEmpty()) {
-            eventHandler.accept(null);
-            // it is necessary to link, by means of bind, its property visible Property to an
-            // expression which is only true in this case - there. Of course, this expression is
-            // obtained using the method map. TODO
-        }
+        // inform the rest of the program that player does not wish to place (or pick up) an occupant
+        if (!text.getValue().isEmpty()) eventHandler.accept(null);
 
-        // next tile to place
         ImageView nextTileImage = new ImageView(largeImageForTile(tile.getValue().id()));
         nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE);
         nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE);
@@ -60,14 +54,22 @@ public class DecksUI {
         StackPane nextTile = new StackPane(nextTileImage, text0);
         nextTile.setId("next-tile");
 
-        // normal tiles deck
+        HBox hBox = getTileDecks(normalTileCount, menhirTileCount);
+
+        VBox vBox = new VBox(hBox, nextTile);
+        vBox.getStylesheets().add("/decks.css");
+
+        return vBox;
+    }
+
+    private static HBox getTileDecks(ObservableValue<Integer> normalTileCount,
+                                     ObservableValue<Integer> menhirTileCount) {
         ImageView normalTileImage = new ImageView("/256/NORMAL.jpg");
         normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
         normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
         Text text1 = new Text(String.valueOf(normalTileCount.getValue()));
         StackPane normalStack = new StackPane(normalTileImage, text1);
 
-        // menhir tiles deck
         ImageView menhirTileImage = new ImageView("/256/MENHIR.jpg");
         menhirTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
         menhirTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
@@ -76,10 +78,6 @@ public class DecksUI {
 
         HBox hBox = new HBox(normalStack, menhirStack);
         hBox.setId("decks");
-
-        VBox vBox = new VBox(hBox, nextTile);
-        vBox.getStylesheets().add("/decks.css");
-
-        return vBox;
+        return hBox;
     }
 }

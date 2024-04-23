@@ -11,6 +11,7 @@ import javafx.scene.text.TextFlow;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.gui.ColorMap.fillColor;
 import static ch.epfl.chacun.gui.Icon.newFor;
 
@@ -37,13 +38,21 @@ public class PlayersUI  {
         Set<PlayerColor> participants = PlayerColor.ALL.stream()
                 .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
 
-        // player's points
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
                 gameState.map(gs -> gs.messageBoard().points());
 
         for (var player : participants) {
             TextFlow textFlow = new TextFlow();
             textFlow.getStyleClass().add("player");
+
+            // current player is surrounded by a gray frame
+            ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
+            currentPlayer.addListener((o, oV, nV) -> {
+                if (player == nV)
+                    textFlow.getStyleClass().add("current");
+                else
+                    textFlow.getStyleClass().remove("current");
+            });
 
             // circle
             Circle circle = new Circle(5);
@@ -59,39 +68,33 @@ public class PlayersUI  {
             text.textProperty().bind(pointsText);
             textFlow.getChildren().addAll(circle, text);
 
-            // occupants (the already placed ones should appear transparent)
-            for (int i = 0; i < 3; i++) {
-                Node hut = newFor(player, Occupant.Kind.HUT);
-
-                ObservableValue<Integer> freeCount =
-                        gameState.map(gs -> gs.freeOccupantsCount(player, Occupant.Kind.HUT));
-                hut.opacityProperty().set((i < freeCount.getValue()) ? 1.0 : 0.1);
-
-                textFlow.getChildren().add(hut);
-            }
+            // occupant
+            createOccupants(player, Occupant.Kind.HUT, gameState, textFlow);
+            createOccupants(player, Occupant.Kind.PAWN, gameState, textFlow);
 
             Text space = new Text("   ");
             textFlow.getChildren().add(space);
-
-            for (int i = 0; i < 5; i++) {
-                Node pawn = newFor(player, Occupant.Kind.PAWN);
-
-                ObservableValue<Integer> freeCount =
-                        gameState.map(gs -> gs.freeOccupantsCount(player, Occupant.Kind.PAWN));
-                pawn.opacityProperty().set((i < freeCount.getValue()) ? 1.0 : 0.1);
-
-                textFlow.getChildren().add(pawn);
-            }
-
-            // current player is surrounded by a gray frame
-            ObservableValue<PlayerColor> currentPlayer =
-                    gameState.map(GameState::currentPlayer);
-            currentPlayer.addListener((o, oV, nV) -> textFlow.getStyleClass().add("current"));
-            // TODO removed from those of the other nodes TextFlow
 
             vBox.getChildren().add(textFlow);
         }
 
         return vBox;
+    }
+
+    private static void createOccupants(PlayerColor player,
+                                        Occupant.Kind kind,
+                                        ObservableValue<GameState> gameState,
+                                        TextFlow textFlow) {
+        for (int i = 0; i < occupantsCount(kind); i++) {
+            int j = i;
+            Node occupant = newFor(player, kind);
+
+            ObservableValue<Integer> freeCount =
+                    gameState.map(gs -> gs.freeOccupantsCount(player, kind));
+            freeCount.addListener((o, oV, nV) ->
+                    occupant.opacityProperty().set((j < freeCount.getValue()) ? 1.0 : 0.1));
+
+            textFlow.getChildren().add(occupant);
+        }
     }
 }

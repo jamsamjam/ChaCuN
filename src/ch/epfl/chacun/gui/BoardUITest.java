@@ -53,9 +53,9 @@ public final class BoardUITest extends Application {
                         tileToPlaceRotationP,
                         visibleOccupantsP,
                         highlightedTilesP,
-                        r -> System.out.println("Rotate: " + r),
-                        t -> System.out.println("Place: " + t),
-                        o -> System.out.println("Select: " + o));
+                        r -> System.out.println(STR."Rotate: \{r}"),
+                        t -> System.out.println(STR."Place: \{t}"),
+                        o -> System.out.println(STR."Select: \{o}"));
 
         gameStateO.set(gameStateO.get().withStartingTilePlaced());
 

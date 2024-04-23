@@ -41,7 +41,7 @@ public class BoardUI {
      * @param occupantHandler called when the current player selects an occupant, i.e. click on one
      *                        of them
      * @return the graphical interface that displays the game board
-     */ // TODO static?
+     */
     public static Node create(int scope,
                               ObservableValue<GameState> gameState,
                               ObservableValue<Rotation> rotation,
