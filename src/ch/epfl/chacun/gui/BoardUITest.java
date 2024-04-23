@@ -34,6 +34,7 @@ public final class BoardUITest extends Application {
 
         var textMaker = new TextMakerFr(playerNames);
 
+        //var occ = new Occupant(Occupant.Kind.PAWN, 34_1);
         var gameState =
                 GameState.initial(playerColors,
                         tileDecks,
@@ -53,9 +54,9 @@ public final class BoardUITest extends Application {
                         tileToPlaceRotationP,
                         visibleOccupantsP,
                         highlightedTilesP,
-                        r -> System.out.println(STR."Rotate: \{r}"),
-                        t -> System.out.println(STR."Place: \{t}"),
-                        o -> System.out.println(STR."Select: \{o}"));
+                        r -> System.out.println( "Rotate: " + r),
+                        t -> System.out.println( "Place: " + t) ,
+                        o -> System.out.println( "Select: " + o));
 
         gameStateO.set(gameStateO.get().withStartingTilePlaced());
 

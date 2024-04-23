@@ -1,13 +1,21 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.effect.Blend;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.ColorInput;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
@@ -16,14 +24,16 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
-import static javafx.beans.binding.Bindings.when;
+import static ch.epfl.chacun.gui.ColorMap.fillColor;
+import static ch.epfl.chacun.gui.Icon.newFor;
+import static ch.epfl.chacun.gui.ImageLoader.NORMAL_TILE_FIT_SIZE;
 
 /**
  * Contains the code for creating the graphical interface that displays the game board
  *
  * @author Sam Lee (375535)
  */
-public class BoardUI {
+public final class BoardUI { // TODO final ?
     private BoardUI() {}
 
     /**
@@ -52,75 +62,129 @@ public class BoardUI {
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
 
-        GridPane gridPane = new GridPane();
-        gridPane.setId("board-grid");
-
-        ScrollPane scrollPane = new ScrollPane(gridPane);
+        ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
         scrollPane.getStylesheets().add("/board.css");
+
+        GridPane gridPane = new GridPane();
+        gridPane.setId("board-grid");
+        scrollPane.setContent(gridPane);
 
         WritableImage emptyTileImage = new WritableImage(1,1);
         emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
+        ImageView tileView = new ImageView(emptyTileImage);
+        tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
+        tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
+
         Map<Integer, Image> idImageCache = new HashMap<>();
 
-        for (int x = -1 * scope ; x < scope + 1; x++) {
-            for (int y = -1 * scope ; y < scope + 1; y++) {
-                Pos pos = new Pos(x, y);
+        gameState.addListener((o, oV, nV) -> {
+            for (int x = -1 * scope ; x < scope + 1; x++) {
+                for (int y = -1 * scope ; y < scope + 1; y++) {
+                    Pos pos = new Pos(x, y);
+                    PlacedTile tile = nV.board().tileAt(pos);
 
-                Group tileSquare = new Group();
-                ImageView imageView = new ImageView();
-                tileSquare.getChildren().add(imageView);
+                    // background image of a tile square
+                    if (tile == null)
+                        continue;
+                    else {
+                        idImageCache.put(tile.id(), ImageLoader.largeImageForTile(tile.id()));
+                        tileView.setImage(idImageCache.get(tile.id()));
+                    }
 
-                ObservableValue<Board> myBoard = gameState.map(GameState::board);
-
-                // background image of a tile square
-                int tileId = myBoard.getValue().tileAt(pos).id(); // TODO
-                idImageCache.put(tileId, ImageLoader.largeImageForTile(tileId)); // TODO already there?
-
-                // TODO when vs. if
-                myBoard.addListener((o, oV, nV) -> {
-                    if (nV.tileAt(pos) == null)
-                        imageView.setImage(emptyTileImage);
-                    else
-                        imageView.setImage(idImageCache.get(tileId));
-                });
-
-                // TODO from here, 3.imageView.setImage(idImageCache.get());
-
-                ImageView cancelMark = new ImageView("marker.png");
-                cancelMark.setId(STR."marker_\{}");
-                tileSquare.getChildren().add(cancelMark);
-
-//                SVGPath occupant = null;
-//                occupant.setId(STR."\{occupant.kind}_\{}}");
-//                tileSquare.getChildren().add(occupant);
-//
-//
-//
-//                cancelMark.property
-//                if (myBoard.getValue().cancelledAnimals().contains()); // visible
-//                occupant.contentProperty().bindnew when()
-//                        .then()
-//                                .otherwise();
-
-//                  Rotation rotation0 = if(key.pressed(alt)) ? Rotation.RIGHT : Rotation.LEFT;
+                    ObjectProperty<Rotation> rotationProperty = new SimpleObjectProperty<>(rotation.getValue());
 
 
-                // tileSquare (with the tile) is rotated, but occupants should always appear vertical
-                tileSquare.rotateProperty().add(rotation.getValue().ordinal());
-                //occupant.rotateProperty().add(rotation.getValue().negated().ordinal());
+                    Group square = new Group();
+                    gridPane.getChildren().add(square);
+                    square.getChildren().add(tileView);
+                    //square.rotateProperty().add();
+
+                    square.setOnMouseClicked(e -> {
+                        if (e.getButton() == MouseButton.SECONDARY) {
+                            Rotation newRotation = e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT;
+                            rotationProperty.set(newRotation);
+                            rotateHandler.accept(newRotation);
+                        } else if (e.getButton() == MouseButton.PRIMARY
+                                && highlightedTileIds.getValue().contains(tile.id())) {
+                            placeHandler.accept(pos);
+                        }
+                    });
 
 
-                myBoard.addListener((o, oV, nV) -> {
-                    tileSquare.getChildren().add(cancelMark, occupants);
-                });
 
-                gridPane.getChildren().add(tileSquare);
+                    // animals and occupants are added permanently, but made visible or not depending on the game state
+                    for (var animal : nV.board().cancelledAnimals()) {
+                        ImageView cancelMark = new ImageView("marker.png");
+                        cancelMark.setId(STR."marker_\{animal.id()}");
+                        square.getChildren().add(cancelMark);
+
+                        if (nV.board().cancelledAnimals().contains(animal))
+                            cancelMark.opacityProperty().set(1.0);
+                        else
+                            cancelMark.opacityProperty().set(0.0);
+                    }
+
+                    for (var occupant : nV.board().occupants()) { // TODO casting?
+                        SVGPath occupantSVG = (SVGPath) newFor(nV.currentPlayer(), occupant.kind());
+                        occupantSVG.setId(STR."\{occupant.kind()}_\{occupant.zoneId()}}");
+                        square.getChildren().add(occupantSVG);
+
+                        occupantSVG.setOnMouseClicked(e -> occupantHandler.accept(occupant));
+
+                        visibleOccupants.addListener((o1, oV1, nV1) ->
+                                occupantSVG.opacityProperty()
+                                        .set(visibleOccupants.getValue().contains(occupant) ? 0.0 : 1.0));
+                        // It should always appear vertical when tile square is rotated
+                        occupantSVG.rotateProperty().bind(Bindings.createDoubleBinding(
+                                () -> (double) rotation.getValue().degreesCW(),
+                                rotation.getValue()
+                                ));
+
+
+
+                    }
+
+                    Property<Color> veilColor = new SimpleObjectProperty<>();
+
+                    if (!highlightedTileIds.getValue().isEmpty() && !highlightedTileIds.getValue().contains(tile.id()))
+                        veilColor.setValue(Color.BLACK);
+                    else if (highlightedTileIds.getValue().contains(tile.id())) { // this tile square is part of fringe
+                        veilColor.setValue(fillColor(nV.currentPlayer()));
+
+                        Tile currentTile = nV.board().tileAt(pos).tile();
+                        if (!nV.board().couldPlaceTile(currentTile))
+                            square.setOnMouseEntered(e -> );
+                    }
+
+                    Color veilColor0 = veilColor.getValue().deriveColor(0, 1, 1, 0.5);
+                    ColorInput veilImage =
+                            new ColorInput(x, y, NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, veilColor0);
+
+                    Blend blend = new Blend(BlendMode.SRC_OVER);
+                    blend.setTopInput(veilImage);
+
+                    square.effectProperty().set(blend);
+
+                    ObjectProperty<SquareData> squareData = new SimpleObjectProperty<>();
+
+                    squareData.bind(Bindings.createObjectBinding(
+                            () -> new SquareData(, rotation, veilColor),
+                            bgImage,
+                            rotation,
+                            veilColor
+                    ));
+
+                }
             }
-        }
+        });
 
-        return null;
+        return scrollPane;
     }
 
+    private record SquareData(ObservableValue<Image> bgImage,
+                              ObservableValue<Rotation> rotation,
+                              ObservableValue<Color> veil) {
+    }
 }
