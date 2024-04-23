@@ -62,36 +62,31 @@ public class BoardUI {
         WritableImage emptyTileImage = new WritableImage(1,1);
         emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
-        // associates the id and the image of a tile
-        Map<Integer, Image> tileCache = new HashMap<>();
+        Map<Integer, Image> idImageCache = new HashMap<>();
 
-        // gridPane has one child per square of the board (here 625)
         for (int x = -1 * scope ; x < scope + 1; x++) {
             for (int y = -1 * scope ; y < scope + 1; y++) {
-                //Pos pos = new Pos(x, y);
-                //int index = indexOf(pos);
-                ObservableValue<Board> myBoard = gameState.map(GameState::board);
-
-                if (myBoard.getValue().tileAt(new Pos(x, y)) == null) {
-                    continue;
-                }
-
-                int tileId = myBoard.getValue().tileAt(new Pos(x, y)).id();
-
-                tileCache.put(tileId,
-                        ImageLoader.largeImageForTile(tileId));
-
-                // scene graph at (x, y) is created
-                // added to gridPane.add.
+                Pos pos = new Pos(x, y);
 
                 Group tileSquare = new Group();
-                ImageView emptyView = new ImageView(emptyTileImage);
-                tileSquare.getChildren().add(emptyView);
+                ImageView imageView = new ImageView();
+                tileSquare.getChildren().add(imageView);
 
-                ObservableValue<Tile> myTile = gameState.map(GameState::tileToPlace);
+                ObservableValue<Board> myBoard = gameState.map(GameState::board);
+
+                // background image of a tile square
+                int tileId = myBoard.getValue().tileAt(pos).id(); // TODO
+                idImageCache.put(tileId, ImageLoader.largeImageForTile(tileId)); // TODO already there?
+
+                // TODO when vs. if
                 myBoard.addListener((o, oV, nV) -> {
-                    //updateSceneGraph(tileSquare, nV));
+                    if (nV.tileAt(pos) == null)
+                        imageView.setImage(emptyTileImage);
+                    else
+                        imageView.setImage(idImageCache.get(tileId));
                 });
+
+                // TODO from here, 3.imageView.setImage(idImageCache.get());
 
                 ImageView cancelMark = new ImageView("marker.png");
                 cancelMark.setId(STR."marker_\{}");
@@ -109,11 +104,17 @@ public class BoardUI {
 //                        .then()
 //                                .otherwise();
 
-//Rotation rotation0 = if(key.pressed(alt)) ? Rotation.RIGHT : Rotation.LEFT;
+//                  Rotation rotation0 = if(key.pressed(alt)) ? Rotation.RIGHT : Rotation.LEFT;
+
 
                 // tileSquare (with the tile) is rotated, but occupants should always appear vertical
                 tileSquare.rotateProperty().add(rotation.getValue().ordinal());
                 //occupant.rotateProperty().add(rotation.getValue().negated().ordinal());
+
+
+                myBoard.addListener((o, oV, nV) -> {
+                    tileSquare.getChildren().add(cancelMark, occupants);
+                });
 
                 gridPane.getChildren().add(tileSquare);
             }
