@@ -63,11 +63,14 @@ public final class BoardUI {
                               Consumer<Pos> placeHandler,
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
+
+        ObjectProperty<Rotation> rotationProperty =
+                new SimpleObjectProperty<>(rotation.getValue());
+        // TODO 수정하려면 이것도 property 만들어야 하는거 맞는지? 1. 수정 2. collections
         ObjectProperty<Set<Occupant>> visibleOccupantsProperty =
                 new SimpleObjectProperty<>(visibleOccupants.getValue());
         ObjectProperty<Set<Integer>> tileIdsProperty =
                 new SimpleObjectProperty<>(tileIds.getValue());
-
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -99,9 +102,6 @@ public final class BoardUI {
                         imageCacheById.put(tile.id(), ImageLoader.largeImageForTile(tile.id()));
                         tileView.setImage(imageCacheById.get(tile.id()));
                     }
-
-                    ObjectProperty<Rotation> rotationProperty = new SimpleObjectProperty<>(rotation.getValue());
-
 
                     Group square = new Group();
                     gridPane.getChildren().add(square);
@@ -148,12 +148,9 @@ public final class BoardUI {
 
                         // It should always appear vertical when tile square is rotated
                         square.rotateProperty().set(rotation.getValue().negated().degreesCW());
-//                        occupantSVG.rotateProperty().bind(Bindings.createObjectBinding(
-//                                () -> rotationProperty.getValue(),
-//                                rotationProperty.getValue()
-//                        ));
                     }
 
+                    // TODO veil 부분부터 다시
                     Property<Color> veilColor = new SimpleObjectProperty<>();
 
                     if (!tileIdsProperty.getValue().isEmpty() && !tileIdsProperty.getValue().contains(tile.id()))
@@ -162,8 +159,8 @@ public final class BoardUI {
                         veilColor.setValue(fillColor(nV.currentPlayer()));
 
                         Tile currentTile = nV.board().tileAt(pos).tile();
-                        if (!nV.board().couldPlaceTile(currentTile))
-                            square.setOnMouseEntered(e -> );
+                        //if (!nV.board().couldPlaceTile(currentTile))
+                            //square.setOnMouseEntered(e -> );
                     }
 
                     Color veilColor0 = veilColor.getValue().deriveColor(0, 1, 1, 0.5);
@@ -177,12 +174,12 @@ public final class BoardUI {
 
                     ObjectProperty<SquareData> squareData = new SimpleObjectProperty<>();
 
-                    squareData.bind(Bindings.createObjectBinding(
-                            () -> new SquareData(, rotation, veilColor),
-                            bgImage,
-                            rotation,
-                            veilColor
-                    ));
+//                    squareData.bind(Bindings.createObjectBinding(
+//                            () -> new SquareData(, rotation, veilColor),
+//                            bgImage,
+//                            rotation,
+//                            veilColor
+//                    ));
 
                 }
             }
