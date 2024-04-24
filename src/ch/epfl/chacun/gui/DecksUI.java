@@ -19,9 +19,8 @@ import static ch.epfl.chacun.gui.ImageLoader.*;
  *
  * @author Sam Lee (375535)
  */
-public class DecksUI {
-    private DecksUI() {
-    }
+public final class DecksUI {
+    private DecksUI() {}
 
     /**
      * Creates the part of the graphical interface which displays the tile decks and the tile to be placed.

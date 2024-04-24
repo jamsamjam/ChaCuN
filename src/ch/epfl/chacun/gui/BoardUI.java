@@ -4,6 +4,7 @@ import ch.epfl.chacun.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
@@ -26,6 +27,7 @@ import java.util.function.Consumer;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 import static ch.epfl.chacun.gui.ColorMap.fillColor;
 import static ch.epfl.chacun.gui.Icon.newFor;
+import static ch.epfl.chacun.gui.ImageLoader.MARKER_FIT_SIZE;
 import static ch.epfl.chacun.gui.ImageLoader.NORMAL_TILE_FIT_SIZE;
 
 /**
@@ -33,7 +35,7 @@ import static ch.epfl.chacun.gui.ImageLoader.NORMAL_TILE_FIT_SIZE;
  *
  * @author Sam Lee (375535)
  */
-public final class BoardUI { // TODO final ?
+public final class BoardUI {
     private BoardUI() {}
 
     /**
@@ -43,7 +45,7 @@ public final class BoardUI { // TODO final ?
      * @param gameState the game state
      * @param rotation the rotation to apply to the tile to be placed
      * @param visibleOccupants all visible occupants
-     * @param highlightedTileIds the set of identifiers of the highlighted tiles
+     * @param tileIds the set of identifiers of the highlighted tiles
      * @param rotateHandler a handler called when the current player wishes to rotate the tile to
      *                      be placed, i.e. he right-clicks on a box in the fringe
      * @param placeHandler a handler called when the current player wishes to place the tile to be
@@ -56,11 +58,16 @@ public final class BoardUI { // TODO final ?
                               ObservableValue<GameState> gameState,
                               ObservableValue<Rotation> rotation,
                               ObservableValue<Set<Occupant>> visibleOccupants,
-                              ObservableValue<Set<Integer>> highlightedTileIds,
+                              ObservableValue<Set<Integer>> tileIds,
                               Consumer<Rotation> rotateHandler,
                               Consumer<Pos> placeHandler,
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
+        ObjectProperty<Set<Occupant>> visibleOccupantsProperty =
+                new SimpleObjectProperty<>(visibleOccupants.getValue());
+        ObjectProperty<Set<Integer>> tileIdsProperty =
+                new SimpleObjectProperty<>(tileIds.getValue());
+
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -77,7 +84,7 @@ public final class BoardUI { // TODO final ?
         tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
         tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
 
-        Map<Integer, Image> idImageCache = new HashMap<>();
+        Map<Integer, Image> imageCacheById = new HashMap<>();
 
         gameState.addListener((o, oV, nV) -> {
             for (int x = -1 * scope ; x < scope + 1; x++) {
@@ -89,8 +96,8 @@ public final class BoardUI { // TODO final ?
                     if (tile == null)
                         continue;
                     else {
-                        idImageCache.put(tile.id(), ImageLoader.largeImageForTile(tile.id()));
-                        tileView.setImage(idImageCache.get(tile.id()));
+                        imageCacheById.put(tile.id(), ImageLoader.largeImageForTile(tile.id()));
+                        tileView.setImage(imageCacheById.get(tile.id()));
                     }
 
                     ObjectProperty<Rotation> rotationProperty = new SimpleObjectProperty<>(rotation.getValue());
@@ -99,7 +106,7 @@ public final class BoardUI { // TODO final ?
                     Group square = new Group();
                     gridPane.getChildren().add(square);
                     square.getChildren().add(tileView);
-                    //square.rotateProperty().add();
+                    square.rotateProperty().set(rotation.getValue().degreesCW());
 
                     square.setOnMouseClicked(e -> {
                         if (e.getButton() == MouseButton.SECONDARY) {
@@ -107,23 +114,24 @@ public final class BoardUI { // TODO final ?
                             rotationProperty.set(newRotation);
                             rotateHandler.accept(newRotation);
                         } else if (e.getButton() == MouseButton.PRIMARY
-                                && highlightedTileIds.getValue().contains(tile.id())) {
+                                && tileIds.getValue().contains(tile.id()))
                             placeHandler.accept(pos);
-                        }
                     });
 
 
 
                     // animals and occupants are added permanently, but made visible or not depending on the game state
                     for (var animal : nV.board().cancelledAnimals()) {
-                        ImageView cancelMark = new ImageView("marker.png");
-                        cancelMark.setId(STR."marker_\{animal.id()}");
-                        square.getChildren().add(cancelMark);
+                        ImageView marker = new ImageView("marker.png");
+                        marker.setId(STR."marker_\{animal.id()}");
+                        marker.setFitWidth(MARKER_FIT_SIZE);
+                        marker.setFitHeight(MARKER_FIT_SIZE);
+                        square.getChildren().add(marker);
 
-                        if (nV.board().cancelledAnimals().contains(animal))
-                            cancelMark.opacityProperty().set(1.0);
-                        else
-                            cancelMark.opacityProperty().set(0.0);
+                        marker.opacityProperty()
+                                .set(nV.board().cancelledAnimals().contains(animal)
+                                        ? 1.0
+                                        : 0.0);
                     }
 
                     for (var occupant : nV.board().occupants()) { // TODO casting?
@@ -133,24 +141,24 @@ public final class BoardUI { // TODO final ?
 
                         occupantSVG.setOnMouseClicked(e -> occupantHandler.accept(occupant));
 
-                        visibleOccupants.addListener((o1, oV1, nV1) ->
-                                occupantSVG.opacityProperty()
-                                        .set(visibleOccupants.getValue().contains(occupant) ? 0.0 : 1.0));
+                        occupantSVG.opacityProperty()
+                                .set(visibleOccupantsProperty.getValue().contains(occupant)
+                                        ? 0.0
+                                        : 1.0);
+
                         // It should always appear vertical when tile square is rotated
-                        occupantSVG.rotateProperty().bind(Bindings.createDoubleBinding(
-                                () -> (double) rotation.getValue().degreesCW(),
-                                rotation.getValue()
-                                ));
-
-
-
+                        square.rotateProperty().set(rotation.getValue().negated().degreesCW());
+//                        occupantSVG.rotateProperty().bind(Bindings.createObjectBinding(
+//                                () -> rotationProperty.getValue(),
+//                                rotationProperty.getValue()
+//                        ));
                     }
 
                     Property<Color> veilColor = new SimpleObjectProperty<>();
 
-                    if (!highlightedTileIds.getValue().isEmpty() && !highlightedTileIds.getValue().contains(tile.id()))
+                    if (!tileIdsProperty.getValue().isEmpty() && !tileIdsProperty.getValue().contains(tile.id()))
                         veilColor.setValue(Color.BLACK);
-                    else if (highlightedTileIds.getValue().contains(tile.id())) { // this tile square is part of fringe
+                    else if (tileIdsProperty.getValue().contains(tile.id())) { // this tile square is part of fringe
                         veilColor.setValue(fillColor(nV.currentPlayer()));
 
                         Tile currentTile = nV.board().tileAt(pos).tile();

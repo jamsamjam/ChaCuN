@@ -2,7 +2,9 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.MessageBoard;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
@@ -20,7 +22,7 @@ import static javafx.application.Platform.runLater;
  *
  * @author Sam Lee (375535)
  */
-public class MessageBoardUI {
+public final class MessageBoardUI {
     private MessageBoardUI() {}
 
     /**
@@ -39,7 +41,10 @@ public class MessageBoardUI {
 
         VBox messageBox = new VBox();
 
-        messages.addListener((o, oV, nV) -> {
+        ObjectProperty<List<MessageBoard.Message>> messageProperty =
+                new SimpleObjectProperty<>(messages.getValue());
+
+        messageProperty.addListener((o, oV, nV) -> {
             messageBox.getChildren().clear();
 
             nV.forEach(message -> {
@@ -52,13 +57,8 @@ public class MessageBoardUI {
                 messageBox.getChildren().add(text);
 
                 // highlighting tiles
-                if (!message.tileIds().isEmpty())
-                    tileIds.setValue(message.tileIds());
-                else
-                    tileIds.setValue(new HashSet<>());
-
-                text.setOnMouseEntered(e -> System.out.println("install event handlers"));
-                text.setOnMouseExited(e -> System.out.println("install event handlers!"));
+                text.setOnMouseEntered(e -> tileIds.setValue(message.tileIds()));
+                text.setOnMouseExited(e -> tileIds.setValue(Set.of()));
             });
         });
 

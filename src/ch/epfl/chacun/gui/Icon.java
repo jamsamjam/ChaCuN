@@ -14,7 +14,7 @@ import static ch.epfl.chacun.gui.ColorMap.strokeColor;
  *
  * @author Sam Lee (375535)
  */
-public class Icon {
+public final class Icon {
     private Icon() {}
 
     /**

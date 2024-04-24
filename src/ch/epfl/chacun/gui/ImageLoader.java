@@ -7,7 +7,7 @@ import javafx.scene.image.Image;
  *
  * @author Sam Lee (375535)
  */
-public class ImageLoader {
+public final class ImageLoader {
     private ImageLoader() {}
 
     /**

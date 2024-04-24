@@ -12,7 +12,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public class ColorMap {
+public final class ColorMap {
     private ColorMap() {}
 
     /**

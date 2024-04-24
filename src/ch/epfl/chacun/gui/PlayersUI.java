@@ -20,7 +20,7 @@ import static ch.epfl.chacun.gui.Icon.newFor;
  *
  * @author Sam Lee (375535)
  */
-public class PlayersUI  {
+public final class PlayersUI  {
     private PlayersUI() {}
 
     /**
