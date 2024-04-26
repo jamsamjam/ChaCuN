@@ -35,7 +35,6 @@ public final class PlayersUI  {
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
 
-        // TODO observable ?
         Set<PlayerColor> participants = PlayerColor.ALL.stream()
                 .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
 

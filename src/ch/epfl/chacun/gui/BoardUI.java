@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -16,7 +17,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.SVGPath;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,13 +60,7 @@ public final class BoardUI {
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
 
-        ObjectProperty<Rotation> rotationProperty =
-                new SimpleObjectProperty<>(rotation.getValue());
-        // TODO 수정하려면 이것도 property 만들어야 하는거 맞는지? 1. 수정 2. collections
-        ObjectProperty<Set<Occupant>> visibleOccupantsProperty =
-                new SimpleObjectProperty<>(visibleOccupants.getValue());
-        ObjectProperty<Set<Integer>> tileIdsProperty =
-                new SimpleObjectProperty<>(tileIds.getValue());
+        ObservableValue<Board> board = gameState.map(GameState::board);
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -76,108 +70,143 @@ public final class BoardUI {
         gridPane.setId("board-grid");
         scrollPane.setContent(gridPane);
 
-        WritableImage emptyTileImage = new WritableImage(1,1);
-        emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
-
-        ImageView tileView = new ImageView(emptyTileImage);
-        tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
-        tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
-
         Map<Integer, Image> imageCacheById = new HashMap<>();
-        Set<Group> fringe = new HashSet<>();
-        ColorInput veil =
-                new ColorInput(0, 0, NORMAL_TILE_PIXEL_SIZE, NORMAL_TILE_PIXEL_SIZE, Color.TRANSPARENT);
 
-        gameState.addListener((o, oV, nV) -> {
-            for (int x = -1 * scope; x <= scope; x++) {
-                for (int y = -1 * scope; y <= scope; y++) {
-                    Pos pos = new Pos(x, y);
-                    PlacedTile tile = nV.board().tileAt(pos);
+        for (int x = -scope; x < scope + 1; x++)
+            for (int y = -scope; y < scope + 1; y++) {
+                Pos pos = new Pos(x, y);
 
-                    // background image of a tile square
-//                    if (!nV.board().insertionPositions().contains(pos))
-//                        continue;
+                ObservableValue<PlacedTile> tile = board.map(b -> b.tileAt(pos));
+                ObjectProperty<SquareData> squareData =
+                        new SimpleObjectProperty<>(SquareData.initial(rotation.getValue()));
 
-                    if (tile == null)
-                        continue;
-                    else {
-                        imageCacheById.put(tile.id(), largeImageForTile(tile.id()));
-                        tileView.setImage(imageCacheById.get(tile.id()));
+                Group square = new Group();
+                gridPane.getChildren().add(square);
+                square.rotateProperty().bind(squareData.map(s -> s.rotation().degreesCW()));
+
+                ImageView tileView = new ImageView();
+                tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
+                tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
+                square.getChildren().add(tileView);
+
+                tileView.imageProperty().bind(squareData.map(SquareData::bgImage));
+                // TODO observablevalue vs. objectProperty
+
+                tile.addListener((o, oV, nV) -> {
+                    assert nV != null;
+
+                    imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
+                    squareData.set(squareData.getValue().setBgImage(imageCacheById.get(nV.id())));
+
+                    square.getChildren().addAll(markers(nV, board));
+                    square.getChildren().addAll(occupants(nV, visibleOccupants, occupantHandler));
+                });
+
+                square.setOnMouseClicked(e -> {
+                    switch (e.getButton()) {
+                        case PRIMARY ->
+                                placeHandler.accept(pos);
+                        case SECONDARY ->
+                                rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
+//                        squareData.set(squareData.getValue()
+////                                    .setRotation(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT));
+                        // default case ?
                     }
+                });
 
-                    Group square = new Group();
-                    square.getChildren().add(tileView);
-                    square.setRotate(rotation.getValue().degreesCW());
-
-                    square.setOnMouseClicked(e -> {
-                        if (e.getButton() == MouseButton.SECONDARY) {
-                            Rotation newRotation = e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT;
-                            rotationProperty.set(newRotation);
-                            rotateHandler.accept(newRotation);
-                        } else if (e.getButton() == MouseButton.PRIMARY
-                                && tileIds.getValue().contains(tile.id()))
-                            placeHandler.accept(pos);
-                    });
-
-                    // animals and occupants are added permanently, but made visible or not depending on the game state
-                    for (var animal : nV.board().cancelledAnimals()) {
-                        ImageView marker = new ImageView("marker.png");
-                        marker.setId(STR."marker_\{animal.id()}");
-                        marker.setFitWidth(MARKER_FIT_SIZE);
-                        marker.setFitHeight(MARKER_FIT_SIZE);
-                        square.getChildren().add(marker);
-
-                        marker.setOpacity(nV.board().cancelledAnimals().contains(animal) ? 1.0 : 0.0);
-                    }
-
-                    for (var occupant : nV.board().occupants()) {
-                        SVGPath occupantSVG = (SVGPath) newFor(tile.placer(), occupant.kind());
-                        // TODO casting, currentPlayer?, 맞는 존에 placed 안되는중
-                        occupantSVG.setId(STR."\{occupant.kind()}_\{occupant.zoneId()}}");
-                        square.getChildren().add(occupantSVG);
-
-                        occupantSVG.setOnMouseClicked(e -> occupantHandler.accept(occupant));
-
-                        occupantSVG.setOpacity(visibleOccupantsProperty.getValue().contains(occupant) ? 0.0 : 1.0);
-
-                        // It should always appear vertical when tile square is rotated
-                        square.setRotate(rotation.getValue().negated().degreesCW());
-                    }
-                    
-                    // TODO cases 다시 체크
-                    if (!tileIdsProperty.getValue().isEmpty() &&
-                            !tileIdsProperty.getValue().contains(tile.id()))
-                        veil.setPaint(Color.BLACK);
-                    else if (tileIdsProperty.getValue().contains(tile.id()) &&
-                            nV.currentPlayer() != null)
-                        veil.setPaint(fillColor(nV.currentPlayer()));
-
+                tileView.effectProperty().bind(squareData.map(s -> {
+                    ColorInput c =
+                            new ColorInput(0, 0, NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, s.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
-                    blend.setTopInput(veil);
-                    blend.setBottomInput(null);
                     blend.setOpacity(0.5);
-                    square.setEffect(blend);
+                    blend.setTopInput(c);
+                    blend.setBottomInput(null);
 
-                    ObjectProperty<SquareData> squareData = new SimpleObjectProperty<>();
+                    return blend;
+                }));
 
-//                    squareData.bind(Bindings.createObjectBinding(
-//                            () -> new SquareData(, rotation, veilColor),
-//                            bgImage,
-//                            rotation,
-//                            veilColor
-//                    ));
 
-                    gridPane.getChildren().add(square);
-                }
+//                    if (!tileIds.getValue().isEmpty()
+//                            && !tileIds.getValue().contains(tile.getValue().id()))
+
+                    //(squareData.getValue().setVeil(Color.BLACK));
+
+//                    if (gameState.getValue().board().insertionPositions().contains(pos))
+//                        squareData.set(squareData.getValue().setVeil(fillColor(gameState.getValue().currentPlayer())));
+
+                    square.setOnMouseEntered(e -> {
+                        // call event handler
+                        // and the current tile, with its current rotation, cannot be placed there
+                        //veil.setPaint(Color.WHITE);
+                    });
+//
+//                if (tile != null)
+//                    squareData.set(squareData.getValue().setBgImage(imageCacheById.get(largeImageForTile(tile.getValue().id()))));
+
+
+                // Animals & occupants are added permanently, and made visible or not depending on the game state
+
             }
-        });
 
         return scrollPane;
+
     }
 
-    private record SquareData(ObservableValue<Image> bgImage,
-                              ObservableValue<Rotation> rotation,
-                              ObservableValue<Color> veil) {
-        // TODO how to do (6) Representation of a box
+    private static List<ImageView> markers(PlacedTile tile, ObservableValue<Board> board) {
+        return tile.meadowZones().stream()
+                .flatMap(meadow -> meadow.animals().stream())
+                .map(animal -> {
+                    ImageView marker = new ImageView("marker.png");
+
+                    marker.setFitWidth(MARKER_FIT_SIZE);
+                    marker.setFitHeight(MARKER_FIT_SIZE);
+                    marker.setId("marker_" + animal.id());
+
+                    marker.visibleProperty()
+                            .bind(board.map(b -> b.cancelledAnimals().contains(animal)));
+
+                    return marker;
+                }).toList();
+    }
+
+    private static List<Node> occupants(PlacedTile tile,
+                                        ObservableValue<Set<Occupant>> visibleOccupants,
+                                        Consumer<Occupant> occupantHandler) {
+        return tile.potentialOccupants().stream().map(occupant -> {
+            var icon = Icon.newFor(tile.placer(), occupant.kind());
+            icon.setId(STR."\{tile.occupant().kind()}_\{tile.occupant().zoneId()}}");
+
+            icon.visibleProperty()
+                    .bind(visibleOccupants.map(set -> set.contains(tile.occupant())));
+            icon.setOnMouseClicked(e -> occupantHandler.accept(tile.occupant()));
+            // It should always appear vertical when tile square is rotated
+            icon.setRotate(tile.rotation().degreesCW());
+
+            return icon;
+        }).toList();
+    }
+
+
+    private record SquareData(Image bgImage,
+                              Rotation rotation,
+                              Color veil) {
+        public static SquareData initial(Rotation rotation) {
+            WritableImage emptyTileImage = new WritableImage(1,1);
+            emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
+
+            return new SquareData(emptyTileImage, rotation, Color.TRANSPARENT);
+        }
+
+        public SquareData setBgImage(Image bgImage) {
+            return new SquareData(bgImage, rotation, veil);
+        }
+
+        public SquareData setRotation(Rotation rotation) {
+            return new SquareData(bgImage, rotation, veil);
+        }
+
+        public SquareData setVeil(Color veil) {
+            return new SquareData(bgImage, rotation, veil);
+        }
     }
 }
