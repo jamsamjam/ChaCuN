@@ -1,4 +1,4 @@
-package ch.epfl.chacun;
+package ch.epfl.chacun.tile;
 
 import ch.epfl.chacun.Animal;
 import ch.epfl.chacun.Direction;

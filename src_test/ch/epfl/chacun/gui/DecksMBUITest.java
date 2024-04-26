@@ -1,21 +1,23 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
+import ch.epfl.chacun.tile.Tiles;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class BoardUITest extends Application {
-    public static void main(String[] args) {launch(args);}
+public class DecksMBUITest extends Application {
+
+    public static void main(String[] args) { launch(args); }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         var playerNames = Map.of(PlayerColor.RED, "Rose",
                 PlayerColor.BLUE, "Bernard",
                 PlayerColor.GREEN, "Sam",
@@ -34,36 +36,42 @@ public final class BoardUITest extends Application {
 
         var textMaker = new TextMakerFr(playerNames);
 
-        //var occ = new Occupant(Occupant.Kind.PAWN, 34_1);
         var gameState =
                 GameState.initial(playerColors,
                         tileDecks,
                         textMaker);
 
-        var tileToPlaceRotationP =
-                new SimpleObjectProperty<>(Rotation.NONE);
-        var visibleOccupantsP =
-                new SimpleObjectProperty<>(Set.<Occupant>of());
-        var highlightedTilesP =
-                new SimpleObjectProperty<>(Set.<Integer>of());
+        var tile1 = tileDecks.topTile(Tile.Kind.START);
+        var normalCount = tileDecks.normalTiles().size();
+        var menhirCount = tileDecks.menhirTiles().size();
+        var text1 = "test running..";
 
         var gameStateO = new SimpleObjectProperty<>(gameState);
-        var boardNode = BoardUI
-                .create(1,
-                        gameStateO,
-                        tileToPlaceRotationP,
-                        visibleOccupantsP,
-                        highlightedTilesP,
-                        r -> System.out.println( "Rotate: " + r),
-                        t -> System.out.println( "Place: " + t) ,
-                        o -> System.out.println( "Select: " + o));
 
-        gameStateO.set(gameStateO.get().withStartingTilePlaced());
+        var tile0 = new SimpleObjectProperty<>(tile1);
+        var normalCount0 = new SimpleObjectProperty<>(normalCount);
+        var menhirCount0 = new SimpleObjectProperty<>(menhirCount);
+        var text0 = new SimpleObjectProperty<>(text1);
+        var ehandler = new Consumer<Occupant>() {
+            @Override
+            public void accept(Occupant occupant) {
 
-        var rootNode = new BorderPane(boardNode);
+            }
+        };
+
+        var decksNode = DecksUI.create(tile0,
+                normalCount0,
+                menhirCount0,
+                text0,
+                ehandler);
+
+        //var playersNode = PlayersUI.create(gameStateO, textMaker);
+        //var rootNode = new BorderPane(playersNode);
+        var rootNode = new StackPane(decksNode);
         primaryStage.setScene(new Scene(rootNode));
 
-        primaryStage.setTitle("ChaCuN test");
+        primaryStage.setTitle("ChaCuN test :)");
         primaryStage.show();
+        // add message board
     }
 }
