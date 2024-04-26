@@ -30,6 +30,7 @@ public final class BoardUITest extends Application {
                         tilesByKind.get(Tile.Kind.MENHIR));
 
         var textMaker = new TextMakerFr(playerNames);
+
         var gameState =
                 GameState.initial(playerColors,
                         tileDecks,

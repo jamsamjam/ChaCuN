@@ -14,7 +14,6 @@ import javafx.scene.effect.ColorInput;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 
@@ -23,7 +22,6 @@ import java.util.function.Consumer;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
 import static ch.epfl.chacun.gui.ColorMap.fillColor;
-import static ch.epfl.chacun.gui.Icon.newFor;
 import static ch.epfl.chacun.gui.ImageLoader.*;
 
 /**
@@ -61,6 +59,9 @@ public final class BoardUI {
         checkArgument(scope > 0);
 
         ObservableValue<Board> board = gameState.map(GameState::board);
+        ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
+        ObjectProperty<SquareData> squareData =
+                new SimpleObjectProperty<>(SquareData.initial(rotation.getValue()));
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -72,34 +73,36 @@ public final class BoardUI {
 
         Map<Integer, Image> imageCacheById = new HashMap<>();
 
-        for (int x = -scope; x < scope + 1; x++)
-            for (int y = -scope; y < scope + 1; y++) {
+        for (int x = -scope; x <= scope; x++)
+            for (int y = -scope; y <= scope; y++) {
                 Pos pos = new Pos(x, y);
-
                 ObservableValue<PlacedTile> tile = board.map(b -> b.tileAt(pos));
-                ObjectProperty<SquareData> squareData =
-                        new SimpleObjectProperty<>(SquareData.initial(rotation.getValue()));
 
-                Group square = new Group();
-                gridPane.getChildren().add(square);
-                square.rotateProperty().bind(squareData.map(s -> s.rotation().degreesCW()));
+//                ObservableValue<Color> veilColor = new SimpleObjectProperty<>();
+//                ObjectProperty<SquareData> squareData = new SimpleObjectProperty<>();
+
+//                if (tile != null || fringe.getValue().contains(pos))
+//                    continue;
 
                 ImageView tileView = new ImageView();
                 tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
                 tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
-                square.getChildren().add(tileView);
 
                 tileView.imageProperty().bind(squareData.map(SquareData::bgImage));
                 // TODO observablevalue vs. objectProperty
 
+                Group square = new Group(tileView);
+                square.rotateProperty().bind(tile.map(t -> t.rotation().degreesCW()));
+                gridPane.getChildren().add(square);
+
                 tile.addListener((o, oV, nV) -> {
-                    assert nV != null;
+                    // TODO assert nV != null; vs. Objects.requireNonNull(nV);
 
                     imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
                     squareData.set(squareData.getValue().setBgImage(imageCacheById.get(nV.id())));
 
                     square.getChildren().addAll(markers(nV, board));
-                    square.getChildren().addAll(occupants(nV, visibleOccupants, occupantHandler));
+                    square.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
                 });
 
                 square.setOnMouseClicked(e -> {
@@ -108,15 +111,13 @@ public final class BoardUI {
                                 placeHandler.accept(pos);
                         case SECONDARY ->
                                 rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
-//                        squareData.set(squareData.getValue()
-////                                    .setRotation(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT));
-                        // default case ?
+                        // TODO default case ?
                     }
                 });
 
                 tileView.effectProperty().bind(squareData.map(s -> {
                     ColorInput c =
-                            new ColorInput(0, 0, NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, s.veil());
+                            new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, s.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
                     blend.setOpacity(0.5);
                     blend.setTopInput(c);
@@ -125,31 +126,35 @@ public final class BoardUI {
                     return blend;
                 }));
 
+                if (fringe.getValue().contains(pos)) {
+                    //assert gameState.getValue().currentPlayer() != null; // TODO
+                    squareData.set(squareData.getValue()
+                            .setVeil(fillColor(gameState.getValue().currentPlayer())));
 
-//                    if (!tileIds.getValue().isEmpty()
-//                            && !tileIds.getValue().contains(tile.getValue().id()))
+                    if (board.getValue().couldPlaceTile(tile.getValue().tile()))
+                        square.setOnMouseEntered(e ->
+                                squareData.set(squareData.getValue().setVeil(Color.TRANSPARENT)));
+                    else
+                        square.setOnMouseEntered(e ->
+                                squareData.set(squareData.getValue().setVeil(Color.WHITE)));
+                } else
+                    squareData.set(squareData.getValue().setVeil(Color.BLACK));
 
-                    //(squareData.getValue().setVeil(Color.BLACK));
-
-//                    if (gameState.getValue().board().insertionPositions().contains(pos))
-//                        squareData.set(squareData.getValue().setVeil(fillColor(gameState.getValue().currentPlayer())));
-
-                    square.setOnMouseEntered(e -> {
-                        // call event handler
-                        // and the current tile, with its current rotation, cannot be placed there
-                        //veil.setPaint(Color.WHITE);
-                    });
+//                squareData.bind(Bindings.createObjectBinding(() -> {
+//                            return new SquareData(tileView.imageProperty().getValue(),
+//                                    rotation.getValue(),
+//                                    veilColor.getValue());
+//                        },
+//                        tileView.imageProperty(),
+//                        rotation,
+//                        veilColor));
 //
-//                if (tile != null)
-//                    squareData.set(squareData.getValue().setBgImage(imageCacheById.get(largeImageForTile(tile.getValue().id()))));
-
-
-                // Animals & occupants are added permanently, and made visible or not depending on the game state
-
+//                tileView.imageProperty().set(squareData.getValue().bgImage());
             }
 
         return scrollPane;
 
+        // TODO starting tile pos = (1, 1) ?
     }
 
     private static List<ImageView> markers(PlacedTile tile, ObservableValue<Board> board) {
@@ -160,7 +165,7 @@ public final class BoardUI {
 
                     marker.setFitWidth(MARKER_FIT_SIZE);
                     marker.setFitHeight(MARKER_FIT_SIZE);
-                    marker.setId("marker_" + animal.id());
+                    marker.setId(STR."marker_\{animal.id()}");
 
                     marker.visibleProperty()
                             .bind(board.map(b -> b.cancelledAnimals().contains(animal)));
@@ -170,6 +175,7 @@ public final class BoardUI {
     }
 
     private static List<Node> occupants(PlacedTile tile,
+                                        ObservableValue<PlacedTile> myTile,
                                         ObservableValue<Set<Occupant>> visibleOccupants,
                                         Consumer<Occupant> occupantHandler) {
         return tile.potentialOccupants().stream().map(occupant -> {
@@ -177,31 +183,26 @@ public final class BoardUI {
             icon.setId(STR."\{tile.occupant().kind()}_\{tile.occupant().zoneId()}}");
 
             icon.visibleProperty()
-                    .bind(visibleOccupants.map(set -> set.contains(tile.occupant())));
+                    .bind(visibleOccupants.map(s -> s.contains(tile.occupant())));
+
             icon.setOnMouseClicked(e -> occupantHandler.accept(tile.occupant()));
             // It should always appear vertical when tile square is rotated
-            icon.setRotate(tile.rotation().degreesCW());
+            icon.rotateProperty()
+                    .bind(myTile.map(t -> t.rotation().negated().degreesCW())); // TODO
 
             return icon;
         }).toList();
     }
 
-
-    private record SquareData(Image bgImage,
-                              Rotation rotation,
-                              Color veil) {
-        public static SquareData initial(Rotation rotation) {
+    private record SquareData(Image bgImage, Rotation rotation, Color veil) {
+        private static SquareData initial(Rotation rotation) {
             WritableImage emptyTileImage = new WritableImage(1,1);
             emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
-            return new SquareData(emptyTileImage, rotation, Color.TRANSPARENT);
+            return new SquareData(emptyTileImage, rotation, Color.TRANSPARENT); // TODO
         }
 
         public SquareData setBgImage(Image bgImage) {
-            return new SquareData(bgImage, rotation, veil);
-        }
-
-        public SquareData setRotation(Rotation rotation) {
             return new SquareData(bgImage, rotation, veil);
         }
 
