@@ -47,7 +47,7 @@ public final class ImageLoader {
      * @return the image of 256 pixels on the side of the face of this tile
      */
     public static Image normalImageForTile(int tileId) {
-        return new Image(STR."/\{NORMAL_TILE_PIXEL_SIZE}\{tileId}.jpg");
+        return new Image(STR."/\{NORMAL_TILE_PIXEL_SIZE}/\{tileId}.jpg");
     }
 
     /**

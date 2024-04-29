@@ -22,7 +22,7 @@ public final class ColorMap {
      * @return the color JavaFX to fill, among other things, the occupants of the given player
      */
     public static Color fillColor(PlayerColor playerColor) {
-        return switch(playerColor) {
+        return switch (playerColor) {
             case RED -> Color.RED;
             case BLUE -> Color.BLUE;
             case GREEN -> Color.LIME;

@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Cell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.BlendMode;
@@ -59,7 +58,7 @@ public final class BoardUI {
                               Consumer<Pos> placeHandler,
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
-        // TODO tileIds ?
+
         ObservableValue<Board> board = gameState.map(GameState::board);
         ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
 
@@ -85,14 +84,14 @@ public final class BoardUI {
 
         for (int x = -scope; x <= scope; x++)
             for (int y = -scope; y <= scope; y++) {
-                Group group = new Group();
-                //cell.rotateProperty().bind(tile.map(t -> t.rotation().degreesCW()));
-                gridPane.add(group, x + scope, y + scope);
-
                 // TODO ObservableValue ?
                 ObjectProperty<CellData> cellData = new SimpleObjectProperty<>();
 
-                ImageView imageView = new ImageView();
+                Group group = new Group();
+                group.rotateProperty().bind(cellData.map(CellData::rotation));
+                gridPane.add(group, x + scope, y + scope);
+
+                ImageView imageView = new ImageView(emptyImage); // TODO emptyImage ?
                 imageView.setFitWidth(NORMAL_TILE_FIT_SIZE);
                 imageView.setFitHeight(NORMAL_TILE_FIT_SIZE);
                 imageView.imageProperty().bind(cellData.map(CellData::bgImage));
@@ -113,10 +112,8 @@ public final class BoardUI {
                     group.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
                 });
 
-                // modify cellData -> so that imageView changes accordingly ?
-
                 BooleanBinding couldBePlaced = Bindings.createBooleanBinding(
-                        () -> board.getValue().couldPlaceTile(nextTile.getValue()),
+                        () -> nextTile.getValue() != null && board.getValue().couldPlaceTile(nextTile.getValue()),
                         board,
                         nextTile);
 
@@ -129,13 +126,15 @@ public final class BoardUI {
                             if (tile.getValue() != null) {
                                 imageCacheById.putIfAbsent(tile.getValue().id(), normalImageForTile(tile.getValue().id()));
                                 image = imageCacheById.get(tile.getValue().id());
+                                rotation0 = tile.getValue().rotation().degreesCW();
 
-                                return new CellData(image,
-                                        tile.getValue().rotation().degreesCW(),
-                                        Color.TRANSPARENT);
+                                if (!tileIds.getValue().isEmpty())
+                                    return new CellData(image, rotation0, Color.BLACK);
+
+                                return new CellData(image, rotation0, Color.TRANSPARENT);
                             }
 
-                            if (fringeProperty.getValue().contains(pos))
+                            if (fringeProperty.getValue().contains(pos)) {
                                 // fringe is not empty -> nextTile != null
                                 if (group.isHover()) {
                                     imageCacheById.putIfAbsent(nextTile.getValue().id(), normalImageForTile(nextTile.getValue().id()));
@@ -144,9 +143,9 @@ public final class BoardUI {
                                     return couldBePlaced.getValue()
                                             ? new CellData(image, rotation0, Color.TRANSPARENT)
                                             : new CellData(image, rotation0, Color.WHITE);
-                                } else
-                                    return new CellData(emptyImage, 0, fillColor(currentPlayer.getValue()));
-
+                                }
+                                return new CellData(emptyImage, 0, fillColor(currentPlayer.getValue()));
+                            }
                             return CellData.initial();
                         },
                         tile,
@@ -170,18 +169,16 @@ public final class BoardUI {
                     }
                 });
 
-                imageView.effectProperty().bind(cellData.map(s -> {
-                    ColorInput c =
-                            new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, s.veil());
+                group.effectProperty().bind(cellData.map(c -> {
+                    ColorInput color =
+                            new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, c.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
                     blend.setOpacity(0.5);
-                    blend.setTopInput(c);
+                    blend.setTopInput(color);
                     blend.setBottomInput(null);
 
                     return blend;
                 }));
-
-
             }
 
         return scrollPane;
