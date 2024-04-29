@@ -61,9 +61,8 @@ public final class BoardUI {
 
         ObservableValue<Board> board = gameState.map(GameState::board);
         ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
-
         ObservableValue<Tile> nextTile = gameState.map(GameState::tileToPlace);
-        //Image nextTileImage = nextTile.getValue() == null ? null : normalImageForTile(nextTile.getValue().id());
+
         ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
         ObjectProperty<Set<Pos>> fringeProperty = nextTile != null
                 ? new SimpleObjectProperty<>(fringe.getValue())
@@ -104,9 +103,6 @@ public final class BoardUI {
                 tile.addListener((o, oV, nV) -> {
                     // TODO assert nV != null; vs. Objects.requireNonNull(nV);
                     assert nV != null;
-
-//                    imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
-//                    cellData.set(cellData.getValue().setBgImage(imageCacheById.get(nV.id())));
 
                     group.getChildren().addAll(markers(nV, board));
                     group.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
@@ -222,6 +218,7 @@ public final class BoardUI {
     }
 
     private record CellData(Image bgImage, int rotation, Color veil) {
+        // TODO methods needed ?..
         private static CellData initial() {
             WritableImage emptyImage = new WritableImage(1,1);
             emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
