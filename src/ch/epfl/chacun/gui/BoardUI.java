@@ -60,12 +60,15 @@ public final class BoardUI {
         checkArgument(scope > 0);
         // TODO tileIds ?
         ObservableValue<Board> board = gameState.map(GameState::board);
-        ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
-        ObjectProperty<Set<Pos>> fringeProperty =
-                new SimpleObjectProperty<>(fringe.getValue());
+        ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
 
-        ObjectProperty<CellData> cellData =
-                new SimpleObjectProperty<>(CellData.initial(rotation.getValue()));
+        ObservableValue<Tile> nextTile = gameState.map(GameState::tileToPlace);
+        //Image nextTileImage = nextTile.getValue() == null ? null : normalImageForTile(nextTile.getValue().id());
+        ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
+
+        // https://stackoverflow.com/questions/67448674/listpropertyt-vs-objectpropertyobservablelistt
+//        ObjectProperty<Set<Pos>> fringeProperty =
+//                new SimpleObjectProperty<>(fringe.getValue());
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -79,45 +82,78 @@ public final class BoardUI {
 
         for (int x = -scope; x <= scope; x++)
             for (int y = -scope; y <= scope; y++) {
+                Group group = new Group();
+                //cell.rotateProperty().bind(tile.map(t -> t.rotation().degreesCW()));
+                gridPane.add(group, x + scope, y + scope);
+
+                // TODO ObservableValue ?
+                ObjectProperty<CellData> cellData = new SimpleObjectProperty<>(CellData.initial());
+
+                ImageView imageView = new ImageView();
+                imageView.setFitWidth(NORMAL_TILE_FIT_SIZE);
+                imageView.setFitHeight(NORMAL_TILE_FIT_SIZE);
+                imageView.imageProperty().bind(cellData.map(CellData::bgImage));
+                group.getChildren().add(imageView);
+
                 Pos pos = new Pos(x, y);
                 ObservableValue<PlacedTile> tile = board.map(b -> b.tileAt(pos));
 
-//                if (tile != null || fringe.getValue().contains(pos))
-//                    continue;
-
-                ImageView tileView = new ImageView();
-                tileView.setFitWidth(NORMAL_TILE_FIT_SIZE);
-                tileView.setFitHeight(NORMAL_TILE_FIT_SIZE);
-
-                tileView.imageProperty().bind(cellData.map(CellData::bgImage));
-                // TODO observablevalue vs. objectProperty
-
-                Group square = new Group(tileView);
-                square.rotateProperty().bind(tile.map(t -> t.rotation().degreesCW()));
-                gridPane.getChildren().add(square);
-
+                // only squares containing a tile have occupants and cancellation tokens
                 tile.addListener((o, oV, nV) -> {
                     // TODO assert nV != null; vs. Objects.requireNonNull(nV);
+                    assert nV != null;
 
                     imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
                     cellData.set(cellData.getValue().setBgImage(imageCacheById.get(nV.id())));
 
-                    square.getChildren().addAll(markers(nV, board));
-                    square.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
+                    group.getChildren().addAll(markers(nV, board));
+                    group.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
                 });
 
-                square.setOnMouseClicked(e -> {
-                    switch (e.getButton()) {
-                        case PRIMARY ->
-                                placeHandler.accept(pos);
-                        case SECONDARY ->
-                                rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
-                        default -> {}
-                        // TODO default case ?
+                // modify cellData -> so that imageView changes accordingly ?
+
+                // ObjectBinding that defines cellData : 25 lines long, uses 7 dependencies.
+                // 이 중 하나는 그 자체가 defined by a second createObjectBinding, which has 2 dependencies)
+//                cellData.bind(Bindings.createObjectBinding(() -> {
+//                            Image image = null;
+//                            Color veil = cellData.getValue().veil();
+//
+//                            if (tile.getValue() != null)
+//                                return new CellData(imageCacheById.get(tile.getValue().id()),
+//                                        tile.getValue().rotation().degreesCW(),
+//                                        veil);
+//
+//                            if (fringe.getValue().contains(pos) && group.isHover())
+//                                return new CellData(normalImageForTile(gameState.getValue().tileToPlace().id()),
+//                                        0,
+//                                        veil);
+//
+//                            return new CellData(imageView.imageProperty().getValue(),
+//                                    0,
+//                                    null);
+//                        },
+//                        imageView.imageProperty(),
+//                        tile,
+//                        tileIds,
+//                        group.hoverProperty(),
+//                        fringe,
+//                        currentPlayer
+//                ));
+
+                group.setOnMouseClicked(e -> {
+                    if (gameState.getValue().nextAction() == GameState.Action.PLACE_TILE
+                            && fringe.getValue().contains(pos)) {
+                        switch (e.getButton()) {
+                            case PRIMARY -> placeHandler.accept(pos);
+                            case SECONDARY ->
+                                    rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
+                            default -> {}
+                            // TODO default case ?, 반대로는 왜 안되는지
+                        }
                     }
                 });
 
-                tileView.effectProperty().bind(cellData.map(s -> {
+                imageView.effectProperty().bind(cellData.map(s -> {
                     ColorInput c =
                             new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, s.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
@@ -128,35 +164,25 @@ public final class BoardUI {
                     return blend;
                 }));
 
-                ObservableValue<Color> veilColor = new SimpleObjectProperty<>(Color.TRANSPARENT);
-
-                if (fringeProperty.getValue().contains(pos)) {
-                    ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
-                    //assert gameState.getValue().currentPlayer() != null; // TODO
+                if (fringe.getValue().contains(pos))
                     cellData.set(cellData.getValue().setVeil(fillColor(currentPlayer.getValue())));
 
-                    if (board.getValue().couldPlaceTile(tile.getValue().tile()))
-                        square.setOnMouseEntered(e ->
-                                cellData.set(cellData.getValue().setVeil(Color.TRANSPARENT)));
-                    else
-                        square.setOnMouseEntered(e ->
-                                cellData.set(cellData.getValue().setVeil(Color.WHITE)));
-                } else if (!tileIds.getValue().isEmpty())
-                    cellData.set(cellData.getValue().setVeil(Color.BLACK));
+                group.setOnMouseEntered(e -> {
+                    if (board.getValue().couldPlaceTile(nextTile.getValue())) {
+                        //cellData.set(cellData.getValue().setBgImage(nextTileImage));
+                        cellData.set(cellData.getValue().setVeil(Color.TRANSPARENT));
+                    } else
+                        cellData.set(cellData.getValue().setVeil(Color.WHITE));
+                });
 
-//                cellData.bind(Bindings.createObjectBinding(() -> {
-//                            return new CellData(tileView.imageProperty().getValue(),
-//                                    rotation.getValue(),
-//                                    veilColor.getValue());
-//                        },
-//                        tileView.imageProperty(),
-//                        rotation,
-//                        veilColor));
+                group.setOnMouseExited(e -> {
+                    if (fringe.getValue().contains(pos)) {
+                        cellData.set(cellData.getValue().setVeil(fillColor(currentPlayer.getValue())));
+                    }
+                });
             }
 
         return scrollPane;
-
-        // TODO starting tile pos = (1, 1) ?, why do we need rotation in SquareData?
     }
 
     private static List<ImageView> markers(PlacedTile tile, ObservableValue<Board> board) {
@@ -188,25 +214,30 @@ public final class BoardUI {
                     .bind(visibleOccupants.map(s -> s.contains(tile.occupant())));
 
             icon.setOnMouseClicked(e -> occupantHandler.accept(tile.occupant()));
-            // It should always appear vertical when tile square is rotated
+            // TODO It should always appear vertical when tile box is rotated
             icon.rotateProperty()
-                    .bind(myTile.map(t -> t.rotation().negated().degreesCW())); // TODO
+                    .bind(myTile.map(t -> t.rotation().negated().degreesCW()));
 
             return icon;
         }).toList();
     }
 
-    private record CellData(Image bgImage, Rotation rotation, Color veil) {
-        private static CellData initial(Rotation rotation) {
-            WritableImage emptyTileImage = new WritableImage(1,1);
-            emptyTileImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
+    private record CellData(Image bgImage, int rotation, Color veil) {
+        private static CellData initial() {
+            WritableImage emptyImage = new WritableImage(1,1);
+            emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
-            return new CellData(emptyTileImage, rotation, Color.TRANSPARENT);
+            return new CellData(emptyImage, 0, Color.TRANSPARENT);
         }
 
         public CellData setBgImage(Image bgImage) {
             return new CellData(bgImage, rotation, veil);
         }
+
+        public CellData setRotation(Rotation rotation) {
+            return new CellData(bgImage, rotation.degreesCW(), veil);
+        }
+
 
         public CellData setVeil(Color veil) {
             return new CellData(bgImage, rotation, veil);
