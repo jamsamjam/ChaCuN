@@ -18,7 +18,7 @@ public final class ImageLoader {
     /**
      * Display size of large tiles.
      */
-    public static final int LARGE_TILE_FIT_SIZE = 256;
+    public static final int LARGE_TILE_FIT_SIZE = LARGE_TILE_PIXEL_SIZE / 2;
 
     /**
      * Size of normal tiles.
@@ -28,7 +28,7 @@ public final class ImageLoader {
     /**
      * Display size of normal tiles.
      */
-    public static final int NORMAL_TILE_FIT_SIZE = 128;
+    public static final int NORMAL_TILE_FIT_SIZE = NORMAL_TILE_PIXEL_SIZE / 2;
 
     /**
      * Size of marker.
@@ -38,7 +38,7 @@ public final class ImageLoader {
     /**
      * Display size of marker.
      */
-    public static final int MARKER_FIT_SIZE = 48;
+    public static final int MARKER_FIT_SIZE = MARKER_PIXEL_SIZE / 2;
 
     /**
      * Returns the image of 256 pixels on the side of the face of this tile.
@@ -47,7 +47,7 @@ public final class ImageLoader {
      * @return the image of 256 pixels on the side of the face of this tile
      */
     public static Image normalImageForTile(int tileId) {
-        return new Image(STR."/\{NORMAL_TILE_PIXEL_SIZE}/\{tileId}.jpg");
+        return new Image(STR."/\{NORMAL_TILE_PIXEL_SIZE}\{tileId}.jpg");
     }
 
     /**

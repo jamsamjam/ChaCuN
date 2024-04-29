@@ -2,6 +2,7 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -65,10 +66,9 @@ public final class BoardUI {
         ObservableValue<Tile> nextTile = gameState.map(GameState::tileToPlace);
         //Image nextTileImage = nextTile.getValue() == null ? null : normalImageForTile(nextTile.getValue().id());
         ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
-
-        // https://stackoverflow.com/questions/67448674/listpropertyt-vs-objectpropertyobservablelistt
-//        ObjectProperty<Set<Pos>> fringeProperty =
-//                new SimpleObjectProperty<>(fringe.getValue());
+        ObjectProperty<Set<Pos>> fringeProperty = nextTile != null
+                ? new SimpleObjectProperty<>(fringe.getValue())
+                : new SimpleObjectProperty<>(Set.of());
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -80,6 +80,9 @@ public final class BoardUI {
 
         Map<Integer, Image> imageCacheById = new HashMap<>();
 
+        WritableImage emptyImage = new WritableImage(1,1);
+        emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
+
         for (int x = -scope; x <= scope; x++)
             for (int y = -scope; y <= scope; y++) {
                 Group group = new Group();
@@ -87,7 +90,7 @@ public final class BoardUI {
                 gridPane.add(group, x + scope, y + scope);
 
                 // TODO ObservableValue ?
-                ObjectProperty<CellData> cellData = new SimpleObjectProperty<>(CellData.initial());
+                ObjectProperty<CellData> cellData = new SimpleObjectProperty<>();
 
                 ImageView imageView = new ImageView();
                 imageView.setFitWidth(NORMAL_TILE_FIT_SIZE);
@@ -103,8 +106,8 @@ public final class BoardUI {
                     // TODO assert nV != null; vs. Objects.requireNonNull(nV);
                     assert nV != null;
 
-                    imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
-                    cellData.set(cellData.getValue().setBgImage(imageCacheById.get(nV.id())));
+//                    imageCacheById.putIfAbsent(nV.id(), normalImageForTile(nV.id()));
+//                    cellData.set(cellData.getValue().setBgImage(imageCacheById.get(nV.id())));
 
                     group.getChildren().addAll(markers(nV, board));
                     group.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
@@ -112,37 +115,51 @@ public final class BoardUI {
 
                 // modify cellData -> so that imageView changes accordingly ?
 
+                BooleanBinding couldBePlaced = Bindings.createBooleanBinding(
+                        () -> board.getValue().couldPlaceTile(nextTile.getValue()),
+                        board,
+                        nextTile);
+
                 // ObjectBinding that defines cellData : 25 lines long, uses 7 dependencies.
-                // 이 중 하나는 그 자체가 defined by a second createObjectBinding, which has 2 dependencies)
-//                cellData.bind(Bindings.createObjectBinding(() -> {
-//                            Image image = null;
-//                            Color veil = cellData.getValue().veil();
-//
-//                            if (tile.getValue() != null)
-//                                return new CellData(imageCacheById.get(tile.getValue().id()),
-//                                        tile.getValue().rotation().degreesCW(),
-//                                        veil);
-//
-//                            if (fringe.getValue().contains(pos) && group.isHover())
-//                                return new CellData(normalImageForTile(gameState.getValue().tileToPlace().id()),
-//                                        0,
-//                                        veil);
-//
-//                            return new CellData(imageView.imageProperty().getValue(),
-//                                    0,
-//                                    null);
-//                        },
-//                        imageView.imageProperty(),
-//                        tile,
-//                        tileIds,
-//                        group.hoverProperty(),
-//                        fringe,
-//                        currentPlayer
-//                ));
+                // 이 중 하나는 그 자체가 defined by a second createObjectBinding, which has 2 dependencies
+                cellData.bind(Bindings.createObjectBinding(() -> {
+                            Image image;
+                            int rotation0;
+
+                            if (tile.getValue() != null) {
+                                imageCacheById.putIfAbsent(tile.getValue().id(), normalImageForTile(tile.getValue().id()));
+                                image = imageCacheById.get(tile.getValue().id());
+
+                                return new CellData(image,
+                                        tile.getValue().rotation().degreesCW(),
+                                        Color.TRANSPARENT);
+                            }
+
+                            if (fringeProperty.getValue().contains(pos))
+                                // fringe is not empty -> nextTile != null
+                                if (group.isHover()) {
+                                    imageCacheById.putIfAbsent(nextTile.getValue().id(), normalImageForTile(nextTile.getValue().id()));
+                                    image = imageCacheById.get(nextTile.getValue().id());
+                                    rotation0 = rotation.getValue().degreesCW();
+                                    return couldBePlaced.getValue()
+                                            ? new CellData(image, rotation0, Color.TRANSPARENT)
+                                            : new CellData(image, rotation0, Color.WHITE);
+                                } else
+                                    return new CellData(emptyImage, 0, fillColor(currentPlayer.getValue()));
+
+                            return CellData.initial();
+                        },
+                        tile,
+                        tileIds,
+                        fringeProperty,
+                        group.hoverProperty(),
+                        currentPlayer,
+                        rotation,
+                        couldBePlaced));
+
 
                 group.setOnMouseClicked(e -> {
-                    if (gameState.getValue().nextAction() == GameState.Action.PLACE_TILE
-                            && fringe.getValue().contains(pos)) {
+                    if (fringe.getValue().contains(pos)) {
                         switch (e.getButton()) {
                             case PRIMARY -> placeHandler.accept(pos);
                             case SECONDARY ->
@@ -164,22 +181,7 @@ public final class BoardUI {
                     return blend;
                 }));
 
-                if (fringe.getValue().contains(pos))
-                    cellData.set(cellData.getValue().setVeil(fillColor(currentPlayer.getValue())));
 
-                group.setOnMouseEntered(e -> {
-                    if (board.getValue().couldPlaceTile(nextTile.getValue())) {
-                        //cellData.set(cellData.getValue().setBgImage(nextTileImage));
-                        cellData.set(cellData.getValue().setVeil(Color.TRANSPARENT));
-                    } else
-                        cellData.set(cellData.getValue().setVeil(Color.WHITE));
-                });
-
-                group.setOnMouseExited(e -> {
-                    if (fringe.getValue().contains(pos)) {
-                        cellData.set(cellData.getValue().setVeil(fillColor(currentPlayer.getValue())));
-                    }
-                });
             }
 
         return scrollPane;
