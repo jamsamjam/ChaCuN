@@ -204,6 +204,7 @@ public final class BoardUI {
         return tile.potentialOccupants().stream().map(occupant -> {
             var icon = Icon.newFor(tile.placer(), occupant.kind());
             icon.setId(STR."\{tile.occupant().kind()}_\{tile.occupant().zoneId()}}");
+            // TODO tile.occupant() == null ?
 
             icon.visibleProperty()
                     .bind(visibleOccupants.map(s -> s.contains(tile.occupant())));
