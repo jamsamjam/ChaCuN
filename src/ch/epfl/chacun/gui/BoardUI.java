@@ -37,10 +37,10 @@ public final class BoardUI {
      * Creates the graphical interface that displays the game board.
      *
      * @param scope the scope of the board to be created (equal to 12 in this project)
-     * @param gameState the game state
-     * @param rotation the rotation to apply to the tile to be placed
-     * @param visibleOccupants all visible occupants
-     * @param tileIds the set of identifiers of the highlighted tiles
+     * @param gameStateO the game state
+     * @param rotationO the rotation to apply to the tile to be placed
+     * @param visibleOccupantsO all visible occupants
+     * @param tileIdsO the set of identifiers of the highlighted tiles
      * @param rotateHandler a handler called when the current player wishes to rotate the tile to
      *                      be placed, i.e. he right-clicks on a box in the fringe
      * @param placeHandler a handler called when the current player wishes to place the tile to be
@@ -50,23 +50,20 @@ public final class BoardUI {
      * @return the graphical interface that displays the game board
      */
     public static Node create(int scope,
-                              ObservableValue<GameState> gameState,
-                              ObservableValue<Rotation> rotation,
-                              ObservableValue<Set<Occupant>> visibleOccupants,
-                              ObservableValue<Set<Integer>> tileIds,
+                              ObservableValue<GameState> gameStateO,
+                              ObservableValue<Rotation> rotationO,
+                              ObservableValue<Set<Occupant>> visibleOccupantsO,
+                              ObservableValue<Set<Integer>> tileIdsO,
                               Consumer<Rotation> rotateHandler,
                               Consumer<Pos> placeHandler,
                               Consumer<Occupant> occupantHandler) {
         checkArgument(scope > 0);
 
-        ObservableValue<Board> board = gameState.map(GameState::board);
-        ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
-        ObservableValue<Tile> nextTile = gameState.map(GameState::tileToPlace);
-
-        ObservableValue<Set<Pos>> fringe = board.map(Board::insertionPositions);
-        ObjectProperty<Set<Pos>> fringeProperty = nextTile != null
-                ? new SimpleObjectProperty<>(fringe.getValue())
-                : new SimpleObjectProperty<>(Set.of());
+        ObservableValue<Board> boardO = gameStateO.map(GameState::board);
+        ObservableValue<PlayerColor> currentPlayerO = gameStateO.map(GameState::currentPlayer);
+        ObservableValue<Tile> nextTileO = gameStateO.map(GameState::tileToPlace);
+        ObservableValue<Set<Pos>> fringeO = boardO.map(Board::insertionPositions);
+        // TODO ObjectProperty<Set<Pos>> fringeProperty ?
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -76,8 +73,7 @@ public final class BoardUI {
         gridPane.setId("board-grid");
         scrollPane.setContent(gridPane);
 
-        Map<Integer, Image> imageCacheById = new HashMap<>();
-
+        // TODO
         WritableImage emptyImage = new WritableImage(1,1);
         emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
@@ -90,77 +86,65 @@ public final class BoardUI {
                 group.rotateProperty().bind(cellData.map(CellData::rotation));
                 gridPane.add(group, x + scope, y + scope);
 
-                ImageView imageView = new ImageView(emptyImage); // TODO emptyImage ?
+                ImageView imageView = new ImageView();
                 imageView.setFitWidth(NORMAL_TILE_FIT_SIZE);
                 imageView.setFitHeight(NORMAL_TILE_FIT_SIZE);
                 imageView.imageProperty().bind(cellData.map(CellData::bgImage));
                 group.getChildren().add(imageView);
 
                 Pos pos = new Pos(x, y);
-                ObservableValue<PlacedTile> tile = board.map(b -> b.tileAt(pos));
+                ObservableValue<PlacedTile> tileO = boardO.map(b -> b.tileAt(pos));
 
-                // only squares containing a tile have occupants and cancellation tokens
-                tile.addListener((o, oV, nV) -> {
-                    // TODO assert nV != null; vs. Objects.requireNonNull(nV);
-                    assert nV != null;
+                // only cells containing a tile have occupants and cancellation tokens
+                tileO.addListener((_, oV, nV) -> {
+                    assert oV == null;
 
-                    group.getChildren().addAll(markers(nV, board));
-                    group.getChildren().addAll(occupants(nV, tile, visibleOccupants, occupantHandler));
+                    group.getChildren().addAll(markers(nV, boardO));
+                    group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
                 });
 
                 BooleanBinding couldBePlaced = Bindings.createBooleanBinding(
-                        () -> nextTile.getValue() != null && board.getValue().couldPlaceTile(nextTile.getValue()),
-                        board,
-                        nextTile);
+                        () -> nextTileO.getValue() != null && boardO.getValue().couldPlaceTile(nextTileO.getValue()),
+                        boardO,
+                        nextTileO);
 
-                // ObjectBinding that defines cellData : 25 lines long, uses 7 dependencies.
-                // 이 중 하나는 그 자체가 defined by a second createObjectBinding, which has 2 dependencies
+                BooleanBinding onFringe = Bindings.createBooleanBinding(
+                        () -> nextTileO.getValue() != null && fringeO.getValue().contains(pos),
+                        nextTileO,
+                        fringeO);
+
                 cellData.bind(Bindings.createObjectBinding(() -> {
-                            Image image;
-                            int rotation0;
+                            if (tileO.getValue() != null) {
+                                if (tileIdsO.getValue().isEmpty())
+                                    return new CellData(tileO.getValue(), Color.TRANSPARENT);
 
-                            if (tile.getValue() != null) {
-                                imageCacheById.putIfAbsent(tile.getValue().id(), normalImageForTile(tile.getValue().id()));
-                                image = imageCacheById.get(tile.getValue().id());
-                                rotation0 = tile.getValue().rotation().degreesCW();
-
-                                if (!tileIds.getValue().isEmpty())
-                                    return new CellData(image, rotation0, Color.BLACK);
-
-                                return new CellData(image, rotation0, Color.TRANSPARENT);
+                                return new CellData(tileO.getValue(), Color.BLACK);
                             }
 
-                            if (fringeProperty.getValue().contains(pos)) {
-                                // fringe is not empty -> nextTile != null
-                                if (group.isHover()) {
-                                    imageCacheById.putIfAbsent(nextTile.getValue().id(), normalImageForTile(nextTile.getValue().id()));
-                                    image = imageCacheById.get(nextTile.getValue().id());
-                                    rotation0 = rotation.getValue().degreesCW();
-                                    return couldBePlaced.getValue()
-                                            ? new CellData(image, rotation0, Color.TRANSPARENT)
-                                            : new CellData(image, rotation0, Color.WHITE);
-                                }
-                                return new CellData(emptyImage, 0, fillColor(currentPlayer.getValue()));
+                            if (onFringe.getValue() && currentPlayerO.getValue() != null) { // TODO
+                                if (group.isHover())
+                                    return new CellData(nextTileO.getValue(),
+                                            couldBePlaced.getValue() ? Color.TRANSPARENT : Color.WHITE);
+
+                                return new CellData(emptyImage, fillColor(currentPlayerO.getValue()));
                             }
-                            return CellData.initial();
+
+                            return new CellData(emptyImage, Color.TRANSPARENT);
                         },
-                        tile,
-                        tileIds,
-                        fringeProperty,
+                        tileO,
+                        tileIdsO,
                         group.hoverProperty(),
-                        currentPlayer,
-                        rotation,
-                        couldBePlaced));
-
+                        currentPlayerO,
+                        rotationO,
+                        couldBePlaced,
+                        onFringe));
 
                 group.setOnMouseClicked(e -> {
-                    if (fringe.getValue().contains(pos)) {
+                    if (fringeO.getValue().contains(pos)) {
                         switch (e.getButton()) {
                             case PRIMARY -> placeHandler.accept(pos);
                             case SECONDARY ->
                                     rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
-                            default -> {}
-                            // TODO default case ?, 반대로는 왜 안되는지
                         }
                     }
                 });
@@ -180,7 +164,8 @@ public final class BoardUI {
         return scrollPane;
     }
 
-    private static List<ImageView> markers(PlacedTile tile, ObservableValue<Board> board) {
+    private static List<ImageView> markers(PlacedTile tile,
+                                           ObservableValue<Board> boardO) {
         return tile.meadowZones().stream()
                 .flatMap(meadow -> meadow.animals().stream())
                 .map(animal -> {
@@ -191,53 +176,53 @@ public final class BoardUI {
                     marker.setId(STR."marker_\{animal.id()}");
 
                     marker.visibleProperty()
-                            .bind(board.map(b -> b.cancelledAnimals().contains(animal)));
+                            .bind(boardO.map(b -> b.cancelledAnimals().contains(animal)));
 
                     return marker;
                 }).toList();
     }
 
     private static List<Node> occupants(PlacedTile tile,
-                                        ObservableValue<PlacedTile> myTile,
-                                        ObservableValue<Set<Occupant>> visibleOccupants,
+                                        ObservableValue<PlacedTile> tileO,
+                                        ObservableValue<Set<Occupant>> visibleOccupantsO,
                                         Consumer<Occupant> occupantHandler) {
+        // TODO assert tileO.getValue() != null;
+
         return tile.potentialOccupants().stream().map(occupant -> {
             var icon = Icon.newFor(tile.placer(), occupant.kind());
             icon.setId(STR."\{tile.occupant().kind()}_\{tile.occupant().zoneId()}}");
             // TODO tile.occupant() == null ?
 
             icon.visibleProperty()
-                    .bind(visibleOccupants.map(s -> s.contains(tile.occupant())));
+                    .bind(visibleOccupantsO.map(s -> s.contains(tile.occupant())));
 
-            icon.setOnMouseClicked(e -> occupantHandler.accept(tile.occupant()));
-            // TODO It should always appear vertical when tile box is rotated
+            icon.setOnMouseClicked(_ -> occupantHandler.accept(tile.occupant()));
+            // It should always appear vertical when tile box is rotated
             icon.rotateProperty()
-                    .bind(myTile.map(t -> t.rotation().negated().degreesCW()));
+                    .bind(tileO.map(t -> t.rotation().negated().degreesCW())); // TODO - ?
 
             return icon;
         }).toList();
     }
 
     private record CellData(Image bgImage, int rotation, Color veil) {
-        // TODO methods needed ?..
-        private static CellData initial() {
-            WritableImage emptyImage = new WritableImage(1,1);
-            emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
+        public static Map<Integer, Image> imageCacheById = new HashMap<>();
 
-            return new CellData(emptyImage, 0, Color.TRANSPARENT);
+        public CellData(PlacedTile tile, Color veil) {
+            this(imageCacheById.computeIfAbsent(tile.tile().id(), ImageLoader::normalImageForTile),
+                    tile.rotation().degreesCW(),
+                    veil);
         }
 
-        public CellData setBgImage(Image bgImage) {
-            return new CellData(bgImage, rotation, veil);
+        public CellData(Tile tile, Color veil) {
+            this(imageCacheById.computeIfAbsent(tile.id(), ImageLoader::normalImageForTile), // TODO should already put it in cache?
+                    0,
+                    veil);
         }
 
-        public CellData setRotation(Rotation rotation) {
-            return new CellData(bgImage, rotation.degreesCW(), veil);
+        public CellData(Image image, Color veil) {
+            this(image, 0, veil);
         }
 
-
-        public CellData setVeil(Color veil) {
-            return new CellData(bgImage, rotation, veil);
-        }
     }
 }

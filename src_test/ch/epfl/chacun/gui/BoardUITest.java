@@ -55,8 +55,9 @@ public final class BoardUITest extends Application {
                         o -> System.out.println("Select: " + o));
 
         var pTile1 = new PlacedTile(Tiles.TILES.get(62), PlayerColor.RED, Rotation.NONE, new Pos(0, -1), null);
+        var occ1 = new Occupant(Occupant.Kind.PAWN, 62_0);
 
-        gameStateO.set(gameStateO.get().withStartingTilePlaced().withPlacedTile(pTile1).withNewOccupant(null));
+        gameStateO.set(gameStateO.get().withStartingTilePlaced().withPlacedTile(pTile1).withNewOccupant(occ1));
 
         var rootNode = new BorderPane(boardNode);
         primaryStage.setScene(new Scene(rootNode));

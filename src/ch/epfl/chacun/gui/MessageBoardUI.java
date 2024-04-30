@@ -28,12 +28,12 @@ public final class MessageBoardUI {
     /**
      * Creates the part of the graphical interface of the message board.
      *
-     * @param messages the observable version of messages displayed on the bulletin board
+     * @param messagesO the observable version of messages displayed on the bulletin board
      * @param tileIds a JavaFX property containing all the identities of the tiles to be
      *                highlighted on the board
      * @return the part of the graphical interface
      */
-    public static Node create(ObservableValue<List<MessageBoard.Message>> messages,
+    public static Node create(ObservableValue<List<MessageBoard.Message>> messagesO,
                               ObjectProperty<Set<Integer>> tileIds) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("message-board");
@@ -42,7 +42,7 @@ public final class MessageBoardUI {
         VBox messageBox = new VBox();
 
         ObjectProperty<List<MessageBoard.Message>> messageProperty =
-                new SimpleObjectProperty<>(messages.getValue());
+                new SimpleObjectProperty<>(messagesO.getValue());
 
         messageProperty.addListener((o, oV, nV) -> {
             messageBox.getChildren().clear();

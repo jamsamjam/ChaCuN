@@ -26,11 +26,12 @@ public final class PlayersUI  {
     /**
      * Creates the part of the graphical interface that displays player information.
      *
-     * @param gameState the observable version of the current game state
+     * @param gameStateO the observable version of the current game state
      * @param tm a text maker
      * @return the part of the graphical interface
      */
-    public static Node create(ObservableValue<GameState> gameState, TextMaker tm) {
+    public static Node create(ObservableValue<GameState> gameStateO,
+                              TextMaker tm) {
         VBox vBox = new VBox();
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
@@ -39,14 +40,14 @@ public final class PlayersUI  {
                 .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
 
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
-                gameState.map(gs -> gs.messageBoard().points());
+                gameStateO.map(gs -> gs.messageBoard().points());
 
         for (var player : participants) {
             TextFlow textFlow = new TextFlow();
             textFlow.getStyleClass().add("player");
 
             // current player is surrounded by a gray frame
-            ObservableValue<PlayerColor> currentPlayer = gameState.map(GameState::currentPlayer);
+            ObservableValue<PlayerColor> currentPlayer = gameStateO.map(GameState::currentPlayer);
             currentPlayer.addListener((o, oV, nV) -> {
                 if (player == nV)
                     textFlow.getStyleClass().add("current");
@@ -69,8 +70,8 @@ public final class PlayersUI  {
             textFlow.getChildren().addAll(circle, text);
 
             // occupant
-            createOccupants(player, Occupant.Kind.HUT, gameState, textFlow);
-            createOccupants(player, Occupant.Kind.PAWN, gameState, textFlow);
+            createOccupants(player, Occupant.Kind.HUT, gameStateO, textFlow);
+            createOccupants(player, Occupant.Kind.PAWN, gameStateO, textFlow);
 
             Text space = new Text("   ");
             textFlow.getChildren().add(space);
@@ -83,14 +84,14 @@ public final class PlayersUI  {
 
     private static void createOccupants(PlayerColor player,
                                         Occupant.Kind kind,
-                                        ObservableValue<GameState> gameState,
+                                        ObservableValue<GameState> gameStateO,
                                         TextFlow textFlow) {
         for (int i = 0; i < occupantsCount(kind); i++) {
             int j = i;
             Node occupant = newFor(player, kind);
 
             ObservableValue<Integer> freeCount =
-                    gameState.map(gs -> gs.freeOccupantsCount(player, kind));
+                    gameStateO.map(gs -> gs.freeOccupantsCount(player, kind));
             freeCount.addListener((o, oV, nV) ->
                     occupant.setOpacity((j < freeCount.getValue()) ? 1.0 : 0.1));
 
