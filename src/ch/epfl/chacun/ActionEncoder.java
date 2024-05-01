@@ -1,9 +1,10 @@
 package ch.epfl.chacun;
 
-import javafx.util.Pair;
-
+import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
+
+import static ch.epfl.chacun.GameState.Action.START_GAME;
 
 /**
  * Contains methods for encoding and decoding action, and applying these actions to a game state.
@@ -15,8 +16,8 @@ public class ActionEncoder {
     private ActionEncoder() {}
 
     /**
-     * Returns a pair composed of the game state with the given tile placed and the base32 string of
-     * length 2, representing this action.
+     * Returns a StateAction composed of the game state with the given tile placed and the base32
+     * string of length 2, representing this action.
      * The string should be in the format of 'ppppp ppprr', where p represents the tile index
      * and r the rotation.
      *
@@ -25,7 +26,7 @@ public class ActionEncoder {
      * @return the corresponding StateAction
      */
     public static StateAction withPlacedTile(GameState gameState,
-                                                         PlacedTile tile){
+                                             PlacedTile tile){
         // TODO comparingInt vs. comparing
         List<Pos> positions = gameState.board().insertionPositions().stream()
                 .sorted(Comparator.comparingInt(Pos::x)
@@ -35,22 +36,22 @@ public class ActionEncoder {
         int bit = positions.indexOf(tile.pos());
         bit = (bit << 2) | tile.rotation().ordinal();
 
-        return StateAction(gameState.withPlacedTile(tile), Base32.encodeBits10(bit));
+        return new StateAction(gameState.withPlacedTile(tile), Base32.encodeBits10(bit));
     };
 
     /**
-     * Returns a pair composed of the game state with the given occupant and the base32 string of
-     * length 1, representing this action.
+     * Returns a StateAction composed of the game state with the given occupant and the base32 string
+     * of length 1, representing this action.
      * The string should be in the format of 'kzzzz', where k represents the occupant kind (0:PAWN,
      * 1:HUT) and z the number of the occupied zone.
      * The case where no occupant is placed is represented by the 5 bits, 11111.
      *
      * @param gameState the initial game state
      * @param occupant the given occupant
-     * @return a pair composed of the game state and the string
+     * @return the corresponding StateAction
      */
     public static StateAction withNewOccupant(GameState gameState,
-                                                          Occupant occupant){
+                                              Occupant occupant){
         String encoding;
         if (occupant == null) encoding = "11111";
         else {
@@ -58,21 +59,21 @@ public class ActionEncoder {
             bit = (bit << 4) | occupant.zoneId();
             encoding = Base32.encodeBits5(bit);
         }
-        return StateAction(gameState.withNewOccupant(occupant), encoding);
+        return new StateAction(gameState.withNewOccupant(occupant), encoding);
     };
 
     /**
-     * Returns a pair composed of the game state without the given occupant and the base32 string of
-     * length 1, representing this action.
+     * Returns a StateAction composed of the game state without the given occupant and the base32
+     * string of length 1, representing this action.
      * The string should be in the format of 'ooooo', where o represents the index of the pawn.
      * The case where no pawn must be taken back is represented by the 5 bits 11111.
      *
      * @param gameState the initial game state
      * @param occupant the given occupant
-     * @return a pair composed of the game state and the string
+     * @return the corresponding StateAction
      */
     public static StateAction withOccupantRemoved(GameState gameState,
-                                                              Occupant occupant){
+                                                  Occupant occupant){
         String encoding;
         if (occupant == null) encoding = "11111";
         else {
@@ -83,27 +84,53 @@ public class ActionEncoder {
             int bit = occupants.indexOf(occupant);
             encoding = Base32.encodeBits5(bit);
         }
-        return StateAction(gameState.withOccupantRemoved(occupant), encoding);
+        return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
     };
 
     /**
-     * Returns a pair composed of the game state
+     * Returns a StateAction composed of the game state after the action is applied, and the string
+     * representing the action.
      *
-     * @param gameState a game state after applying the action to the initial game state
-     * @param encoding base 32 encoding of an action
-     * @return a pair composed of the game state and the string
+     * @param gameState the initial game state
+     * @param encoding the base 32 encoding of an action
+     * @return the corresponding StateAction
      */
     public static StateAction decodeAndApply(GameState gameState,
-                                                         String encoding) {
-        // the given string does not represent a valid action -> returns null
-
-        return new StateAction(gameState.)
+                                             String encoding) {
+        try {
+            return decodeAndApplyInternal(gameState, encoding);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
+    private static StateAction decodeAndApplyInternal(GameState gameState,
+                                                      String encoding) {
+        int decoding = Base32.decode(encoding);
 
-    private static Record StateAction(GameState gameState, String encoding) {
+        //return new StateAction(gameState,)
 
 
+        switch (gameState.nextAction()) {
+            case START_GAME -> {}
+
+            case PLACE_TILE -> {}
+            case RETAKE_PAWN -> {}
+            case OCCUPY_TILE -> {}
+
+            case END_GAME -> {
+            }
+        }
+
+        return null;
     }
 
+    /**
+     * Represents a StateAction of the game state and the string.
+     *
+     * @param gameState the game state
+     * @param encoding the string
+     */
+    public record StateAction(GameState gameState, String encoding) {}
+        // TODO access right?
 }
