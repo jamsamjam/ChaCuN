@@ -26,7 +26,7 @@ import static ch.epfl.chacun.gui.ColorMap.fillColor;
 import static ch.epfl.chacun.gui.ImageLoader.*;
 
 /**
- * Contains the code for creating the graphical interface that displays the game board
+ * Creates the graphical interface that displays the game board.
  *
  * @author Sam Lee (375535)
  */

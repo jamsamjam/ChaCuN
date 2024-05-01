@@ -48,7 +48,7 @@ public final class PlayersUI  {
 
             // current player is surrounded by a gray frame
             ObservableValue<PlayerColor> currentPlayer = gameStateO.map(GameState::currentPlayer);
-            currentPlayer.addListener((o, oV, nV) -> {
+            currentPlayer.addListener((_, _, nV) -> {
                 if (player == nV)
                     textFlow.getStyleClass().add("current");
                 else
@@ -92,7 +92,7 @@ public final class PlayersUI  {
 
             ObservableValue<Integer> freeCount =
                     gameStateO.map(gs -> gs.freeOccupantsCount(player, kind));
-            freeCount.addListener((o, oV, nV) ->
+            freeCount.addListener((_, _, _) ->
                     occupant.setOpacity((j < freeCount.getValue()) ? 1.0 : 0.1));
 
             textFlow.getChildren().add(occupant);

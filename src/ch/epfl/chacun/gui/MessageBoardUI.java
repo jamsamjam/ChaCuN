@@ -4,13 +4,11 @@ import ch.epfl.chacun.MessageBoard;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +42,7 @@ public final class MessageBoardUI {
         ObjectProperty<List<MessageBoard.Message>> messageProperty =
                 new SimpleObjectProperty<>(messagesO.getValue());
 
-        messageProperty.addListener((o, oV, nV) -> {
+        messageProperty.addListener((_, _, nV) -> {
             messageBox.getChildren().clear();
 
             nV.forEach(message -> {
@@ -57,8 +55,8 @@ public final class MessageBoardUI {
                 messageBox.getChildren().add(text);
 
                 // highlighting tiles
-                text.setOnMouseEntered(e -> tileIds.setValue(message.tileIds()));
-                text.setOnMouseExited(e -> tileIds.setValue(Set.of()));
+                text.setOnMouseEntered(_ -> tileIds.setValue(message.tileIds()));
+                text.setOnMouseExited(_ -> tileIds.setValue(Set.of()));
             });
         });
 
