@@ -1,10 +1,7 @@
 package ch.epfl.chacun;
 
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
-
-import static ch.epfl.chacun.GameState.Action.START_GAME;
 
 /**
  * Contains methods for encoding and decoding action, and applying these actions to a game state.
