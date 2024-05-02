@@ -34,31 +34,54 @@ public class ActionsUI {
         hBox.setId("actions");
 
         Text text = new Text();
-        TextField textField = new TextField();
-        textField.setId("actions-field");
-        textField.setTextFormatter(new TextFormatter<>(change -> {
-            // only accept characters from the base32 alphabet,
-            // transform all lowercase letters into uppercase letters.
-            // TODO 일부만 valid characters 면 그것들만 테이크하는게 맞는지
-            actionsO.getValue().stream().flatMap(string -> string.chars().boxed())
-                            .forEach(c -> {
-                                if (Base32.isValid()) {
-                                    change.setText(""); // remove invalid characters
-                                    change.setRange(0, change.getControlText().length());
-                                }
-                            })
-            return change;
-        }));
+        StringBuilder sb = new StringBuilder();
+        ObservableValue<Integer> actionCount = actionsO.map(List::size);
 
-        textField.setOnAction(_ -> {
-            eventHandler.accept(textField.getText());
-            textField.clear();
-            // TODO textField.textProperty()
+        actionCount.addListener((_, _, nV) -> { // TODO addListener to actionsO.prop ?
+            for (int i = nV - 4; i < nV; i++) {
+                sb.append(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
+                if (i != nV - 1) sb.append(", ");
+            }
+            text.setText(sb.toString());
         });
 
+        // TODO Text should be updated with new message input ?
+        TextField textField = getTextField(eventHandler);
         hBox.getChildren().addAll(text, textField);
 
         return hBox;
     }
 
+    private static TextField getTextField(Consumer<String> eventHandler) {
+        TextField textField = new TextField();
+        textField.setId("actions-field");
+        textField.setPrefWidth(60);
+
+        textField.setTextFormatter(new TextFormatter<>(change -> {
+            StringBuilder filteredText = new StringBuilder();
+            change.getText().chars()
+                    .forEach(u -> {
+                        char c = (char) u;
+                        if (Character.isLowerCase(c))
+                            filteredText.append(Character.toUpperCase(c));
+                        else if (Base32.ALPHABET.indexOf(c) != -1)
+                            filteredText.append(c);
+                    });
+
+            change.setText(filteredText.toString());
+
+            return change;
+        }));
+
+        textField.textProperty().addListener((_, oV, nV) -> {
+            if (nV.length() > 2) textField.setText(oV);
+        });
+
+        textField.setOnAction(_ -> {
+            eventHandler.accept(textField.getText());
+            textField.clear();
+        });
+
+        return textField;
+    }
 }

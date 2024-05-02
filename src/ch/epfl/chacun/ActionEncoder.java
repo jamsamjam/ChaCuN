@@ -3,6 +3,9 @@ package ch.epfl.chacun;
 import java.util.Comparator;
 import java.util.List;
 
+import static ch.epfl.chacun.Occupant.Kind.PAWN;
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Contains methods for encoding and decoding action, and applying these actions to a game state.
  *
@@ -34,7 +37,7 @@ public class ActionEncoder {
         bit = (bit << 2) | tile.rotation().ordinal();
 
         return new StateAction(gameState.withPlacedTile(tile), Base32.encodeBits10(bit));
-    };
+    }
 
     /**
      * Returns a StateAction composed of the game state with the given occupant and the base32 string
@@ -52,12 +55,12 @@ public class ActionEncoder {
         String encoding;
         if (occupant == null) encoding = "11111";
         else {
-            int bit = occupant.kind() == Occupant.Kind.PAWN ? 0 : 1;
+            int bit = occupant.kind().ordinal();
             bit = (bit << 4) | occupant.zoneId();
             encoding = Base32.encodeBits5(bit);
         }
         return new StateAction(gameState.withNewOccupant(occupant), encoding);
-    };
+    }
 
     /**
      * Returns a StateAction composed of the game state without the given occupant and the base32
@@ -75,21 +78,21 @@ public class ActionEncoder {
         if (occupant == null) encoding = "11111";
         else {
             List<Occupant> occupants = gameState.board().occupants().stream()
-                    .filter(o -> o.kind() == Occupant.Kind.PAWN)
+                    .filter(o -> o.kind() == PAWN)
                     .sorted(Comparator.comparingInt(Occupant::zoneId))
                     .toList();
             int bit = occupants.indexOf(occupant);
             encoding = Base32.encodeBits5(bit);
         }
         return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
-    };
+    }
 
     /**
      * Returns a StateAction composed of the game state after the action is applied, and the string
      * representing the action.
      *
      * @param gameState the initial game state
-     * @param encoding the base 32 encoding of an action
+     * @param encoding the base 32 encoding of an action // TODO returned 그대로?
      * @return the corresponding StateAction
      */
     public static StateAction decodeAndApply(GameState gameState,
@@ -103,23 +106,70 @@ public class ActionEncoder {
 
     private static StateAction decodeAndApplyInternal(GameState gameState,
                                                       String encoding) {
-        int decoding = Base32.decode(encoding);
-
-        //return new StateAction(gameState,)
-
+        int bit = Base32.decode(encoding); // here length is checked
 
         switch (gameState.nextAction()) {
-            case START_GAME -> {}
+            case PLACE_TILE -> {
+                checkArgument(encoding.length() == 2);
+                // ppppp ppprr
+                int index = bit >> 2;
+                int rotation = bit & 0b11;
 
-            case PLACE_TILE -> {}
-            case RETAKE_PAWN -> {}
-            case OCCUPY_TILE -> {}
+                List<Pos> positions = gameState.board().insertionPositions().stream()
+                        .sorted(Comparator.comparingInt(Pos::x)
+                                .thenComparingInt(Pos::y))
+                        .toList();
 
-            case END_GAME -> {
+                checkArgument(index < positions.size()); // TODO index can be neg?
+                checkArgument(rotation < Rotation.ALL.size());
+
+                PlacedTile tile = new PlacedTile(gameState.tileDecks().topTile(Tile.Kind.NORMAL),
+                        gameState.currentPlayer(),
+                        Rotation.ALL.get(rotation),
+                        positions.get(index));
+
+                return new StateAction(gameState.withPlacedTile(tile), encoding);
             }
-        }
 
-        return null;
+            case RETAKE_PAWN -> {
+                // ooooo
+                Occupant occupant;
+                if (bit == 0b11111) occupant = null;
+                else {
+                    List<Occupant> occupants = gameState.board().occupants().stream()
+                            .filter(o -> o.kind() == PAWN)
+                            .sorted(Comparator.comparingInt(Occupant::zoneId))
+                            .toList();
+                    occupant = occupants.get(bit);
+
+                    // check if the occupant belongs to the current player
+                    // TODO How to find a placedtile with the occ's zoneId ?
+                    // TODO checkArgument here?
+                    //checkArgument(tile.placer() == gameState.currentPlayer());
+                }
+
+                return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
+            }
+
+            case OCCUPY_TILE -> {
+                // kzzzz
+                Occupant occupant;
+
+                // TODO check if the tile to occupy belongs to the current player
+                // TODO check if the occupation is valid (right zone)
+
+                if (bit == 0b11111) occupant = null;
+                else {
+                    int kind = bit >> 4;
+                    int id = bit & 0b1111;
+                    occupant = new Occupant(Occupant.Kind.values()[kind], id);
+                }
+
+                return new StateAction(gameState.withNewOccupant(occupant), encoding);
+            }
+
+            default -> throw new IllegalArgumentException();
+        }
     }
 
     /**

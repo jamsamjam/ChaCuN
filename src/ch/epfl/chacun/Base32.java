@@ -22,7 +22,7 @@ public class Base32 {
      * @return true iff the given string is only composed of characters from the base32 alphabet
      */
     public static boolean isValid(String string) {
-        checkArgument(string != null); // TODO empty string ?
+        checkArgument(string != null); // TODO empty string ?, small case
 
         for (int i = 0; i < string.length(); i++) {
             char chr = string.charAt(i);
@@ -40,9 +40,7 @@ public class Base32 {
      * bits of the given integer
      */
     public static String encodeBits5(int bit) {
-        bit &= 0b11111; // TODO needed ?
-        char chr = ALPHABET.charAt(bit);
-
+        char chr = ALPHABET.charAt(bit & 0b11111); // TODO needed ?
         return String.valueOf(chr);
     }
 
@@ -55,10 +53,7 @@ public class Base32 {
      * bits of the given integer
      */
     public static String encodeBits10(int bit) {
-        int bit0 = bit & 0b11111;
-        int bit1 = bit & 0b1111100000;
-
-        return encodeBits5(bit1) + encodeBits5(bit0);
+        return encodeBits5(bit & 0b1111100000) + encodeBits5(bit & 0b11111);
     }
 
     /**
@@ -72,14 +67,12 @@ public class Base32 {
         checkArgument(!string.isEmpty() && string.length() < 3);
 
         char chr0 = string.charAt(0);
-        int bit0 = ALPHABET.indexOf(chr0);
-        int result = bit0;
+        int bit = ALPHABET.indexOf(chr0);
 
         if (string.length() == 2) {
             char chr1 = string.charAt(1);
-            int bit1 = ALPHABET.indexOf(chr1);
-            result = (result << 5) | bit1;
+            bit = (bit << 5) | ALPHABET.indexOf(chr1);
         }
-        return result;
+        return bit;
     }
 }

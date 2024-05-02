@@ -107,6 +107,7 @@ public final class BoardUI {
                         () -> nextTileO.getValue() != null && boardO.getValue().couldPlaceTile(nextTileO.getValue()),
                         boardO,
                         nextTileO);
+                // TODO nextTiletoPlace 만 체크하는게 아니라 cursor 가 있는 해당 타일을 체크해야
 
                 BooleanBinding onFringe = Bindings.createBooleanBinding(
                         () -> nextTileO.getValue() != null && fringeO.getValue().contains(pos),
