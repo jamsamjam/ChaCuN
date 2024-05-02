@@ -64,7 +64,7 @@ public final class BoardUI {
         ObservableValue<Tile> tileToPlaceO = gameStateO.map(GameState::tileToPlace);
 
         ObservableValue<Set<Pos>> fringeO = boardO.map(Board::insertionPositions);
-        // TODO ObjectProperty<Set<Pos>> fringeProperty ?
+        // TODO :) ObjectProperty<Set<Pos>> fringeProperty ?
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -122,13 +122,12 @@ public final class BoardUI {
                                                 currentPlayerO.getValue(),
                                                 rotationO.getValue(),
                                                 pos);
-                                System.out.println(placedTile.id() + ": id");
 
                                 if (group.isHover()) {
                                     Color color = boardO.getValue().canAddTile(placedTile)
                                             ? Color.TRANSPARENT
                                             : Color.WHITE;
-                                    return new CellData(placedTile, color); //TODO
+                                    return new CellData(placedTile, color);
                                 }
 
                                 return new CellData(emptyImage, fillColor(currentPlayerO.getValue()));
@@ -213,7 +212,7 @@ public final class BoardUI {
         private static final Map<Integer, Image> imageCacheById = new HashMap<>();
 
         private CellData(PlacedTile tile, Color veil) {
-            this(imageCacheById.computeIfAbsent(tile.id(), ImageLoader::normalImageForTile), // TODO
+            this(imageCacheById.computeIfAbsent(tile.id(), ImageLoader::normalImageForTile),
                     tile.rotation().degreesCW(),
                     veil);
         }
