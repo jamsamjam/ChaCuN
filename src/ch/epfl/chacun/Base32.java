@@ -40,7 +40,7 @@ public class Base32 {
      * bits of the given integer
      */
     public static String encodeBits5(int bit) {
-        char chr = ALPHABET.charAt(bit & 0b11111); // TODO needed ?
+        char chr = ALPHABET.charAt(bit & 0b11111);
         return String.valueOf(chr);
     }
 

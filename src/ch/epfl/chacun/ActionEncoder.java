@@ -92,7 +92,7 @@ public class ActionEncoder {
      * representing the action.
      *
      * @param gameState the initial game state
-     * @param encoding the base 32 encoding of an action // TODO returned 그대로?
+     * @param encoding the base 32 encoding of an action
      * @return the corresponding StateAction
      */
     public static StateAction decodeAndApply(GameState gameState,

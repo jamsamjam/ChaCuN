@@ -89,7 +89,7 @@ public final class Board {
      */
     public PlacedTile tileWithId(int tileId) {
        for (int i : tileIndexes)
-           if (placedTiles[i].tile().id() == tileId)
+           if (placedTiles[i].id() == tileId)
                return placedTiles[i];
        throw new IllegalArgumentException();
     }
