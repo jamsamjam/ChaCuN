@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.Base32;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
@@ -34,18 +35,17 @@ public class ActionsUI {
         hBox.setId("actions");
 
         Text text = new Text();
-        StringBuilder sb = new StringBuilder();
-        ObservableValue<Integer> actionCount = actionsO.map(List::size);
+        text.textProperty().bind(Bindings.createStringBinding(() -> {
+            int size = actionsO.getValue().size();
+            StringBuilder sb = new StringBuilder();
 
-        actionCount.addListener((_, _, nV) -> { // TODO addListener to actionsO.prop ?
-            for (int i = nV - 4; i < nV; i++) {
+            for (int i = size - 4; i < size; i++) {
                 sb.append(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
-                if (i != nV - 1) sb.append(", ");
+                if (i != size - 1) sb.append(", ");
             }
-            text.setText(sb.toString());
-        });
+            return sb.toString();
+        }, actionsO));
 
-        // TODO Text should be updated with new message input ?
         TextField textField = getTextField(eventHandler);
         hBox.getChildren().addAll(text, textField);
 

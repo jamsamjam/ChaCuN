@@ -3,15 +3,14 @@ package ch.epfl.chacun;
 import java.util.Comparator;
 import java.util.List;
 
+import static ch.epfl.chacun.Base32.isValid;
 import static ch.epfl.chacun.Occupant.Kind.PAWN;
-import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
  * Contains methods for encoding and decoding action, and applying these actions to a game state.
  *
  * @author Sam Lee (375535)
  */
-@SuppressWarnings("SpellCheckingInspection")
 public class ActionEncoder {
     private ActionEncoder() {}
 
@@ -27,7 +26,6 @@ public class ActionEncoder {
      */
     public static StateAction withPlacedTile(GameState gameState,
                                              PlacedTile tile){
-        // TODO comparingInt vs. comparing
         List<Pos> positions = gameState.board().insertionPositions().stream()
                 .sorted(Comparator.comparingInt(Pos::x)
                         .thenComparingInt(Pos::y))
@@ -72,6 +70,7 @@ public class ActionEncoder {
      * @param occupant the given occupant
      * @return the corresponding StateAction
      */
+    @SuppressWarnings("SpellCheckingInspection")
     public static StateAction withOccupantRemoved(GameState gameState,
                                                   Occupant occupant){
         String encoding;
@@ -99,18 +98,19 @@ public class ActionEncoder {
                                              String encoding) {
         try {
             return decodeAndApplyInternal(gameState, encoding);
-        } catch (IllegalArgumentException e) {
+        } catch (DecodingException e) {
             return null;
         }
     }
 
     private static StateAction decodeAndApplyInternal(GameState gameState,
-                                                      String encoding) {
-        int bit = Base32.decode(encoding); // here length is checked
+                                                      String encoding) throws DecodingException {
+        if (!isValid(encoding)) throw new DecodingException();
 
-        switch (gameState.nextAction()) {
+        int bit = Base32.decode(encoding);
+
+        switch (gameState.nextAction()) { // TODO review checks
             case PLACE_TILE -> {
-                checkArgument(encoding.length() == 2);
                 // ppppp ppprr
                 int index = bit >> 2;
                 int rotation = bit & 0b11;
@@ -120,8 +120,8 @@ public class ActionEncoder {
                                 .thenComparingInt(Pos::y))
                         .toList();
 
-                checkArgument(index < positions.size()); // TODO index can be neg?
-                checkArgument(rotation < Rotation.ALL.size());
+                if (index > positions.size() || rotation > Rotation.ALL.size())
+                    throw new DecodingException();
 
                 PlacedTile tile = new PlacedTile(gameState.tileDecks().topTile(Tile.Kind.NORMAL),
                         gameState.currentPlayer(),
@@ -143,9 +143,9 @@ public class ActionEncoder {
                     occupant = occupants.get(bit);
 
                     // check if the occupant belongs to the current player
-                    // TODO How to find a placedtile with the occ's zoneId ?
-                    // TODO checkArgument here?
-                    //checkArgument(tile.placer() == gameState.currentPlayer());
+                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
+                            != gameState.currentPlayer())
+                        throw new DecodingException();
                 }
 
                 return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
@@ -155,22 +155,29 @@ public class ActionEncoder {
                 // kzzzz
                 Occupant occupant;
 
-                // TODO check if the tile to occupy belongs to the current player
-                // TODO check if the occupation is valid (right zone)
-
                 if (bit == 0b11111) occupant = null;
                 else {
                     int kind = bit >> 4;
                     int id = bit & 0b1111;
                     occupant = new Occupant(Occupant.Kind.values()[kind], id);
-                }
 
+                    // check if the occupant belongs to the current player
+                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
+                            != gameState.currentPlayer())
+                        throw new DecodingException();
+
+                    // check if the occupant is being placed in the right zone
+                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
+                        throw new DecodingException();
+                }
                 return new StateAction(gameState.withNewOccupant(occupant), encoding);
             }
 
-            default -> throw new IllegalArgumentException();
+            default -> throw new DecodingException();
         }
     }
+
+    private static class DecodingException extends Exception {}
 
     /**
      * Represents a StateAction of the game state and the string.
@@ -179,5 +186,4 @@ public class ActionEncoder {
      * @param encoding the string
      */
     public record StateAction(GameState gameState, String encoding) {}
-        // TODO access right?
 }

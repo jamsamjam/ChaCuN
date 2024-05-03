@@ -1,15 +1,19 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
-import ch.epfl.chacun.tile.Tiles;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.value.ObservableValue;
+import tile.Tiles;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -39,11 +43,14 @@ public class ActionsUITest extends Application {
                         textMaker);
         var gameStateO = new SimpleObjectProperty<>(gameState);
 
-        var actions = List.of("AB", "A5", "D", "AU", "C");
-        var actionsO = new SimpleObjectProperty<>(actions);
+        var actions = new ArrayList<>(List.of("AB", "A5", "D", "AU", "C"));
+        ObjectProperty<List<String>> actionsO = new SimpleObjectProperty<>(actions);
         var handler = new Consumer<String>() {
             @Override
             public void accept(String string) {
+                var newL = new ArrayList<>(List.copyOf(actions)); // TODO mach 이해
+                newL.add(string);
+                actionsO.set(newL);
                 System.out.println(string + " was entered !");
             }
         };

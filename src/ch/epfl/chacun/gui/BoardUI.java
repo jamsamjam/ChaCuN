@@ -64,7 +64,6 @@ public final class BoardUI {
         ObservableValue<Tile> tileToPlaceO = gameStateO.map(GameState::tileToPlace);
 
         ObservableValue<Set<Pos>> fringeO = boardO.map(Board::insertionPositions);
-        // TODO :) ObjectProperty<Set<Pos>> fringeProperty ?
 
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
@@ -73,10 +72,6 @@ public final class BoardUI {
         GridPane gridPane = new GridPane();
         gridPane.setId("board-grid");
         scrollPane.setContent(gridPane);
-
-        // TODO
-        WritableImage emptyImage = new WritableImage(1,1);
-        emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
 
         for (int x = -scope; x <= scope; x++)
             for (int y = -scope; y <= scope; y++) {
@@ -130,9 +125,9 @@ public final class BoardUI {
                                     return new CellData(placedTile, color);
                                 }
 
-                                return new CellData(emptyImage, fillColor(currentPlayerO.getValue()));
+                                return new CellData(fillColor(currentPlayerO.getValue()));
                             }
-                            return new CellData(emptyImage, Color.TRANSPARENT);
+                            return new CellData(Color.TRANSPARENT);
                         },
                         tileO,
                         tileIdsO,
@@ -211,14 +206,21 @@ public final class BoardUI {
     private record CellData(Image bgImage, int rotation, Color veil) {
         private static final Map<Integer, Image> imageCacheById = new HashMap<>();
 
+        private static WritableImage emptyImage() {
+            WritableImage emptyImage = new WritableImage(1,1);
+            emptyImage.getPixelWriter().setColor( 0 , 0 , Color.gray(0.98));
+
+            return emptyImage;
+        }
+
         private CellData(PlacedTile tile, Color veil) {
             this(imageCacheById.computeIfAbsent(tile.id(), ImageLoader::normalImageForTile),
                     tile.rotation().degreesCW(),
                     veil);
         }
 
-        private CellData(Image image, Color veil) {
-            this(image, 0, veil);
+        private CellData(Color veil) {
+            this(emptyImage(), 0, veil);
         }
     }
 }
