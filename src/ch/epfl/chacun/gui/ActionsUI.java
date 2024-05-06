@@ -39,7 +39,7 @@ public class ActionsUI {
             int size = actionsO.getValue().size();
             StringBuilder sb = new StringBuilder();
 
-            for (int i = size - 4; i < size; i++) {
+            for (int i = Math.max(0, size - 4); i < size; i++) {
                 sb.append(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
                 if (i != size - 1) sb.append(", ");
             }

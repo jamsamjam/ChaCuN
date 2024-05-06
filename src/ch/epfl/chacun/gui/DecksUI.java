@@ -31,7 +31,7 @@ public final class DecksUI {
      * @param menhirTileCountO the observable version of the number of tiles remaining in the pile
      *                        of menhir tiles
      * @param textO the observable version of the text to display in place of the tile to place
-     * @param eventHandler an event handler intended to be called when the current player signals
+     * @param occupantHandler an event handler intended to be called when the current player signals
      *                        that he does not wish to place or pick up an occupant, by clicking on the text displayed in place of the next tile
      * @return the part of the graphical interface
      */
@@ -39,9 +39,9 @@ public final class DecksUI {
                               ObservableValue<Integer> normalTileCountO,
                               ObservableValue<Integer> menhirTileCountO,
                               ObservableValue<String> textO,
-                              Consumer<Occupant> eventHandler) {
+                              Consumer<Occupant> occupantHandler) {
         // inform the rest of the program that player does not wish to place (or pick up) an occupant
-        if (!textO.getValue().isEmpty()) eventHandler.accept(null);
+        if (!textO.getValue().isEmpty()) occupantHandler.accept(null);
 
         ImageView nextTileImage = new ImageView(largeImageForTile(tileO.getValue().id()));
         nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE);

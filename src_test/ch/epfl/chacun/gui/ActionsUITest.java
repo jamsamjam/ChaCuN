@@ -3,7 +3,6 @@ package ch.epfl.chacun.gui;
 import ch.epfl.chacun.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
-import tile.Tiles;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;

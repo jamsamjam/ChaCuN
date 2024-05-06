@@ -112,12 +112,14 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
      * @param adjacentMeadow the given meadow
      * @return an identical or updated MessageBoard
      */
-    public MessageBoard withScoredHuntingTrap(PlayerColor scorer, Area<Zone.Meadow> adjacentMeadow) {
-        int points = meadowPoints(adjacentMeadow, Set.of());
+    public MessageBoard withScoredHuntingTrap(PlayerColor scorer,
+                                              Area<Zone.Meadow> adjacentMeadow,
+                                              Set<Animal> cancelledAnimals) {
+        int points = meadowPoints(adjacentMeadow, cancelledAnimals);
 
         if (points > 0) {
             Message newMessage = new Message(textMaker.playerScoredHuntingTrap(scorer, points,
-                    meadowAnimals(adjacentMeadow, Set.of())),
+                    meadowAnimals(adjacentMeadow, cancelledAnimals)),
                     points,
                     Set.of(scorer),
                     adjacentMeadow.tileIds());

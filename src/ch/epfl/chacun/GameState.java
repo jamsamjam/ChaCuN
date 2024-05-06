@@ -170,15 +170,16 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), meadow);
                     Set<Animal> animals = Area.animals(adjacentMeadow, Set.of());
 
+                    // cancel deer devoured by tigers in the adjacent meadow
                     int tigerCount = (int) animals.stream()
                             .filter(a -> a.kind() == Animal.Kind.TIGER).count();
                     Set<Animal> deadDear = animals.stream()
                             .filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount)
                             .collect(Collectors.toSet());
 
-                    myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
-                    // later deadDear should be passed to withScoredHuntingTrap
-                    myBoard = myBoard.withMoreCancelledAnimals(animals); // cancel all
+                    // calculate the points with the remaining animals & cancel all animals
+                    myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow, deadDear);
+                    myBoard = myBoard.withMoreCancelledAnimals(animals);
                 }
 
                 case Zone.Meadow meadow when meadow.specialPower() == SHAMAN -> {

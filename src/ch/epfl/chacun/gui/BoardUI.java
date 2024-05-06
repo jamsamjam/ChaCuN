@@ -45,8 +45,8 @@ public final class BoardUI {
      *                      be placed, i.e. he right-clicks on a box in the fringe
      * @param placeHandler a handler called when the current player wishes to place the tile to be
      *                     placed, i.e. he left-clicks on a box in the fringe
-     * @param occupantHandler called when the current player selects an occupant, i.e. click on one
-     *                        of them
+     * @param occupantHandler a handler called when the current player selects an occupant, i.e.
+     *                        click on one of them
      * @return the graphical interface that displays the game board
      */
     public static Node create(int scope,
