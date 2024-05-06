@@ -168,16 +168,17 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
 
                 case Zone.Meadow meadow when meadow.specialPower() == HUNTING_TRAP -> {
                     Area<Zone.Meadow> adjacentMeadow = myBoard.adjacentMeadow(tile.pos(), meadow);
+                    Set<Animal> animals = Area.animals(adjacentMeadow, Set.of());
 
-                    int tigerCount = (int) Area.animals(adjacentMeadow, Set.of()).stream()
+                    int tigerCount = (int) animals.stream()
                             .filter(a -> a.kind() == Animal.Kind.TIGER).count();
-                    Set<Animal> deadDear = Area.animals(adjacentMeadow, Set.of()).stream()
+                    Set<Animal> deadDear = animals.stream()
                             .filter(a -> a.kind() == Animal.Kind.DEER).limit(tigerCount)
                             .collect(Collectors.toSet());
 
                     myMessageBoard = myMessageBoard.withScoredHuntingTrap(currentPlayer(), adjacentMeadow);
                     // later deadDear should be passed to withScoredHuntingTrap
-                    myBoard = myBoard.withMoreCancelledAnimals(Area.animals(adjacentMeadow, Set.of())); // cancel all
+                    myBoard = myBoard.withMoreCancelledAnimals(animals); // cancel all
                 }
 
                 case Zone.Meadow meadow when meadow.specialPower() == SHAMAN -> {
@@ -259,13 +260,11 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
 
-            if (hasMenhir(forest)) {
+            if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
-
-                if (myBoard.lastPlacedTile().tile().kind() == NORMAL) {
-                    myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
-                    canPlay2ndTurn = myTileDecks.topTile(MENHIR) != null;
-                }
+                myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
+                canPlay2ndTurn = myTileDecks.topTile(MENHIR) != null;
+                // TODO
             }
         }
 

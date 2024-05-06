@@ -13,7 +13,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  */
 public final class Board {
     /**
-     * Array of placed tiles, containing 625 elements mostly equal to null.
+     * Array of placed tiles, containing elements mostly equal to null.
      */
     private final PlacedTile[] placedTiles;
 
@@ -52,11 +52,12 @@ public final class Board {
      */
     public static final int REACH = 12;
     private static final int LENGTH = REACH * 2 + 1;
+    private static final int TILES = LENGTH * LENGTH;
 
     /**
      * Empty board instance.
      */
-    public static final Board EMPTY = new Board(new PlacedTile[625], new int[0], ZonePartitions.EMPTY, Set.of());
+    public static final Board EMPTY = new Board(new PlacedTile[TILES], new int[0], ZonePartitions.EMPTY, Set.of());
 
     /**
      * Returns the placed tile at the specified position on the board.
@@ -364,9 +365,9 @@ public final class Board {
             myPlacedTiles[indexOf(myTile.pos())] = myTile.withOccupant(occupant);
             builder.addInitialOccupant(myTile.placer(), occupant.kind(), myTile.zoneWithId(occupant.zoneId()));
 
-            return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
+            return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
         }
-
+        // TODO Le « throws » est inutile (exception « unchecked ») (il ne faut pas lancer d'exception ici)
         throw new IllegalArgumentException();
     }
 
@@ -384,7 +385,7 @@ public final class Board {
         myPlacedTiles[indexOf(myTile.pos())] = myTile.withNoOccupant();
         builder.removePawn(myTile.placer(), myTile.zoneWithId(occupant.zoneId()));
 
-        return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
     }
 
     /**
@@ -404,7 +405,7 @@ public final class Board {
         forests.forEach(builder::clearGatherers);
         rivers.forEach(builder::clearFishers);
 
-        return new Board(myPlacedTiles, tileIndexes.clone(), builder.build(), cancelledAnimals);
+        return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
     }
 
     private <Z extends Zone> void clearOccupants(Set<Area<Z>> areas, PlacedTile[] myPlacedTiles) {
@@ -431,12 +432,12 @@ public final class Board {
      */
     public Board withMoreCancelledAnimals(Set<Animal> newlyCancelledAnimals) {
         PlacedTile[] myPlacedTiles = placedTiles.clone();
-        int[] myTileIndexes = tileIndexes.clone();
 
         Set<Animal> myCancelledAnimals = new HashSet<>(cancelledAnimals);
         myCancelledAnimals.addAll(newlyCancelledAnimals);
 
-        return new Board(myPlacedTiles, myTileIndexes, zonePartitions, Set.copyOf(myCancelledAnimals));
+        return new Board(myPlacedTiles, tileIndexes, zonePartitions, Collections.unmodifiableSet(myCancelledAnimals));
+        // TODO cancelledAnimals : why not Set.copyOf() ?
     }
 
     @Override

@@ -47,9 +47,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
     public MessageBoard withScoredForest(Area<Zone.Forest> forest) {
         if (forest.isOccupied()) {
             Set<PlayerColor> scorers = forest.majorityOccupants();
-            int points =  forClosedForest(forest.tileIds().size(), Area.mushroomGroupCount(forest));
-            int mushroomGroupCount = Area.mushroomGroupCount(forest);
             int tileCount = forest.tileIds().size();
+            int mushroomGroupCount = Area.mushroomGroupCount(forest);
+            int points = forClosedForest(tileCount, mushroomGroupCount);
 
             Message newMessage = new Message(textMaker.playersScoredForest(scorers, points, mushroomGroupCount, tileCount),
                     points,
@@ -259,6 +259,8 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         List<Message> updatedMessages = new ArrayList<>(this.messages);
         updatedMessages.add(newMessage);
         return new MessageBoard(this.textMaker, updatedMessages);
+
+        // TODO Vous auriez encore juste pu y ajouter la création des messages.
     }
 
     private Map<Animal.Kind, Integer> meadowAnimals(Area<Zone.Meadow> meadow, Set<Animal> cancelledAnimals) {
@@ -276,6 +278,9 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
                 animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
                 animalMap.getOrDefault(Animal.Kind.DEER, 0));
     }
+
+    // TODO Dommage de calculer 2 fois la map du nombre d'animaux :'(
+    // private attribute
 
     /**
      * The Message class represents a message on the message board.

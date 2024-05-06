@@ -1,5 +1,8 @@
 package ch.epfl.chacun;
 
+import static ch.epfl.chacun.Occupant.Kind.HUT;
+import static ch.epfl.chacun.Occupant.Kind.PAWN;
+
 /**
  * Brings together the four zone partitions of the game.
  *
@@ -124,25 +127,21 @@ public record ZonePartitions (ZonePartition<Zone.Forest> forests,
          * given player, to the area containing the given zone.
          *
          * @param player the given player
-         * @param occupantKind the given kind
+         * @param kind the given kind
          * @param occupiedZone the given zone
          * @throws IllegalArgumentException if the given sort of occupant cannot occupy an area of
          *                                  the given kind.
          */
-        public void addInitialOccupant(PlayerColor player, Occupant.Kind occupantKind, Zone occupiedZone) {
+        public void addInitialOccupant(PlayerColor player, Occupant.Kind kind, Zone occupiedZone) {
             switch (occupiedZone) {
                 case Zone.Forest forest
-                        when occupantKind.equals(Occupant.Kind.PAWN) ->
-                        forestBuilder.addInitialOccupant(forest, player);
+                        when kind == PAWN -> forestBuilder.addInitialOccupant(forest, player);
                 case Zone.Meadow meadow
-                        when occupantKind.equals(Occupant.Kind.PAWN) ->
-                        meadowBuilder.addInitialOccupant(meadow, player);
+                        when kind == PAWN -> meadowBuilder.addInitialOccupant(meadow, player);
                 case Zone.River river
-                        when occupantKind.equals(Occupant.Kind.PAWN) ->
-                        riverBuilder.addInitialOccupant(river, player);
+                        when kind == PAWN -> riverBuilder.addInitialOccupant(river, player);
                 case Zone.Water water
-                        when occupantKind.equals(Occupant.Kind.HUT) ->
-                        riverSystemBuilder.addInitialOccupant(water, player);
+                        when kind == HUT -> riverSystemBuilder.addInitialOccupant(water, player);
                 default -> throw new IllegalArgumentException();
             }
         }

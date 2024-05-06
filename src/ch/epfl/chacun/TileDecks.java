@@ -57,7 +57,7 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * Returns a new tile decks with the top tile of the pile removed.
      *
      * @param kind the kind of tiles
-     * @return the new tile decks
+     * @return the updated tile decks
      * @throws IllegalArgumentException if the pile is empty
      */
     public TileDecks withTopTileDrawn(Tile.Kind kind) {
@@ -76,5 +76,17 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
         };
     }
 
+    /**
+     * Returns a new tile decks with all tiles removed from the top that do not satisfy the condition.
+     *
+     * @param kind the kind of tiles
+     * @param predicate the given condition
+     * @return the updated tile decks
+     */
+    public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
+       while (!predicate.test(topTile(kind)))
+            this.withTopTileDrawn(kind);
 
+        return this; // TODO
+    }
 }

@@ -144,7 +144,7 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
     public Set<PlayerColor> majorityOccupants() {
         int[] colorCounts = new int[PlayerColor.ALL.size()];
 
-        int max = colorCounts[0];
+        int max = 0;
         for (PlayerColor color : occupants) {
             colorCounts[color.ordinal()]++;
             if (colorCounts[color.ordinal()] > max) max = colorCounts[color.ordinal()];
@@ -202,15 +202,12 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      * @throws IllegalArgumentException if the receiver contains no occupant of the given color
      */
     public Area<Z> withoutOccupant(PlayerColor occupant) {
-        List<PlayerColor> myOccupants = new ArrayList<>(occupants);
+        checkArgument(occupants.contains(occupant));
 
-        for (PlayerColor color : occupants) {
-            if (color.equals(occupant)) {
-                myOccupants.remove(color);
-                return new Area<>(zones, myOccupants, openConnections);
-            }
-        }
-        throw new IllegalArgumentException();
+        List<PlayerColor> myOccupants = new ArrayList<>(occupants);
+        myOccupants.remove(occupant);
+
+        return new Area<>(zones, myOccupants, openConnections);
     }
 
     /**
@@ -241,8 +238,10 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {
         for (Zone zone : zones)
-            if (zone.specialPower() != null && zone.specialPower().equals(specialPower))
+            if (zone.specialPower() != null && zone.specialPower() == specialPower)
                 return zone;
         return null;
+        // specialPower != null
+        // TODO La deuxième vérification prend aussi en compte le cas où la specialPower est null
     }
 }
