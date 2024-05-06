@@ -76,43 +76,5 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
         };
     }
 
-    /**
-     * Returns a new tile decks with all tiles removed from the top of a pile that do not satisfy
-     * a given condition.
-     *
-     * @param kind the kind of tiles
-     * @param predicate the predicate to test the tiles
-     * @return the new tile decks
-     */
-    public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
-        return switch (kind) {
-            case START -> new TileDecks(startTiles.subList(nextIndex(startTiles, predicate),
-                    startTiles.size()),
-                    normalTiles,
-                    menhirTiles);
-            case NORMAL -> new TileDecks(startTiles, normalTiles.subList(nextIndex(normalTiles,
-                    predicate),
-                    normalTiles.size()),
-                    menhirTiles);
-            case MENHIR -> new TileDecks(startTiles,
-                    normalTiles,
-                    menhirTiles.subList(nextIndex(menhirTiles, predicate), menhirTiles.size()));
-        };
-    }
 
-    /**
-     * Finds the index of the first element in the list that does not satisfy the given predicate,
-     * otherwise returns the size of the list.
-     *
-     * @param tiles the given tiles
-     * @param predicate the given predicate
-     * @return the index of the first element in the list that does not satisfy the given predicate,
-     * or the size of the list
-     */
-    private int nextIndex(List<Tile> tiles, Predicate<Tile> predicate) {
-        for (int i = 0; i < tiles.size(); i++)
-            if (predicate.test(tiles.get(i)))
-                return i;
-        return tiles.size();
-    }
 }
