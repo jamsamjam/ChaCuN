@@ -1,6 +1,7 @@
 package ch.epfl.chacun;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -261,7 +262,6 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         List<Message> updatedMessages = new ArrayList<>(messages);
         updatedMessages.add(message);
         return new MessageBoard(textMaker, updatedMessages);
-
         // TODO Vous auriez encore juste pu y ajouter la création des messages.
     }
 
@@ -299,7 +299,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
          */
         public Message {
             Objects.requireNonNull(text);
-            checkArgument(points >= 0);
+            checkArgument(points >= 0); // TODO
             scorers = Set.copyOf(scorers);
             tileIds = Set.copyOf(tileIds);
         }

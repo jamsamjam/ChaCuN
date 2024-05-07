@@ -35,6 +35,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parameters parameters = getParameters();
+        //assert parameters != null;
         List<String> playersNames = parameters.getUnnamed();
         String seedStr = parameters.getNamed().get("seed");
 
@@ -61,7 +62,6 @@ public class Main extends Application {
                 tilesByKind.get(Tile.Kind.MENHIR));
 
         Map<PlayerColor, String> playerColorMap = new HashMap<>();
-
         for (int i = 0; i < playersNames.size(); i++)
             playerColorMap.put(PlayerColor.ALL.get(i), playersNames.get(i));
 
@@ -104,9 +104,7 @@ public class Main extends Application {
         ObjectProperty<Set<Integer>> highlightedTilesP =
                 new SimpleObjectProperty<>(Set.of());
 
-        // construct the scene
         BorderPane borderPane = new BorderPane();
-        Scene scene = new Scene(borderPane, 1440, 1080);
 
         Node boardNode = BoardUI.create(Board.REACH,
                 gameStateO,
@@ -117,7 +115,7 @@ public class Main extends Application {
                     System.out.println("Rotate: " + r);
                 },
                 t -> {
-                    System.out.println("Place: " + t);
+                    System.out.println(7);
                 },
                 o -> System.out.println("Select: " + o));
 
@@ -136,7 +134,7 @@ public class Main extends Application {
         ObjectProperty<List<String>> actionsO = new SimpleObjectProperty<>(actions);
 
         Node actionsNode = ActionsUI.create(actionsO, (a -> {
-            List<String> newActions = new ArrayList<>(List.copyOf(actionsO.get()));
+            List<String> newActions = new ArrayList<>(actionsO.get()); //TODO List.copyOf ?
             newActions.add(a);
             actionsO.set(newActions);
         }));
@@ -148,14 +146,14 @@ public class Main extends Application {
                 o -> System.out.println("Select: " + o));
         vBox.getChildren().addAll(actionsNode, decksNode);
 
+        primaryStage.setScene(new Scene(borderPane));
+        primaryStage.setWidth(1440);
+        primaryStage.setHeight(1080);
+        primaryStage.setTitle("ChaCuN");
+        primaryStage.show();
+
         // place the starting tile
         gameStateO.setValue(gameState.withStartingTilePlaced());
 
-        // TODO 일일이 다 만들어야 함
-
-        primaryStage.setTitle("ChaCuN");
-        primaryStage.setScene(scene);
-
-        primaryStage.show();
     }
 }
