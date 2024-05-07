@@ -36,7 +36,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parameters parameters = getParameters();
         List<String> playersNames = parameters.getUnnamed();
-        String seedStr = parameters.getNamed().getOrDefault("seed", "none");
+        String seedStr = parameters.getNamed().get("seed");
 
         checkArgument(playersNames.size() >= 2 && playersNames.size() <= 5);
 
@@ -45,13 +45,14 @@ public class Main extends Application {
                 RandomGeneratorFactory.getDefault();
         RandomGenerator generator = generatorFactory.create();
 
-        if (!seedStr.equals("none")) {
+        if (seedStr != null) {
             long seed = parseUnsignedLong(seedStr);
             generator = generatorFactory.create(seed);
         }
 
-        List<Tile> tiles = Tiles.TILES.stream().toList();
-        //TODO Collections.shuffle(tiles, generator);
+        //TODO List<Tile> tiles = Tiles.TILES.stream().toList();
+        List<Tile> tiles = new ArrayList<>(Tiles.TILES);
+        Collections.shuffle(tiles, generator);
 
         Map<Tile.Kind, List<Tile>> tilesByKind = tiles.stream()
                 .collect(Collectors.groupingBy(Tile::kind));
@@ -63,6 +64,7 @@ public class Main extends Application {
 
         for (int i = 0; i < playersNames.size(); i++)
             playerColorMap.put(PlayerColor.ALL.get(i), playersNames.get(i));
+
         List<PlayerColor> playerColors = playerColorMap.keySet().stream()
                 .sorted()
                 .toList();
@@ -75,7 +77,7 @@ public class Main extends Application {
                 textMaker);
 
         SimpleObjectProperty<GameState> gameStateO =
-                new SimpleObjectProperty<>(gameState); // TODO
+                new SimpleObjectProperty<>(gameState);
         ObservableValue<MessageBoard> messageBoardO =
                 gameStateO.map(GameState::messageBoard);
         ObservableValue<List<MessageBoard.Message>> messagesO =
@@ -112,10 +114,10 @@ public class Main extends Application {
                 visibleOccupantsP,
                 highlightedTilesP,
                 r -> {
-                    System.out.println("Rotate: " + r)
+                    System.out.println("Rotate: " + r);
                 },
                 t -> {
-                    System.out.println("Place: " + t)
+                    System.out.println("Place: " + t);
                 },
                 o -> System.out.println("Select: " + o));
 
@@ -147,7 +149,9 @@ public class Main extends Application {
         vBox.getChildren().addAll(actionsNode, decksNode);
 
         // place the starting tile
-        gameStateO.setValue(gameState.withStartingTilePlaced()); // TODO 왜 자동으로 안바뀌는지 ?
+        gameStateO.setValue(gameState.withStartingTilePlaced());
+
+        // TODO 일일이 다 만들어야 함
 
         primaryStage.setTitle("ChaCuN");
         primaryStage.setScene(scene);

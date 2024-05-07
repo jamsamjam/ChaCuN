@@ -256,7 +256,9 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
         Board myBoard = board;
         TileDecks myTileDecks = tileDecks;
         MessageBoard myMessageBoard = messageBoard;
-        boolean canPlay2ndTurn = false;
+
+        for (var river : myBoard.riversClosedByLastTile())
+            myMessageBoard = myMessageBoard.withScoredRiver(river);
 
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
@@ -264,25 +266,22 @@ public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile til
             if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) {
                 myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
                 myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
-                canPlay2ndTurn = myTileDecks.topTile(MENHIR) != null;
-                // TODO
+
+                if (myTileDecks.topTile(MENHIR) != null) {
+                    myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
+
+                    return new GameState(myPlayers,
+                            myTileDecks.withTopTileDrawn(MENHIR),
+                            tileDecks().topTile(MENHIR),
+                            myBoard,
+                            Action.PLACE_TILE,
+                            myMessageBoard);
+                }
             }
         }
 
-        for (var river : myBoard.riversClosedByLastTile())
-            myMessageBoard = myMessageBoard.withScoredRiver(river);
-
-        myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
-
-        if (canPlay2ndTurn)
-            return new GameState(myPlayers,
-                myTileDecks.withTopTileDrawn(MENHIR),
-                tileDecks().topTile(MENHIR),
-                myBoard,
-                Action.PLACE_TILE,
-                myMessageBoard);
-
         Collections.rotate(myPlayers, -1);
+        myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
         myTileDecks = myTileDecks.withTopTileDrawnUntil(NORMAL, myBoard::couldPlaceTile);
 
         if (myTileDecks.topTile(NORMAL) == null)

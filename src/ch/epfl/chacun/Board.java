@@ -367,7 +367,7 @@ public final class Board {
 
             return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
         }
-        // TODO Le « throws » est inutile (exception « unchecked ») (il ne faut pas lancer d'exception ici)
+        // TODO Le « throws » est inutile (exception « unchecked ») (il ne faut pas lancer d'exception ici) :)
         throw new IllegalArgumentException();
     }
 
@@ -437,7 +437,7 @@ public final class Board {
         myCancelledAnimals.addAll(newlyCancelledAnimals);
 
         return new Board(myPlacedTiles, tileIndexes, zonePartitions, Collections.unmodifiableSet(myCancelledAnimals));
-        // TODO cancelledAnimals : why not Set.copyOf() ?
+        // TODO cancelledAnimals : why not Set.copyOf() ? :)
     }
 
     @Override

@@ -257,10 +257,10 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
         return update(newMessage);
     }
 
-    private MessageBoard update(Message newMessage) {
-        List<Message> updatedMessages = new ArrayList<>(this.messages);
-        updatedMessages.add(newMessage);
-        return new MessageBoard(this.textMaker, updatedMessages);
+    private MessageBoard update(Message message) {
+        List<Message> updatedMessages = new ArrayList<>(messages);
+        updatedMessages.add(message);
+        return new MessageBoard(textMaker, updatedMessages);
 
         // TODO Vous auriez encore juste pu y ajouter la création des messages.
     }
@@ -280,9 +280,6 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
                 animalMap.getOrDefault(Animal.Kind.AUROCHS, 0),
                 animalMap.getOrDefault(Animal.Kind.DEER, 0));
     }
-
-    // TODO Dommage de calculer 2 fois la map du nombre d'animaux :'(
-    // private attribute
 
     /**
      * The Message class represents a message on the message board.

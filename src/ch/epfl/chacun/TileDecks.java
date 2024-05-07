@@ -84,9 +84,10 @@ public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile
      * @return the updated tile decks
      */
     public TileDecks withTopTileDrawnUntil(Tile.Kind kind, Predicate<Tile> predicate) {
-       while (!predicate.test(topTile(kind)))
-            this.withTopTileDrawn(kind);
+        TileDecks myDecks = new TileDecks(startTiles, normalTiles, menhirTiles);
+        while (myDecks.deckSize(kind) != 0 && !predicate.test(myDecks.topTile(kind)))
+            myDecks = myDecks.withTopTileDrawn(kind);
 
-        return this; // TODO
+        return myDecks;
     }
 }

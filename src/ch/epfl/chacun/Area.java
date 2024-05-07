@@ -238,10 +238,9 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
      */
     public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {
         for (Zone zone : zones)
-            if (zone.specialPower() != null && zone.specialPower() == specialPower)
+            if (zone.specialPower() == specialPower)
                 return zone;
         return null;
-        // specialPower != null
-        // TODO La deuxième vérification prend aussi en compte le cas où la specialPower est null
+        // TODO La deuxième vérification prend aussi en compte le cas où la specialPower est null :)
     }
 }

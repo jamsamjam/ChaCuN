@@ -47,7 +47,7 @@ public class ActionsUITest extends Application {
         var handler = new Consumer<String>() {
             @Override
             public void accept(String string) {
-                var newL = new ArrayList<>(List.copyOf(actions)); // TODO mach 이해
+                var newL = new ArrayList<>(List.copyOf(actions));
                 newL.add(string);
                 actionsO.set(newL);
                 System.out.println(string + " was entered !");
