@@ -175,7 +175,6 @@ public final class BoardUI {
                     marker.setFitWidth(MARKER_FIT_SIZE);
                     marker.setFitHeight(MARKER_FIT_SIZE);
                     marker.setId(STR."marker_\{animal.id()}");
-
                     marker.visibleProperty()
                             .bind(boardO.map(b -> b.cancelledAnimals().contains(animal)));
 

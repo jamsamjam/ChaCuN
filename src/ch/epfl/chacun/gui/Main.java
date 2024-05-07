@@ -15,7 +15,9 @@ import java.util.*;
 import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static ch.epfl.chacun.ActionEncoder.decodeAndApply;
 import static ch.epfl.chacun.Preconditions.checkArgument;
 import static java.lang.Long.parseUnsignedLong;
 
@@ -30,130 +32,126 @@ public class Main extends Application {
      *
      * @param args the arguments received
      */
-    public static void main(String[] args) {launch(args);}
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        Parameters parameters = getParameters();
-        //assert parameters != null;
-        List<String> playersNames = parameters.getUnnamed();
-        String seedStr = parameters.getNamed().get("seed");
-
-        checkArgument(playersNames.size() >= 2 && playersNames.size() <= 5);
+    public void start(Stage primaryStage) throws Exception { // TODO var usage only here - consistency?
+        var parameters = getParameters();
+        assert parameters != null;
+        var playersNames = parameters.getUnnamed();
+        assert playersNames.size() >= 2 && playersNames.size() <= 5; // TODO
+        var seedStr = parameters.getNamed().get("seed");
 
         // shuffle tiles
-        RandomGeneratorFactory<RandomGenerator> generatorFactory =
-                RandomGeneratorFactory.getDefault();
-        RandomGenerator generator = generatorFactory.create();
+        var generatorFactory = RandomGeneratorFactory.getDefault();
+        var generator = generatorFactory.create();
 
         if (seedStr != null) {
-            long seed = parseUnsignedLong(seedStr);
+            var seed = parseUnsignedLong(seedStr);
             generator = generatorFactory.create(seed);
         }
 
         //TODO List<Tile> tiles = Tiles.TILES.stream().toList();
-        List<Tile> tiles = new ArrayList<>(Tiles.TILES);
+        var tiles = new ArrayList<>(Tiles.TILES);
         Collections.shuffle(tiles, generator);
 
-        Map<Tile.Kind, List<Tile>> tilesByKind = tiles.stream()
+        var mainPane = new BorderPane();
+
+        var tilesByKind = tiles.stream()
                 .collect(Collectors.groupingBy(Tile::kind));
-        TileDecks tileDecks = new TileDecks(tilesByKind.get(Tile.Kind.START),
-                tilesByKind.get(Tile.Kind.NORMAL),
-                tilesByKind.get(Tile.Kind.MENHIR));
+        var tileDecks =
+                new TileDecks(tilesByKind.get(Tile.Kind.START),
+                        tilesByKind.get(Tile.Kind.NORMAL),
+                        tilesByKind.get(Tile.Kind.MENHIR));
 
-        Map<PlayerColor, String> playerColorMap = new HashMap<>();
-        for (int i = 0; i < playersNames.size(); i++)
-            playerColorMap.put(PlayerColor.ALL.get(i), playersNames.get(i));
-
-        List<PlayerColor> playerColors = playerColorMap.keySet().stream()
+        var playerColorMap = IntStream.range(0, playersNames.size()).boxed()
+                        .collect(Collectors.toMap(
+                                PlayerColor.ALL::get,
+                                playersNames::get, (_, b) -> b));
+        var playerColors = playerColorMap.keySet().stream()
                 .sorted()
                 .toList();
 
-        TextMakerFr textMaker = new TextMakerFr(playerColorMap);
+        var textMaker = new TextMakerFr(playerColorMap);
 
-        GameState gameState =
-                GameState.initial(playerColors,
-                tileDecks,
-                textMaker);
+        var gameState = GameState
+                .initial(playerColors,
+                        tileDecks,
+                        textMaker);
 
-        SimpleObjectProperty<GameState> gameStateO =
-                new SimpleObjectProperty<>(gameState);
-        ObservableValue<MessageBoard> messageBoardO =
-                gameStateO.map(GameState::messageBoard);
-        ObservableValue<List<MessageBoard.Message>> messagesO =
-                messageBoardO.map(MessageBoard::messages);
+        var gameStateO = new SimpleObjectProperty<>(gameState);
 
-        Tile nextTile = tileDecks.topTile(Tile.Kind.START);
-        int normalCount = tileDecks.normalTiles().size();
-        int menhirCount = tileDecks.menhirTiles().size();
-        String tileText = textMaker.clickToOccupy(); // TODO unOccupied 로 바껴야함
 
-        ObservableValue<Tile> tileO =
-                new SimpleObjectProperty<>(nextTile);
-        ObservableValue<Integer> normalCount0 =
-                new SimpleObjectProperty<>(normalCount);
-        ObservableValue<Integer> menhirCount0 =
-                new SimpleObjectProperty<>(menhirCount);
-        ObservableValue<String> textO =
-                new SimpleObjectProperty<>(tileText);
+        var tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
+        var visibleOccupantsP = new SimpleObjectProperty<>(Set.<Occupant>of());
+        var highlightedTilesP = new SimpleObjectProperty<>(Set.<Integer>of());
 
-        ObservableValue<Rotation> tileToPlaceRotationP =
-                new SimpleObjectProperty<>(Rotation.NONE);
-        ObservableValue<Set<Occupant>> visibleOccupantsP =
-                new SimpleObjectProperty<>(Set.of());
-        ObjectProperty<Set<Integer>> highlightedTilesP =
-                new SimpleObjectProperty<>(Set.of());
+        var boardNode = BoardUI
+                .create(Board.REACH,
+                        gameStateO,
+                        tileToPlaceRotationP,
+                        visibleOccupantsP,
+                        highlightedTilesP,
+                        r -> {
+                            System.out.println("Rotate: " + r);
+                        },
+                        t -> {
+                            System.out.println(7);
+                        },
+                        o -> System.out.println("Select: " + o));
 
-        BorderPane borderPane = new BorderPane();
+        var rightPane = new BorderPane();
+        mainPane.setCenter(boardNode);
+        mainPane.setRight(rightPane);
 
-        Node boardNode = BoardUI.create(Board.REACH,
-                gameStateO,
-                tileToPlaceRotationP,
-                visibleOccupantsP,
-                highlightedTilesP,
-                r -> {
-                    System.out.println("Rotate: " + r);
-                },
-                t -> {
-                    System.out.println(7);
-                },
-                o -> System.out.println("Select: " + o));
+        var messagesO = new SimpleObjectProperty<>(gameState.messageBoard().messages());
 
-        BorderPane borderPane1 = new BorderPane();
-        borderPane.setCenter(boardNode);
-        borderPane.setRight(borderPane1);
+        var playersNode = PlayersUI.create(gameStateO, textMaker);
+        var msBoardNode = MessageBoardUI.create(messagesO, highlightedTilesP);
+        var vBox = new VBox();
+        rightPane.setTop(playersNode);
+        rightPane.setCenter(msBoardNode);
+        rightPane.setBottom(vBox);
 
-        Node playersNode = PlayersUI.create(gameStateO, textMaker);
-        Node msBoardNode = MessageBoardUI.create(messagesO, highlightedTilesP);
-        VBox vBox = new VBox();
-        borderPane1.setTop(playersNode);
-        borderPane1.setCenter(msBoardNode);
-        borderPane1.setBottom(vBox);
+        var actionsO = new SimpleObjectProperty<List<String>>(List.of());
 
-        List<String> actions = new ArrayList<>();
-        ObjectProperty<List<String>> actionsO = new SimpleObjectProperty<>(actions);
-
-        Node actionsNode = ActionsUI.create(actionsO, (a -> {
-            List<String> newActions = new ArrayList<>(actionsO.get()); //TODO List.copyOf ?
-            newActions.add(a);
-            actionsO.set(newActions);
+        var actionsNode = ActionsUI
+                .create(actionsO, (a -> {
+                    var newActions = new ArrayList<>(actionsO.getValue()); //TODO getValue vs. get
+                    newActions.add(a);
+                    actionsO.set(newActions);
         }));
 
-        Node decksNode = DecksUI.create(tileO,
-                normalCount0,
-                menhirCount0,
-                textO,
-                o -> System.out.println("Select: " + o));
+        var tileO = new SimpleObjectProperty<>(tileDecks.topTile(Tile.Kind.START));
+        var normalCount0 = new SimpleObjectProperty<>(tileDecks.normalTiles().size());
+        var menhirCount0 = new SimpleObjectProperty<>(tileDecks.menhirTiles().size());
+        var textO = new SimpleObjectProperty<>(textMaker.clickToOccupy());
+
+        var decksNode = DecksUI
+                .create(tileO,
+                        normalCount0,
+                        menhirCount0,
+                        textO,
+                        o -> System.out.println("Select: " + o));
         vBox.getChildren().addAll(actionsNode, decksNode);
 
-        primaryStage.setScene(new Scene(borderPane));
+        // TODO end construction of scene
+
+        // place the starting tile
+        gameStateO.set(gameStateO.get().withStartingTilePlaced()); // TODO not working
+
+//        for (int i = 0; i < actionsO.getValue().size(); i++) {
+//            ActionEncoder.StateAction newState = decodeAndApply(gameStateO.getValue(), actionsO.getValue().get(i));
+//            assert newState != null;
+//            gameStateO.setValue(newState.gameState());
+//        }
+
+        primaryStage.setScene(new Scene(mainPane)); // Scene(borderPane, 1440, 1080)
         primaryStage.setWidth(1440);
         primaryStage.setHeight(1080);
         primaryStage.setTitle("ChaCuN");
         primaryStage.show();
-
-        // place the starting tile
-        gameStateO.setValue(gameState.withStartingTilePlaced());
-
     }
 }

@@ -3,6 +3,7 @@ package ch.epfl.chacun;
 import java.util.Comparator;
 import java.util.List;
 
+import static ch.epfl.chacun.Base32.encodeBits5;
 import static ch.epfl.chacun.Base32.isValid;
 import static ch.epfl.chacun.Occupant.Kind.PAWN;
 
@@ -42,7 +43,6 @@ public class ActionEncoder {
      * of length 1, representing this action.
      * The string should be in the format of 'kzzzz', where k represents the occupant kind (0:PAWN,
      * 1:HUT) and z the number of the occupied zone.
-     * The case where no occupant is placed is represented by the 5 bits, 11111.
      *
      * @param gameState the initial game state
      * @param occupant the given occupant
@@ -51,11 +51,11 @@ public class ActionEncoder {
     public static StateAction withNewOccupant(GameState gameState,
                                               Occupant occupant){
         String encoding;
-        if (occupant == null) encoding = "11111";
+        if (occupant == null) encoding = "11111"; // no occupant is placed
         else {
             int bit = occupant.kind().ordinal();
             bit = (bit << 4) | occupant.zoneId();
-            encoding = Base32.encodeBits5(bit);
+            encoding = encodeBits5(bit);
         }
         return new StateAction(gameState.withNewOccupant(occupant), encoding);
     }
@@ -64,7 +64,6 @@ public class ActionEncoder {
      * Returns a StateAction composed of the game state without the given occupant and the base32
      * string of length 1, representing this action.
      * The string should be in the format of 'ooooo', where o represents the index of the pawn.
-     * The case where no pawn must be taken back is represented by the 5 bits 11111.
      *
      * @param gameState the initial game state
      * @param occupant the given occupant
@@ -74,14 +73,14 @@ public class ActionEncoder {
     public static StateAction withOccupantRemoved(GameState gameState,
                                                   Occupant occupant){
         String encoding;
-        if (occupant == null) encoding = "11111";
+        if (occupant == null) encoding = "11111"; // no pawn must be taken back
         else {
             List<Occupant> occupants = gameState.board().occupants().stream()
                     .filter(o -> o.kind() == PAWN)
                     .sorted(Comparator.comparingInt(Occupant::zoneId))
                     .toList();
             int bit = occupants.indexOf(occupant);
-            encoding = Base32.encodeBits5(bit);
+            encoding = encodeBits5(bit);
         }
         return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
     }
@@ -91,23 +90,23 @@ public class ActionEncoder {
      * representing the action.
      *
      * @param gameState the initial game state
-     * @param encoding the base 32 encoding of an action
+     * @param encodedAction the base 32 encoding of an action
      * @return the corresponding StateAction
      */
     public static StateAction decodeAndApply(GameState gameState,
-                                             String encoding) {
+                                             String encodedAction) {
         try {
-            return decodeAndApplyInternal(gameState, encoding);
+            return decodeAndApplyInternal(gameState, encodedAction);
         } catch (DecodingException e) {
             return null;
         }
     }
 
     private static StateAction decodeAndApplyInternal(GameState gameState,
-                                                      String encoding) throws DecodingException {
-        if (!isValid(encoding)) throw new DecodingException();
+                                                      String encodedAction) throws DecodingException {
+        if (!isValid(encodedAction)) throw new DecodingException();
 
-        int bit = Base32.decode(encoding);
+        int bit = Base32.decode(encodedAction);
 
         switch (gameState.nextAction()) { // TODO review checks
             case PLACE_TILE -> {
@@ -128,7 +127,7 @@ public class ActionEncoder {
                         Rotation.ALL.get(rotation),
                         positions.get(index));
 
-                return new StateAction(gameState.withPlacedTile(tile), encoding);
+                return new StateAction(gameState.withPlacedTile(tile), encodedAction);
             }
 
             case RETAKE_PAWN -> {
@@ -148,7 +147,7 @@ public class ActionEncoder {
                         throw new DecodingException();
                 }
 
-                return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
+                return new StateAction(gameState.withOccupantRemoved(occupant), encodedAction);
             }
 
             case OCCUPY_TILE -> {
@@ -170,7 +169,7 @@ public class ActionEncoder {
                     if (!gameState.lastTilePotentialOccupants().contains(occupant))
                         throw new DecodingException();
                 }
-                return new StateAction(gameState.withNewOccupant(occupant), encoding);
+                return new StateAction(gameState.withNewOccupant(occupant), encodedAction);
             }
 
             default -> throw new DecodingException();
@@ -180,10 +179,10 @@ public class ActionEncoder {
     private static class DecodingException extends Exception {}
 
     /**
-     * Represents a StateAction of the game state and the string.
+     * Represents a pair of the game state and the string representing the action.
      *
      * @param gameState the game state
-     * @param encoding the string
+     * @param encodedAction the string
      */
-    public record StateAction(GameState gameState, String encoding) {}
+    public record StateAction(GameState gameState, String encodedAction) {}
 }
