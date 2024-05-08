@@ -299,7 +299,7 @@ public record MessageBoard(TextMaker textMaker, List<Message> messages) {
          */
         public Message {
             Objects.requireNonNull(text);
-            checkArgument(points >= 0); // TODO
+            checkArgument(points >= 0);
             scorers = Set.copyOf(scorers);
             tileIds = Set.copyOf(tileIds);
         }
