@@ -92,7 +92,8 @@ public final class BoardUI {
 
                 // only cells containing a tile have occupants and cancellation tokens
                 tileO.addListener((_, oV, nV) -> {
-                    assert oV == null;
+                    //assert oV == null; // TODO
+                    assert nV != null;
 
                     group.getChildren().addAll(markers(nV, boardO));
                     group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
@@ -142,17 +143,23 @@ public final class BoardUI {
                         switch (e.getButton()) {
                             case PRIMARY -> {
                                 placeHandler.accept(pos);
-                                group.rotateProperty().unbind(); // after the final rotation of image is set
+                                group.rotateProperty().unbind();
+                                //e.consume(); // TODO
                             }
-                            case SECONDARY ->
-                                    rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
+                            case SECONDARY -> {
+                                Rotation oldRotation = rotationO.getValue();
+                                Rotation newRotation = e.isAltDown()
+                                        ? oldRotation.add(Rotation.RIGHT)
+                                        : oldRotation.add(Rotation.LEFT);
+                                rotateHandler.accept(newRotation);
+                                //e.consume();
+                            }
                         }
                     }
                 });
 
                 group.effectProperty().bind(cellData.map(c -> {
-                    ColorInput color =
-                            new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, c.veil());
+                    ColorInput color = new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, c.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
                     blend.setOpacity(0.5);
                     blend.setTopInput(color);
@@ -187,12 +194,16 @@ public final class BoardUI {
                                         ObservableValue<Set<Occupant>> visibleOccupantsO,
                                         Consumer<Occupant> occupantHandler) {
         return tile.potentialOccupants().stream().map(occupant -> {
-            var icon = Icon.newFor(tile.placer(), occupant.kind());
-            icon.setId(STR."\{tile.occupant().kind()}_\{tile.occupant().zoneId()}}");
+            Node icon = Icon.newFor(tile.placer(), occupant.kind());
+            icon.setId(STR."\{occupant.kind().toString().toLowerCase()}_\{occupant.zoneId()}");
 
             icon.visibleProperty()
-                    .bind(visibleOccupantsO.map(s -> s.contains(tile.occupant())));
-            icon.setOnMouseClicked(_ -> occupantHandler.accept(tile.occupant()));
+                    .bind(visibleOccupantsO.map(s -> s.contains(occupant)));
+            icon.setOnMouseClicked(e -> {
+                occupantHandler.accept(occupant);
+                icon.visibleProperty().unbind();
+                e.consume();
+            });
 
             // It should always appear vertical when tile box is rotated
             icon.rotateProperty()
@@ -221,5 +232,6 @@ public final class BoardUI {
         private CellData(Color veil) {
             this(emptyImage(), 0, veil);
         }
+        // TODO var consistency
     }
 }

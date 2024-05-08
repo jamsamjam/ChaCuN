@@ -25,8 +25,12 @@ import static ch.epfl.chacun.Zone.SpecialPower.*;
  * @param nextAction the next action to perform,
  * @param messageBoard the message board containing the messages generated so far in the game
  */
-public record GameState(List<PlayerColor> players, TileDecks tileDecks, Tile tileToPlace,
-                        Board board, Action nextAction, MessageBoard messageBoard) {
+public record GameState(List<PlayerColor> players,
+                        TileDecks tileDecks,
+                        Tile tileToPlace,
+                        Board board,
+                        Action nextAction,
+                        MessageBoard messageBoard) {
     /**
      * Compact constructor of GameState.
      *

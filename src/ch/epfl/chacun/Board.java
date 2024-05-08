@@ -368,6 +368,7 @@ public final class Board {
             return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
         }
         // TODO Le « throws » est inutile (exception « unchecked ») (il ne faut pas lancer d'exception ici) :)
+        // what happens if try to occupy an area that is already occupied
         throw new IllegalArgumentException();
     }
 

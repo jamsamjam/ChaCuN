@@ -2,23 +2,20 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
 import javafx.application.Application;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.*;
-import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ch.epfl.chacun.ActionEncoder.decodeAndApply;
-import static ch.epfl.chacun.Preconditions.checkArgument;
+import static ch.epfl.chacun.Tile.Kind.MENHIR;
+import static ch.epfl.chacun.Tile.Kind.NORMAL;
 import static java.lang.Long.parseUnsignedLong;
 
 /**
@@ -35,7 +32,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
+    // TODO occupy text, closed area not regained
     @Override
     public void start(Stage primaryStage) throws Exception { // TODO var usage only here - consistency?
         var parameters = getParameters();
@@ -63,13 +60,13 @@ public class Main extends Application {
                 .collect(Collectors.groupingBy(Tile::kind));
         var tileDecks =
                 new TileDecks(tilesByKind.get(Tile.Kind.START),
-                        tilesByKind.get(Tile.Kind.NORMAL),
-                        tilesByKind.get(Tile.Kind.MENHIR));
+                        tilesByKind.get(NORMAL),
+                        tilesByKind.get(MENHIR));
 
         var playerColorMap = IntStream.range(0, playersNames.size()).boxed()
-                        .collect(Collectors.toMap(
-                                PlayerColor.ALL::get,
-                                playersNames::get, (_, b) -> b));
+                .collect(Collectors.toMap(
+                        PlayerColor.ALL::get,
+                        playersNames::get, (_, b) -> b));
         var playerColors = playerColorMap.keySet().stream()
                 .sorted()
                 .toList();
@@ -83,64 +80,87 @@ public class Main extends Application {
 
         var gameStateO = new SimpleObjectProperty<>(gameState);
 
-
         var tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
-        var visibleOccupantsP = new SimpleObjectProperty<>(Set.<Occupant>of());
+        var visibleoccupantsP = new SimpleObjectProperty<>(Set.<Occupant>of());
         var highlightedTilesP = new SimpleObjectProperty<>(Set.<Integer>of());
 
         var boardNode = BoardUI
                 .create(Board.REACH,
                         gameStateO,
                         tileToPlaceRotationP,
-                        visibleOccupantsP,
+                        visibleoccupantsP,
                         highlightedTilesP,
-                        r -> {
-                            System.out.println("Rotate: " + r);
-                        },
-                        t -> {
-                            System.out.println(7);
-                        },
-                        o -> System.out.println("Select: " + o));
+                        tileToPlaceRotationP::set,
+                        pos -> {
+                            var state = gameStateO.getValue();
+                            if (state.tileToPlace() != null) {
+                                var tile = new PlacedTile(state.tileToPlace(),
+                                        state.currentPlayer(),
+                                        tileToPlaceRotationP.getValue(),
+                                        pos);
 
-        var rightPane = new BorderPane();
+                                gameStateO.set(gameStateO.getValue().withPlacedTile(tile));
+                                visibleoccupantsP.set(gameStateO.getValue().lastTilePotentialOccupants());
+                            }
+                        },
+                        occupant -> {
+                            visibleoccupantsP.set(Set.of(occupant));
+                            gameStateO.set(gameStateO.getValue().withNewOccupant(occupant));
+                        });
+
+        var infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
-        mainPane.setRight(rightPane);
+        mainPane.setRight(infoPane);
+        // TODO how to set the center to displayed
 
-        var messagesO = new SimpleObjectProperty<>(gameState.messageBoard().messages());
+        var messagesO = gameStateO.map(gs -> gs.messageBoard().messages());
 
         var playersNode = PlayersUI.create(gameStateO, textMaker);
         var msBoardNode = MessageBoardUI.create(messagesO, highlightedTilesP);
+
         var vBox = new VBox();
-        rightPane.setTop(playersNode);
-        rightPane.setCenter(msBoardNode);
-        rightPane.setBottom(vBox);
+        infoPane.setTop(playersNode);
+        infoPane.setCenter(msBoardNode);
+        infoPane.setBottom(vBox);
 
         var actionsO = new SimpleObjectProperty<List<String>>(List.of());
 
         var actionsNode = ActionsUI
-                .create(actionsO, (a -> {
-                    var newActions = new ArrayList<>(actionsO.getValue()); //TODO getValue vs. get
-                    newActions.add(a);
-                    actionsO.set(newActions);
-        }));
+                .create(actionsO,
+                        a -> {
+                            var newActions = new ArrayList<>(actionsO.get()); //TODO getValue vs. get
+                            newActions.add(a);
+                            actionsO.set(newActions);
+                        });
 
-        var tileO = new SimpleObjectProperty<>(tileDecks.topTile(Tile.Kind.START));
-        var normalCount0 = new SimpleObjectProperty<>(tileDecks.normalTiles().size());
-        var menhirCount0 = new SimpleObjectProperty<>(tileDecks.menhirTiles().size());
-        var textO = new SimpleObjectProperty<>(textMaker.clickToOccupy());
+        var tileO = gameStateO.map(GameState::tileToPlace);
+        var tileDecksO = gameStateO.map(GameState::tileDecks);
+        var normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
+        var menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
+        var textP = new SimpleObjectProperty<>("");
 
         var decksNode = DecksUI
                 .create(tileO,
                         normalCount0,
                         menhirCount0,
-                        textO,
-                        o -> System.out.println("Select: " + o));
+                        textP,
+                        o -> {
+                            textP.set("");
+
+                        });
+
+        var nextActionO = gameStateO.map(GameState::nextAction);
+
+        nextActionO.addListener((_, _, nV) -> {
+            if (nV == GameState.Action.RETAKE_PAWN) {
+                textP.set(textMaker.clickToUnoccupy());
+            } else if (nV == GameState.Action.OCCUPY_TILE)
+                textP.set(textMaker.clickToOccupy());
+        });
+
         vBox.getChildren().addAll(actionsNode, decksNode);
 
-        // TODO end construction of scene
-
-        // place the starting tile
-        gameStateO.set(gameStateO.get().withStartingTilePlaced()); // TODO not working
+        gameStateO.set(gameStateO.get().withStartingTilePlaced());
 
 //        for (int i = 0; i < actionsO.getValue().size(); i++) {
 //            ActionEncoder.StateAction newState = decodeAndApply(gameStateO.getValue(), actionsO.getValue().get(i));
