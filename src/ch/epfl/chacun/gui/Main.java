@@ -144,10 +144,7 @@ public class Main extends Application {
                         normalCount0,
                         menhirCount0,
                         textP,
-                        o -> {
-                            textP.set("");
-
-                        });
+                        _ -> gameStateO.set(gameStateO.get().withNewOccupant(null)));
 
         var nextActionO = gameStateO.map(GameState::nextAction);
 
@@ -156,6 +153,8 @@ public class Main extends Application {
                 textP.set(textMaker.clickToUnoccupy());
             } else if (nV == GameState.Action.OCCUPY_TILE)
                 textP.set(textMaker.clickToOccupy());
+            else
+                textP.set("");
         });
 
         vBox.getChildren().addAll(actionsNode, decksNode);

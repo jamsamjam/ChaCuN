@@ -51,28 +51,27 @@ public final class DecksUI {
         ImageView nextTileImage = new ImageView();
         nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE);
         nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE);
-
-        tileO.addListener((_, _, nV) -> {
-            if (nV != null) nextTileImage.setImage(largeImageForTile(nV.id()));
-        });
+        nextTileImage.imageProperty().bind(tileO.map(t -> t == null ?
+                null :
+                largeImageForTile(t.id())));
 
         Text text = new Text();
         text.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
         text.textProperty().bind(textO.map(Object::toString));
-        text.visibleProperty().bind(tileO.map(Objects::isNull));
+        text.visibleProperty().bind(textO.map(s -> !s.isEmpty()));
 
-        StackPane nextTile = new StackPane(nextTileImage, text);
-        nextTile.setId("next-tile");
+        StackPane stackPane = new StackPane(nextTileImage, text);
+        stackPane.setId("next-tile");
 
-        if (!textO.getValue().isEmpty()) {
-            text.setOnMouseClicked(_ -> {
+        if (text.isVisible()) {
+            stackPane.setOnMouseClicked(_ -> {
                 occupantHandler.accept(null);
             });
         }
 
         HBox hBox = getTileDecks(normalTileCountO, menhirTileCountO);
 
-        VBox vBox = new VBox(hBox, nextTile);
+        VBox vBox = new VBox(hBox, stackPane);
         vBox.getStylesheets().add("/decks.css");
 
         return vBox;
