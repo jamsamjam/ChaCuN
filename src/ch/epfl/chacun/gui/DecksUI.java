@@ -1,14 +1,9 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.Occupant;
-import ch.epfl.chacun.TextMaker;
-import ch.epfl.chacun.TextMakerFr;
 import ch.epfl.chacun.Tile;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -63,14 +58,11 @@ public final class DecksUI {
         StackPane stackPane = new StackPane(nextTileImage, text);
         stackPane.setId("next-tile");
 
-        if (text.isVisible()) {
-            stackPane.setOnMouseClicked(_ -> {
-                occupantHandler.accept(null);
-            });
-        }
+        stackPane.setOnMouseClicked(_ -> {
+            if (text.isVisible()) occupantHandler.accept(null);
+        });
 
         HBox hBox = getTileDecks(normalTileCountO, menhirTileCountO);
-
         VBox vBox = new VBox(hBox, stackPane);
         vBox.getStylesheets().add("/decks.css");
 

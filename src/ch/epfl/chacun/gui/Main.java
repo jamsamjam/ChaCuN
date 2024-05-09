@@ -2,7 +2,6 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -14,8 +13,8 @@ import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ch.epfl.chacun.Tile.Kind.MENHIR;
-import static ch.epfl.chacun.Tile.Kind.NORMAL;
+import static ch.epfl.chacun.ActionEncoder.*;
+import static ch.epfl.chacun.Tile.Kind.*;
 import static java.lang.Long.parseUnsignedLong;
 
 /**
@@ -32,7 +31,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    // TODO occupy text, closed area not regained
+    // TODO after area is closed occupant is not regained
     @Override
     public void start(Stage primaryStage) throws Exception { // TODO var usage only here - consistency?
         var parameters = getParameters();
@@ -50,7 +49,7 @@ public class Main extends Application {
             generator = generatorFactory.create(seed);
         }
 
-        //TODO List<Tile> tiles = Tiles.TILES.stream().toList();
+        // TODO List<Tile> tiles = Tiles.TILES.stream().toList();
         var tiles = new ArrayList<>(Tiles.TILES);
         Collections.shuffle(tiles, generator);
 
@@ -83,6 +82,15 @@ public class Main extends Application {
         var tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
         var visibleoccupantsP = new SimpleObjectProperty<>(Set.<Occupant>of());
         var highlightedTilesP = new SimpleObjectProperty<>(Set.<Integer>of());
+        var actionsO = new SimpleObjectProperty<List<String>>(List.of());
+
+        gameStateO.addListener((_, oV, nV) -> {
+           if (oV.nextAction() == GameState.Action.PLACE_TILE) {
+               var newVisibles = new HashSet<>(visibleoccupantsP.get());
+               newVisibles.addAll(nV.lastTilePotentialOccupants());
+               visibleoccupantsP.set(newVisibles);
+           }
+        });
 
         var boardNode = BoardUI
                 .create(Board.REACH,
@@ -99,38 +107,69 @@ public class Main extends Application {
                                         tileToPlaceRotationP.getValue(),
                                         pos);
 
-                                gameStateO.set(gameStateO.getValue().withPlacedTile(tile));
-                                visibleoccupantsP.set(gameStateO.getValue().lastTilePotentialOccupants());
+                                var newState = withPlacedTile(state, tile);
+                                update(gameStateO, actionsO, newState);
                             }
                         },
                         occupant -> {
-                            visibleoccupantsP.set(Set.of(occupant));
-                            gameStateO.set(gameStateO.getValue().withNewOccupant(occupant));
+                            var state = gameStateO.getValue();
+
+                            if (state.nextAction() == GameState.Action.RETAKE_PAWN) {
+                                var newState = withOccupantRemoved(state, occupant);
+                                update(gameStateO, actionsO, newState);
+
+                                var newVisibles = new HashSet<>(visibleoccupantsP.get());
+                                newVisibles.remove(occupant);
+                                visibleoccupantsP.set(newVisibles);
+                            } else if (visibleoccupantsP.getValue().contains(occupant)) {
+                                var newState = withNewOccupant(state, occupant);
+                                update(gameStateO, actionsO, newState);
+
+                                var newVisibles = new HashSet<>(visibleoccupantsP.get());
+                                newVisibles.removeAll(state.lastTilePotentialOccupants());
+                                newVisibles.add(occupant);
+                                visibleoccupantsP.set(newVisibles);
+                            }// TODO 이미 놓여져있는 occ 클릭해도 넘어감; / typihg 한거는 visible 반영안됨
                         });
 
         var infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
         mainPane.setRight(infoPane);
-        // TODO how to set the center to displayed
+        // TODO how to set the center to be displayed
 
+        var messageBoardO = gameStateO.map(GameState::messageBoard);
         var messagesO = gameStateO.map(gs -> gs.messageBoard().messages());
 
-        var playersNode = PlayersUI.create(gameStateO, textMaker);
-        var msBoardNode = MessageBoardUI.create(messagesO, highlightedTilesP);
+        var playersNode = PlayersUI
+                .create(gameStateO,
+                        textMaker);
+        var messageBoardNode = MessageBoardUI
+                .create(messagesO,
+                        highlightedTilesP);
+
+        messageBoardO.addListener((_, _, nV) -> {
+            var tileIds = nV.messages().getLast().tileIds();
+            highlightedTilesP.set(tileIds);
+
+            var updatedOccupants = new HashSet<>(visibleoccupantsP.get());
+            tileIds.forEach(id -> {
+                // For each highlighted (scored) tile, remove its occupant
+                var tile = gameStateO.get().board().tileWithId(id);
+                updatedOccupants.removeIf(o -> o.zoneId() == tile.idOfZoneOccupiedBy(o.kind())); // TODO
+            });
+            visibleoccupantsP.set(updatedOccupants);
+        });
 
         var vBox = new VBox();
         infoPane.setTop(playersNode);
-        infoPane.setCenter(msBoardNode);
+        infoPane.setCenter(messageBoardNode);
         infoPane.setBottom(vBox);
-
-        var actionsO = new SimpleObjectProperty<List<String>>(List.of());
 
         var actionsNode = ActionsUI
                 .create(actionsO,
                         a -> {
-                            var newActions = new ArrayList<>(actionsO.get()); //TODO getValue vs. get
-                            newActions.add(a);
-                            actionsO.set(newActions);
+                            var newState = decodeAndApply(gameStateO.getValue(), a);
+                            update(gameStateO, actionsO, newState);
                         });
 
         var tileO = gameStateO.map(GameState::tileToPlace);
@@ -144,7 +183,13 @@ public class Main extends Application {
                         normalCount0,
                         menhirCount0,
                         textP,
-                        _ -> gameStateO.set(gameStateO.get().withNewOccupant(null)));
+                        o -> {
+                            assert o == null;
+                            var newState = withNewOccupant(gameStateO.getValue(), null);
+                            update(gameStateO, actionsO, newState);
+
+                            visibleoccupantsP.set(Set.of());
+                        });
 
         var nextActionO = gameStateO.map(GameState::nextAction);
 
@@ -161,16 +206,21 @@ public class Main extends Application {
 
         gameStateO.set(gameStateO.get().withStartingTilePlaced());
 
-//        for (int i = 0; i < actionsO.getValue().size(); i++) {
-//            ActionEncoder.StateAction newState = decodeAndApply(gameStateO.getValue(), actionsO.getValue().get(i));
-//            assert newState != null;
-//            gameStateO.setValue(newState.gameState());
-//        }
-
         primaryStage.setScene(new Scene(mainPane)); // Scene(borderPane, 1440, 1080)
         primaryStage.setWidth(1440);
         primaryStage.setHeight(1080);
         primaryStage.setTitle("ChaCuN");
         primaryStage.show();
+    }
+
+    private static void update(SimpleObjectProperty<GameState> gameStateO,
+                               SimpleObjectProperty<List<String>> actionsO,
+                               StateAction newState) {
+        assert newState != null; // TODO requireNonNull
+        gameStateO.set(newState.gameState());
+
+        var newActions = new ArrayList<>(actionsO.get());
+        newActions.add(newState.encodedAction()); // TODO encodedAction = 11111 ?
+        actionsO.set(newActions);
     }
 }

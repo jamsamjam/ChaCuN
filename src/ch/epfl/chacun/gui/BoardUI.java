@@ -105,11 +105,11 @@ public final class BoardUI {
                         fringeO);
 
                 cellData.bind(Bindings.createObjectBinding(() -> {
-                            if (tileO.getValue() != null) {
-                                if (tileIdsO.getValue() != null && tileIdsO.getValue().isEmpty())
-                                    return new CellData(tileO.getValue(), Color.TRANSPARENT);
-
-                                return new CellData(tileO.getValue(), Color.BLACK);
+                            if (tileO.getValue() != null) { //!tileIdsO.getValue().isEmpty()
+                                if (!tileIdsO.getValue().isEmpty()
+                                && !tileIdsO.getValue().contains(tileO.getValue().id()))
+                                    return new CellData(tileO.getValue(), Color.BLACK); // TODO changes only after hovered
+                                return new CellData(tileO.getValue(), Color.TRANSPARENT);
                             }
 
                             if (onFringe.getValue() && currentPlayerO.getValue() != null) {
@@ -232,6 +232,5 @@ public final class BoardUI {
         private CellData(Color veil) {
             this(emptyImage(), 0, veil);
         }
-        // TODO var consistency
     }
 }

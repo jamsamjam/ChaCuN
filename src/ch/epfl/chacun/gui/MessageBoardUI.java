@@ -39,22 +39,17 @@ public final class MessageBoardUI {
 
         VBox messageBox = new VBox();
 
-        ObjectProperty<List<MessageBoard.Message>> messageProperty =
-                new SimpleObjectProperty<>(messagesO.getValue());
-
-        messageProperty.addListener((_, _, nV) -> {
-            messageBox.getChildren().clear();
+        messagesO.addListener((_, _, nV) -> {
+            messageBox.getChildren().clear(); // TODO
 
             nV.forEach(message -> {
                 Text text = new Text(message.text());
                 text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
-
-                // the listener must scroll the scroll pane so that the latest message is visible
-                // not always enough to make the last message visible for unknown reasons
-                runLater(() -> scrollPane.setVvalue(1));
                 messageBox.getChildren().add(text);
 
-                // highlighting tiles
+                // not always enough to make the last message visible for unknown reasons
+                runLater(() -> scrollPane.setVvalue(1));
+
                 text.setOnMouseEntered(_ -> tileIds.setValue(message.tileIds()));
                 text.setOnMouseExited(_ -> tileIds.setValue(Set.of()));
             });

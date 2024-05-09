@@ -37,13 +37,13 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
-        String mushroom = mushroomGroupCount > 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
+        String mushroom = mushroomGroupCount == 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tantqu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}";
     }
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
-        String fish = fishCount > 0 ? "." : STR." et contenant \{fishCount} poissons";
+        String fish = fishCount == 0 ? "." : STR." et contenant \{fishCount} poissons";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}";
     }
 

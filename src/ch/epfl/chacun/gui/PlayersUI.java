@@ -92,9 +92,7 @@ public final class PlayersUI  {
 
             ObservableValue<Integer> freeCount =
                     gameStateO.map(gs -> gs.freeOccupantsCount(player, kind));
-            freeCount.addListener((_, _, _) ->
-                    occupant.setOpacity((j < freeCount.getValue()) ? 1.0 : 0.1));
-
+            occupant.opacityProperty().bind(freeCount.map(f -> j < f ? 1.0 : 0.1));
             textFlow.getChildren().add(occupant);
         }
     }

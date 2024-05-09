@@ -55,7 +55,7 @@ public class ActionEncoder {
         else {
             int bit = occupant.kind().ordinal();
             bit = (bit << 4) | occupant.zoneId();
-            encoding = encodeBits5(bit);
+            encoding = encodeBits5(bit); // TODO
         }
         return new StateAction(gameState.withNewOccupant(occupant), encoding);
     }
@@ -98,7 +98,7 @@ public class ActionEncoder {
         try {
             return decodeAndApplyInternal(gameState, encodedAction);
         } catch (DecodingException e) {
-            return null;
+            return null; // TODO
         }
     }
 
@@ -122,7 +122,7 @@ public class ActionEncoder {
                 if (index > positions.size() || rotation > Rotation.ALL.size())
                     throw new DecodingException();
 
-                PlacedTile tile = new PlacedTile(gameState.tileDecks().topTile(Tile.Kind.NORMAL),
+                PlacedTile tile = new PlacedTile(gameState.tileToPlace(),
                         gameState.currentPlayer(),
                         Rotation.ALL.get(rotation),
                         positions.get(index));
