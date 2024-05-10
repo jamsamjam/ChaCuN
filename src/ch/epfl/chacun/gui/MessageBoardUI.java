@@ -47,7 +47,7 @@ public final class MessageBoardUI {
                 Message message = nV.get(i);
 
                 Text text = new Text(message.text());
-                text.setWrappingWidth(LARGE_TILE_FIT_SIZE); // TODO
+                text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);
 
                 // not always enough to make the last message visible for unknown reasons

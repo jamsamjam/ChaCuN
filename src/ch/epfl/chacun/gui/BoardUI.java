@@ -91,7 +91,7 @@ public final class BoardUI {
                 ObservableValue<PlacedTile> tileO = boardO.map(b -> b.tileAt(pos));
 
                 // only cells containing a tile have occupants and cancellation tokens
-                tileO.addListener((_, oV, nV) -> {
+                tileO.addListener((_, _, nV) -> {
                     group.getChildren().addAll(markers(nV, boardO));
                     group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
                 });
@@ -102,29 +102,30 @@ public final class BoardUI {
                         fringeO);
 
                 cellData.bind(Bindings.createObjectBinding(() -> {
-                            if (tileO.getValue() != null) { //!tileIdsO.getValue().isEmpty()
-                                if (!tileIdsO.getValue().isEmpty()
-                                && !tileIdsO.getValue().contains(tileO.getValue().id()))
-                                    return new CellData(tileO.getValue(), Color.BLACK);
-                                return new CellData(tileO.getValue(), Color.TRANSPARENT);
-                            }
+                            PlacedTile tile = tileO.getValue();
 
-                            if (onFringe.getValue() && currentPlayerO.getValue() != null) {
-                                PlacedTile placedTile =
-                                        new PlacedTile(tileToPlaceO.getValue(),
-                                                currentPlayerO.getValue(),
-                                                rotationO.getValue(),
-                                                pos);
+                            if (tile != null)
+                                return tileIdsO.getValue().isEmpty() || tileIdsO.getValue().contains(tile.id())
+                                        ? new CellData(tile, Color.TRANSPARENT)
+                                        : new CellData(tile, Color.BLACK);
+
+                            if (onFringe.getValue()
+                                    && currentPlayerO.getValue() != null) {
+
+                                PlacedTile tileToPlace = new PlacedTile(tileToPlaceO.getValue(),
+                                        currentPlayerO.getValue(),
+                                        rotationO.getValue(),
+                                        pos);
 
                                 if (group.isHover()) {
-                                    Color color = boardO.getValue().canAddTile(placedTile)
+                                    Color color = boardO.getValue().canAddTile(tileToPlace)
                                             ? Color.TRANSPARENT
                                             : Color.WHITE;
-                                    return new CellData(placedTile, color);
+                                    return new CellData(tileToPlace, color);
                                 }
-
                                 return new CellData(fillColor(currentPlayerO.getValue()));
                             }
+
                             return new CellData(Color.TRANSPARENT);
                         },
                         tileO,
@@ -156,7 +157,8 @@ public final class BoardUI {
                 });
 
                 group.effectProperty().bind(cellData.map(c -> {
-                    ColorInput color = new ColorInput(pos.x(), pos.y(), NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, c.veil());
+                    ColorInput color =
+                            new ColorInput(0, 0, NORMAL_TILE_FIT_SIZE, NORMAL_TILE_FIT_SIZE, c.veil());
                     Blend blend = new Blend(BlendMode.SRC_OVER);
                     blend.setOpacity(0.5);
                     blend.setTopInput(color);
