@@ -241,13 +241,5 @@ public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, in
             if (zone.specialPower() == specialPower)
                 return zone;
         return null;
-        // TODO La deuxième vérification prend aussi en compte le cas où la specialPower est null :)
-
-//        public Zone zoneWithSpecialPower(Zone.SpecialPower specialPower) {
-//            for (Zone zone : zones)
-//                if (zone.specialPower() != null && zone.specialPower().equals(specialPower))
-//                    return zone;
-//            return null;
-//        }
     }
 }

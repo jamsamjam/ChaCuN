@@ -28,33 +28,33 @@ public final class MessageBoardUI {
      * Creates the part of the graphical interface of the message board.
      *
      * @param messagesO the observable version of messages displayed on the bulletin board
-     * @param tileIds a JavaFX property containing all the identities of the tiles to be
+     * @param tileIdsP a JavaFX property containing all the identities of the tiles to be
      *                highlighted on the board
      * @return the part of the graphical interface
      */
     public static Node create(ObservableValue<List<Message>> messagesO,
-                              ObjectProperty<Set<Integer>> tileIds) {
+                              ObjectProperty<Set<Integer>> tileIdsP) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("message-board");
         scrollPane.getStylesheets().add("/message-board.css");
 
         VBox messageBox = new VBox();
 
-        messagesO.addListener((_, oV, nV) -> { // TODO check
-            assert oV.size() != nV.size();
+        messagesO.addListener((_, oV, nV) -> {
+            //assert oV.size() != nV.size();
 
             for (int i = oV.size(); i < nV.size(); i++) {
                 Message message = nV.get(i);
 
                 Text text = new Text(message.text());
-                text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
+                text.setWrappingWidth(LARGE_TILE_FIT_SIZE); // TODO
                 messageBox.getChildren().add(text);
 
                 // not always enough to make the last message visible for unknown reasons
                 runLater(() -> scrollPane.setVvalue(1));
 
-                text.setOnMouseEntered(_ -> tileIds.setValue(message.tileIds()));
-                text.setOnMouseExited(_ -> tileIds.setValue(Set.of()));
+                text.setOnMouseEntered(_ -> tileIdsP.setValue(message.tileIds()));
+                text.setOnMouseExited(_ -> tileIdsP.setValue(Set.of()));
             }
         });
 

@@ -78,14 +78,14 @@ public class Main extends Application {
                         tileDecks,
                         textMaker);
 
-        SimpleObjectProperty<GameState> gameStateO = new SimpleObjectProperty<>(gameState);
+        SimpleObjectProperty<GameState> gameStateP = new SimpleObjectProperty<>(gameState);
 
         SimpleObjectProperty<Rotation> tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
         SimpleObjectProperty<Set<Occupant>> visibleoccupantsP = new SimpleObjectProperty<>(Set.of());
-        SimpleObjectProperty<Set<Integer>> tileIdsO = new SimpleObjectProperty<>(Set.of());
-        SimpleObjectProperty<List<String>> actionsO = new SimpleObjectProperty<>(List.of());
+        SimpleObjectProperty<Set<Integer>> tileIdsP = new SimpleObjectProperty<>(Set.of());
+        SimpleObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
 
-        gameStateO.addListener((_, oV, nV) -> {
+        gameStateP.addListener((_, oV, nV) -> {
            if (oV.nextAction() == GameState.Action.PLACE_TILE) {
                HashSet<Occupant> newVisibles = new HashSet<>(visibleoccupantsP.getValue());
                newVisibles.addAll(nV.lastTilePotentialOccupants());
@@ -98,26 +98,26 @@ public class Main extends Application {
 
         Node boardNode = BoardUI
                 .create(Board.REACH,
-                        gameStateO,
+                        gameStateP,
                         tileToPlaceRotationP,
                         visibleoccupantsP,
-                        tileIdsO,
+                        tileIdsP,
                         tileToPlaceRotationP::set,
                         pos -> {
-                            var state = gameStateO.getValue();
+                            var state = gameStateP.getValue();
                             if (state.tileToPlace() != null) {
                                 var tile = new PlacedTile(state.tileToPlace(),
                                         state.currentPlayer(),
                                         tileToPlaceRotationP.getValue(),
                                         pos);
 
-                                update(gameStateO, actionsO, withPlacedTile(state, tile));
+                                update(gameStateP, actionsP, withPlacedTile(state, tile));
                             }
                         },
                         occupant -> {
-                            var state = gameStateO.getValue();
-                            update(gameStateO,
-                                    actionsO,
+                            var state = gameStateP.getValue();
+                            update(gameStateP,
+                                    actionsP,
                                     state.nextAction() == GameState.Action.PLACE_TILE ?
                                             withOccupantRemoved(state, occupant) :
                                             withNewOccupant(state, occupant));
@@ -127,15 +127,14 @@ public class Main extends Application {
         mainPane.setCenter(boardNode);
         mainPane.setRight(infoPane);
 
-        ObservableValue<List<MessageBoard.Message>> messagesO = gameStateO.map(gs -> gs.messageBoard().messages());
+        ObservableValue<List<MessageBoard.Message>> messagesO = gameStateP.map(gs -> gs.messageBoard().messages());
 
         Node playersNode = PlayersUI
-                .create(gameStateO,
+                .create(gameStateP,
                         textMaker);
         Node messageBoardNode = MessageBoardUI
                 .create(messagesO,
-                        tileIdsO);
-
+                        tileIdsP);
 
         VBox vBox = new VBox();
         infoPane.setTop(playersNode);
@@ -143,11 +142,11 @@ public class Main extends Application {
         infoPane.setBottom(vBox);
 
         Node actionsNode = ActionsUI
-                .create(actionsO,
-                        t -> update(gameStateO, actionsO, decodeAndApply(gameStateO.getValue(), t)));
+                .create(actionsP,
+                        t -> update(gameStateP, actionsP, decodeAndApply(gameStateP.getValue(), t)));
 
-        ObservableValue<Tile> tileO = gameStateO.map(GameState::tileToPlace);
-        ObservableValue<TileDecks> tileDecksO = gameStateO.map(GameState::tileDecks);
+        ObservableValue<Tile> tileO = gameStateP.map(GameState::tileToPlace);
+        ObservableValue<TileDecks> tileDecksO = gameStateP.map(GameState::tileDecks);
         ObservableValue<Integer> normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
         ObservableValue<Integer> menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
         SimpleObjectProperty<String> textP = new SimpleObjectProperty<>("");
@@ -157,12 +156,9 @@ public class Main extends Application {
                         normalCount0,
                         menhirCount0,
                         textP,
-                        o -> {
-                            assert o == null;
-                            update(gameStateO, actionsO, withNewOccupant(gameStateO.getValue(), null));
-                        });
+                        o -> update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null)));
 
-        ObservableValue<GameState.Action> nextActionO = gameStateO.map(GameState::nextAction);
+        ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
 
         nextActionO.addListener((_, _, nV) -> {
             if (nV == GameState.Action.RETAKE_PAWN) {
@@ -175,7 +171,7 @@ public class Main extends Application {
 
         vBox.getChildren().addAll(actionsNode, decksNode);
 
-        gameStateO.set(gameStateO.getValue().withStartingTilePlaced());
+        gameStateP.set(gameStateP.getValue().withStartingTilePlaced());
 
         primaryStage.setScene(new Scene(mainPane));
         primaryStage.setWidth(1440);
@@ -184,15 +180,15 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    private static void update(SimpleObjectProperty<GameState> gameStateO,
-                               SimpleObjectProperty<List<String>> actionsO,
+    private static void update(SimpleObjectProperty<GameState> gameStateP,
+                               SimpleObjectProperty<List<String>> actionsP,
                                StateAction newState) {
         if (newState != null) {
-            gameStateO.set(newState.gameState());
+            gameStateP.set(newState.gameState());
 
-            var newActions = new ArrayList<>(actionsO.get());
+            var newActions = new ArrayList<>(actionsP.get());
             newActions.add(newState.string());
-            actionsO.set(newActions);
+            actionsP.set(newActions);
         }
     }
 }
