@@ -216,11 +216,12 @@ public class Main extends Application {
     private static void update(SimpleObjectProperty<GameState> gameStateO,
                                SimpleObjectProperty<List<String>> actionsO,
                                StateAction newState) {
-        assert newState != null; // TODO requireNonNull
-        gameStateO.set(newState.gameState());
+        if (newState != null) {
+            gameStateO.set(newState.gameState());
 
-        var newActions = new ArrayList<>(actionsO.get());
-        newActions.add(newState.encodedAction()); // TODO encodedAction = 11111 ?
-        actionsO.set(newActions);
+            var newActions = new ArrayList<>(actionsO.get());
+            newActions.add(newState.string());
+            actionsO.set(newActions);
+        }
     }
 }

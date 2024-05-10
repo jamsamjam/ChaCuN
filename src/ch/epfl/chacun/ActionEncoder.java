@@ -3,8 +3,7 @@ package ch.epfl.chacun;
 import java.util.Comparator;
 import java.util.List;
 
-import static ch.epfl.chacun.Base32.encodeBits5;
-import static ch.epfl.chacun.Base32.isValid;
+import static ch.epfl.chacun.Base32.*;
 import static ch.epfl.chacun.Occupant.Kind.PAWN;
 
 /**
@@ -35,7 +34,7 @@ public class ActionEncoder {
         int bit = positions.indexOf(tile.pos());
         bit = (bit << 2) | tile.rotation().ordinal();
 
-        return new StateAction(gameState.withPlacedTile(tile), Base32.encodeBits10(bit));
+        return new StateAction(gameState.withPlacedTile(tile), encodeBits10(bit));
     }
 
     /**
@@ -50,14 +49,12 @@ public class ActionEncoder {
      */
     public static StateAction withNewOccupant(GameState gameState,
                                               Occupant occupant){
-        String encoding;
-        if (occupant == null) encoding = "11111"; // no occupant is placed
-        else {
-            int bit = occupant.kind().ordinal();
-            bit = (bit << 4) | occupant.zoneId();
-            encoding = encodeBits5(bit); // TODO
+        int bit = 11111; // no occupant is placed
+        if (occupant != null) {
+            bit = occupant.kind().ordinal();
+            bit = (bit << 4) | occupant.zoneId(); // TODO
         }
-        return new StateAction(gameState.withNewOccupant(occupant), encoding);
+        return new StateAction(gameState.withNewOccupant(occupant), encodeBits5(bit));
     }
 
     /**
@@ -72,17 +69,15 @@ public class ActionEncoder {
     @SuppressWarnings("SpellCheckingInspection")
     public static StateAction withOccupantRemoved(GameState gameState,
                                                   Occupant occupant){
-        String encoding;
-        if (occupant == null) encoding = "11111"; // no pawn must be taken back
-        else {
+        int bit = 11111; // no pawn must be taken back
+        if (occupant != null) {
             List<Occupant> occupants = gameState.board().occupants().stream()
                     .filter(o -> o.kind() == PAWN)
                     .sorted(Comparator.comparingInt(Occupant::zoneId))
                     .toList();
-            int bit = occupants.indexOf(occupant);
-            encoding = encodeBits5(bit);
+            bit = occupants.indexOf(occupant);
         }
-        return new StateAction(gameState.withOccupantRemoved(occupant), encoding);
+        return new StateAction(gameState.withOccupantRemoved(occupant), encodeBits5(bit));
     }
 
     /**
@@ -90,23 +85,24 @@ public class ActionEncoder {
      * representing the action.
      *
      * @param gameState the initial game state
-     * @param encodedAction the base 32 encoding of an action
-     * @return the corresponding StateAction
+     * @param string the base 32 encoding of an action
+     * @return the corresponding StateAction, or null if the given string doesn't represent a valid
+     * action
      */
     public static StateAction decodeAndApply(GameState gameState,
-                                             String encodedAction) {
+                                             String string) {
         try {
-            return decodeAndApplyInternal(gameState, encodedAction);
+            return decodeAndApplyInternal(gameState, string);
         } catch (DecodingException e) {
-            return null; // TODO
+            return null;
         }
     }
 
     private static StateAction decodeAndApplyInternal(GameState gameState,
-                                                      String encodedAction) throws DecodingException {
-        if (!isValid(encodedAction)) throw new DecodingException();
+                                                      String string) throws DecodingException {
+        if (!isValid(string)) throw new DecodingException();
 
-        int bit = Base32.decode(encodedAction);
+        int bit = Base32.decode(string);
 
         switch (gameState.nextAction()) { // TODO review checks
             case PLACE_TILE -> {
@@ -127,14 +123,14 @@ public class ActionEncoder {
                         Rotation.ALL.get(rotation),
                         positions.get(index));
 
-                return new StateAction(gameState.withPlacedTile(tile), encodedAction);
+                return new StateAction(gameState.withPlacedTile(tile), string);
             }
 
             case RETAKE_PAWN -> {
                 // ooooo
-                Occupant occupant;
-                if (bit == 0b11111) occupant = null;
-                else {
+                Occupant occupant = null;
+
+                if (bit != 0b11111) {
                     List<Occupant> occupants = gameState.board().occupants().stream()
                             .filter(o -> o.kind() == PAWN)
                             .sorted(Comparator.comparingInt(Occupant::zoneId))
@@ -147,15 +143,14 @@ public class ActionEncoder {
                         throw new DecodingException();
                 }
 
-                return new StateAction(gameState.withOccupantRemoved(occupant), encodedAction);
+                return new StateAction(gameState.withOccupantRemoved(occupant), string);
             }
 
             case OCCUPY_TILE -> {
                 // kzzzz
-                Occupant occupant;
+                Occupant occupant = null;
 
-                if (bit == 0b11111) occupant = null;
-                else {
+                if (bit != 0b11111) {
                     int kind = bit >> 4;
                     int id = bit & 0b1111;
                     occupant = new Occupant(Occupant.Kind.values()[kind], id);
@@ -169,10 +164,11 @@ public class ActionEncoder {
                     if (!gameState.lastTilePotentialOccupants().contains(occupant))
                         throw new DecodingException();
                 }
-                return new StateAction(gameState.withNewOccupant(occupant), encodedAction);
+
+                return new StateAction(gameState.withNewOccupant(occupant), string);
             }
 
-            default -> throw new DecodingException();
+            case null, default -> throw new DecodingException();
         }
     }
 
@@ -182,7 +178,7 @@ public class ActionEncoder {
      * Represents a pair of the game state and the string representing the action.
      *
      * @param gameState the game state
-     * @param encodedAction the string
+     * @param string the string
      */
-    public record StateAction(GameState gameState, String encodedAction) {}
+    public record StateAction(GameState gameState, String string) {}
 }
