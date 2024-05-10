@@ -36,8 +36,8 @@ public final class PlayersUI  {
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
 
-        Set<PlayerColor> participants = PlayerColor.ALL.stream()
-                .filter(p -> tm.playerName(p) != null).collect(Collectors.toSet());
+        List<PlayerColor> participants = PlayerColor.ALL.stream()
+                .filter(p -> tm.playerName(p) != null).sorted().toList(); // TODo check again
 
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
                 gameStateO.map(gs -> gs.messageBoard().points());

@@ -52,7 +52,7 @@ public class ActionEncoder {
         int bit = 11111; // no occupant is placed
         if (occupant != null) {
             bit = occupant.kind().ordinal();
-            bit = (bit << 4) | occupant.zoneId(); // TODO
+            bit = (bit << 4) | Zone.localId(occupant.zoneId());
         }
         return new StateAction(gameState.withNewOccupant(occupant), encodeBits5(bit));
     }
@@ -66,7 +66,6 @@ public class ActionEncoder {
      * @param occupant the given occupant
      * @return the corresponding StateAction
      */
-    @SuppressWarnings("SpellCheckingInspection")
     public static StateAction withOccupantRemoved(GameState gameState,
                                                   Occupant occupant){
         int bit = 11111; // no pawn must be taken back
@@ -107,7 +106,7 @@ public class ActionEncoder {
         switch (gameState.nextAction()) { // TODO review checks
             case PLACE_TILE -> {
                 // ppppp ppprr
-                int index = bit >> 2;
+                int index = bit >>> 2;
                 int rotation = bit & 0b11;
 
                 List<Pos> positions = gameState.board().insertionPositions().stream()
@@ -138,7 +137,7 @@ public class ActionEncoder {
                     occupant = occupants.get(bit);
 
                     // check if the occupant belongs to the current player
-                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
+                    if (gameState.board().tileWithId(occupant.zoneId()).placer()
                             != gameState.currentPlayer())
                         throw new DecodingException();
                 }
@@ -151,18 +150,18 @@ public class ActionEncoder {
                 Occupant occupant = null;
 
                 if (bit != 0b11111) {
-                    int kind = bit >> 4;
-                    int id = bit & 0b1111;
-                    occupant = new Occupant(Occupant.Kind.values()[kind], id);
+                    int kind = bit >>> 4;
+                    int id = bit & 0b01111;
+
+                    occupant = new Occupant(Occupant.Kind.values()[kind], gameState.board().lastPlacedTile().id() * 10 + id);
 
                     // check if the occupant belongs to the current player
-                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
-                            != gameState.currentPlayer())
+                    if (gameState.board().lastPlacedTile().placer() != gameState.currentPlayer())
                         throw new DecodingException();
 
-                    // check if the occupant is being placed in the right zone
-                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
-                        throw new DecodingException();
+                    // TODO check if the occupant is being placed in the right zone
+//                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
+//                        throw new DecodingException();
                 }
 
                 return new StateAction(gameState.withNewOccupant(occupant), string);

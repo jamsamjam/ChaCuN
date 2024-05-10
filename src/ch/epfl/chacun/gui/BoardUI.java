@@ -92,9 +92,6 @@ public final class BoardUI {
 
                 // only cells containing a tile have occupants and cancellation tokens
                 tileO.addListener((_, oV, nV) -> {
-                    //assert oV == null; // TODO
-                    assert nV != null;
-
                     group.getChildren().addAll(markers(nV, boardO));
                     group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
                 });
@@ -108,7 +105,7 @@ public final class BoardUI {
                             if (tileO.getValue() != null) { //!tileIdsO.getValue().isEmpty()
                                 if (!tileIdsO.getValue().isEmpty()
                                 && !tileIdsO.getValue().contains(tileO.getValue().id()))
-                                    return new CellData(tileO.getValue(), Color.BLACK); // TODO changes only after hovered
+                                    return new CellData(tileO.getValue(), Color.BLACK);
                                 return new CellData(tileO.getValue(), Color.TRANSPARENT);
                             }
 
@@ -144,7 +141,7 @@ public final class BoardUI {
                             case PRIMARY -> {
                                 placeHandler.accept(pos);
                                 group.rotateProperty().unbind();
-                                //e.consume(); // TODO
+                                e.consume();
                             }
                             case SECONDARY -> {
                                 Rotation oldRotation = rotationO.getValue();
@@ -152,7 +149,7 @@ public final class BoardUI {
                                         ? oldRotation.add(Rotation.RIGHT)
                                         : oldRotation.add(Rotation.LEFT);
                                 rotateHandler.accept(newRotation);
-                                //e.consume();
+                                e.consume();
                             }
                         }
                     }

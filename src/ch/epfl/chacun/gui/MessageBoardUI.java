@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.MessageBoard;
+import ch.epfl.chacun.MessageBoard.Message;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -31,7 +32,7 @@ public final class MessageBoardUI {
      *                highlighted on the board
      * @return the part of the graphical interface
      */
-    public static Node create(ObservableValue<List<MessageBoard.Message>> messagesO,
+    public static Node create(ObservableValue<List<Message>> messagesO,
                               ObjectProperty<Set<Integer>> tileIds) {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("message-board");
@@ -39,10 +40,12 @@ public final class MessageBoardUI {
 
         VBox messageBox = new VBox();
 
-        messagesO.addListener((_, _, nV) -> {
-            messageBox.getChildren().clear(); // TODO
+        messagesO.addListener((_, oV, nV) -> { // TODO check
+            assert oV.size() != nV.size();
 
-            nV.forEach(message -> {
+            for (int i = oV.size(); i < nV.size(); i++) {
+                Message message = nV.get(i);
+
                 Text text = new Text(message.text());
                 text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);
@@ -52,7 +55,7 @@ public final class MessageBoardUI {
 
                 text.setOnMouseEntered(_ -> tileIds.setValue(message.tileIds()));
                 text.setOnMouseExited(_ -> tileIds.setValue(Set.of()));
-            });
+            }
         });
 
         scrollPane.setContent(messageBox);

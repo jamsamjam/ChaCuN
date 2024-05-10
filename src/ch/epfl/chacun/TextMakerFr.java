@@ -131,7 +131,7 @@ public final class TextMakerFr implements TextMaker {
 
     private String animal(Map<Animal.Kind, Integer> animals) {
         List<String> kinds = List.of("mammouth", "aurochs", "cerf");
-        List<Integer> counts = List.of(animals.getOrDefault(MAMMOTH, 0), // TODO 0 displayed?
+        List<Integer> counts = List.of(animals.getOrDefault(MAMMOTH, 0),
                 animals.getOrDefault(AUROCHS, 0),
                 animals.getOrDefault(DEER, 0));
 

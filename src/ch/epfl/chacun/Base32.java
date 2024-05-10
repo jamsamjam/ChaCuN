@@ -22,7 +22,7 @@ public class Base32 {
      * @return true iff the given string is only composed of characters from the base32 alphabet
      */
     public static boolean isValid(String string) {
-        checkArgument(string != null || !string.isEmpty()); // TODO
+        checkArgument(string != null);
 
         for (int i = 0; i < string.length(); i++) {
             char chr = string.charAt(i);

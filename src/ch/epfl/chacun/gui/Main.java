@@ -3,12 +3,15 @@ package ch.epfl.chacun.gui;
 import ch.epfl.chacun.*;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -31,73 +34,74 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-    // TODO after area is closed occupant is not regained
+
     @Override
-    public void start(Stage primaryStage) throws Exception { // TODO var usage only here - consistency?
-        var parameters = getParameters();
+    public void start(Stage primaryStage) throws Exception {
+        Parameters parameters = getParameters();
         assert parameters != null;
-        var playersNames = parameters.getUnnamed();
-        assert playersNames.size() >= 2 && playersNames.size() <= 5; // TODO
-        var seedStr = parameters.getNamed().get("seed");
+        List<String> playersNames = parameters.getUnnamed();
+        assert playersNames.size() >= 2 && playersNames.size() <= 5;
+        String seedStr = parameters.getNamed().get("seed");
 
         // shuffle tiles
-        var generatorFactory = RandomGeneratorFactory.getDefault();
-        var generator = generatorFactory.create();
+        RandomGeneratorFactory<RandomGenerator> generatorFactory = RandomGeneratorFactory.getDefault();
+        RandomGenerator generator = generatorFactory.create();
 
         if (seedStr != null) {
-            var seed = parseUnsignedLong(seedStr);
+            long seed = parseUnsignedLong(seedStr);
             generator = generatorFactory.create(seed);
         }
 
-        // TODO List<Tile> tiles = Tiles.TILES.stream().toList();
-        var tiles = new ArrayList<>(Tiles.TILES);
+        List<Tile> tiles = new ArrayList<>(Tiles.TILES);
         Collections.shuffle(tiles, generator);
 
-        var mainPane = new BorderPane();
+        BorderPane mainPane = new BorderPane();
 
-        var tilesByKind = tiles.stream()
+        Map<Tile.Kind, List<Tile>> tilesByKind = tiles.stream()
                 .collect(Collectors.groupingBy(Tile::kind));
-        var tileDecks =
-                new TileDecks(tilesByKind.get(Tile.Kind.START),
+        TileDecks tileDecks =
+                new TileDecks(tilesByKind.get(START),
                         tilesByKind.get(NORMAL),
                         tilesByKind.get(MENHIR));
 
-        var playerColorMap = IntStream.range(0, playersNames.size()).boxed()
+        Map<PlayerColor, String> playerColorMap = IntStream.range(0, playersNames.size()).boxed()
                 .collect(Collectors.toMap(
                         PlayerColor.ALL::get,
                         playersNames::get, (_, b) -> b));
-        var playerColors = playerColorMap.keySet().stream()
-                .sorted()
-                .toList();
+        List<PlayerColor> playerColors = playerColorMap.keySet().stream()
+                .sorted().toList(); // TODO
 
-        var textMaker = new TextMakerFr(playerColorMap);
+        TextMakerFr textMaker = new TextMakerFr(playerColorMap);
 
-        var gameState = GameState
+        GameState gameState = GameState
                 .initial(playerColors,
                         tileDecks,
                         textMaker);
 
-        var gameStateO = new SimpleObjectProperty<>(gameState);
+        SimpleObjectProperty<GameState> gameStateO = new SimpleObjectProperty<>(gameState);
 
-        var tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
-        var visibleoccupantsP = new SimpleObjectProperty<>(Set.<Occupant>of());
-        var highlightedTilesP = new SimpleObjectProperty<>(Set.<Integer>of());
-        var actionsO = new SimpleObjectProperty<List<String>>(List.of());
+        SimpleObjectProperty<Rotation> tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
+        SimpleObjectProperty<Set<Occupant>> visibleoccupantsP = new SimpleObjectProperty<>(Set.of());
+        SimpleObjectProperty<Set<Integer>> tileIdsO = new SimpleObjectProperty<>(Set.of());
+        SimpleObjectProperty<List<String>> actionsO = new SimpleObjectProperty<>(List.of());
 
         gameStateO.addListener((_, oV, nV) -> {
            if (oV.nextAction() == GameState.Action.PLACE_TILE) {
-               var newVisibles = new HashSet<>(visibleoccupantsP.get());
+               HashSet<Occupant> newVisibles = new HashSet<>(visibleoccupantsP.getValue());
                newVisibles.addAll(nV.lastTilePotentialOccupants());
+               visibleoccupantsP.set(newVisibles);
+           } else {
+               HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
                visibleoccupantsP.set(newVisibles);
            }
         });
 
-        var boardNode = BoardUI
+        Node boardNode = BoardUI
                 .create(Board.REACH,
                         gameStateO,
                         tileToPlaceRotationP,
                         visibleoccupantsP,
-                        highlightedTilesP,
+                        tileIdsO,
                         tileToPlaceRotationP::set,
                         pos -> {
                             var state = gameStateO.getValue();
@@ -107,91 +111,58 @@ public class Main extends Application {
                                         tileToPlaceRotationP.getValue(),
                                         pos);
 
-                                var newState = withPlacedTile(state, tile);
-                                update(gameStateO, actionsO, newState);
+                                update(gameStateO, actionsO, withPlacedTile(state, tile));
                             }
                         },
                         occupant -> {
                             var state = gameStateO.getValue();
-
-                            if (state.nextAction() == GameState.Action.RETAKE_PAWN) {
-                                var newState = withOccupantRemoved(state, occupant);
-                                update(gameStateO, actionsO, newState);
-
-                                var newVisibles = new HashSet<>(visibleoccupantsP.get());
-                                newVisibles.remove(occupant);
-                                visibleoccupantsP.set(newVisibles);
-                            } else if (visibleoccupantsP.getValue().contains(occupant)) {
-                                var newState = withNewOccupant(state, occupant);
-                                update(gameStateO, actionsO, newState);
-
-                                var newVisibles = new HashSet<>(visibleoccupantsP.get());
-                                newVisibles.removeAll(state.lastTilePotentialOccupants());
-                                newVisibles.add(occupant);
-                                visibleoccupantsP.set(newVisibles);
-                            }// TODO 이미 놓여져있는 occ 클릭해도 넘어감; / typihg 한거는 visible 반영안됨
+                            update(gameStateO,
+                                    actionsO,
+                                    state.nextAction() == GameState.Action.PLACE_TILE ?
+                                            withOccupantRemoved(state, occupant) :
+                                            withNewOccupant(state, occupant));
                         });
 
-        var infoPane = new BorderPane();
+        BorderPane infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
         mainPane.setRight(infoPane);
-        // TODO how to set the center to be displayed
 
-        var messageBoardO = gameStateO.map(GameState::messageBoard);
-        var messagesO = gameStateO.map(gs -> gs.messageBoard().messages());
+        ObservableValue<List<MessageBoard.Message>> messagesO = gameStateO.map(gs -> gs.messageBoard().messages());
 
-        var playersNode = PlayersUI
+        Node playersNode = PlayersUI
                 .create(gameStateO,
                         textMaker);
-        var messageBoardNode = MessageBoardUI
+        Node messageBoardNode = MessageBoardUI
                 .create(messagesO,
-                        highlightedTilesP);
+                        tileIdsO);
 
-        messageBoardO.addListener((_, _, nV) -> {
-            var tileIds = nV.messages().getLast().tileIds();
-            highlightedTilesP.set(tileIds);
 
-            var updatedOccupants = new HashSet<>(visibleoccupantsP.get());
-            tileIds.forEach(id -> {
-                // For each highlighted (scored) tile, remove its occupant
-                var tile = gameStateO.get().board().tileWithId(id);
-                updatedOccupants.removeIf(o -> o.zoneId() == tile.idOfZoneOccupiedBy(o.kind())); // TODO
-            });
-            visibleoccupantsP.set(updatedOccupants);
-        });
-
-        var vBox = new VBox();
+        VBox vBox = new VBox();
         infoPane.setTop(playersNode);
         infoPane.setCenter(messageBoardNode);
         infoPane.setBottom(vBox);
 
-        var actionsNode = ActionsUI
+        Node actionsNode = ActionsUI
                 .create(actionsO,
-                        a -> {
-                            var newState = decodeAndApply(gameStateO.getValue(), a);
-                            update(gameStateO, actionsO, newState);
-                        });
+                        t -> update(gameStateO, actionsO, decodeAndApply(gameStateO.getValue(), t)));
 
-        var tileO = gameStateO.map(GameState::tileToPlace);
-        var tileDecksO = gameStateO.map(GameState::tileDecks);
-        var normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
-        var menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
-        var textP = new SimpleObjectProperty<>("");
+        ObservableValue<Tile> tileO = gameStateO.map(GameState::tileToPlace);
+        ObservableValue<TileDecks> tileDecksO = gameStateO.map(GameState::tileDecks);
+        ObservableValue<Integer> normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
+        ObservableValue<Integer> menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
+        SimpleObjectProperty<String> textP = new SimpleObjectProperty<>("");
 
-        var decksNode = DecksUI
+        Node decksNode = DecksUI
                 .create(tileO,
                         normalCount0,
                         menhirCount0,
                         textP,
                         o -> {
                             assert o == null;
-                            var newState = withNewOccupant(gameStateO.getValue(), null);
-                            update(gameStateO, actionsO, newState);
-
-                            visibleoccupantsP.set(Set.of());
+                            update(gameStateO, actionsO, withNewOccupant(gameStateO.getValue(), null));
                         });
 
-        var nextActionO = gameStateO.map(GameState::nextAction);
+        ObservableValue<GameState.Action> nextActionO = gameStateO.map(GameState::nextAction);
 
         nextActionO.addListener((_, _, nV) -> {
             if (nV == GameState.Action.RETAKE_PAWN) {
@@ -204,9 +175,9 @@ public class Main extends Application {
 
         vBox.getChildren().addAll(actionsNode, decksNode);
 
-        gameStateO.set(gameStateO.get().withStartingTilePlaced());
+        gameStateO.set(gameStateO.getValue().withStartingTilePlaced());
 
-        primaryStage.setScene(new Scene(mainPane)); // Scene(borderPane, 1440, 1080)
+        primaryStage.setScene(new Scene(mainPane));
         primaryStage.setWidth(1440);
         primaryStage.setHeight(1080);
         primaryStage.setTitle("ChaCuN");

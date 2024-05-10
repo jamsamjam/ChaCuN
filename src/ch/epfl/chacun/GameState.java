@@ -49,8 +49,8 @@ public record GameState(List<PlayerColor> players,
     }
 
     /**
-     * Returns the initial game state for the given players, piles and "text creator", whose next
-     * action is START_GAME(hence the tile to be placed is null), and whose board and display board
+     * Returns the initial game state for the given players, tileDecks, and textMaker, whose next
+     * action is START_GAME (hence the tile to be placed is null), and whose board and display board
      * are empty.
      *
      * @param players the given players

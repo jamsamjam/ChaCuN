@@ -436,8 +436,7 @@ public final class Board {
         Set<Animal> myCancelledAnimals = new HashSet<>(cancelledAnimals);
         myCancelledAnimals.addAll(newlyCancelledAnimals);
 
-        return new Board(myPlacedTiles, tileIndexes, zonePartitions, Collections.unmodifiableSet(myCancelledAnimals));
-        // TODO cancelledAnimals : why not Set.copyOf() ? :)
+        return new Board(myPlacedTiles, tileIndexes, zonePartitions, Set.copyOf(myCancelledAnimals));
     }
 
     @Override
