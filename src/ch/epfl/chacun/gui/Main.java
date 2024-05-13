@@ -86,19 +86,12 @@ public class Main extends Application {
         SimpleObjectProperty<Set<Integer>> tileIdsP = new SimpleObjectProperty<>(Set.of());
         SimpleObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
 
-        gameStateP.addListener((_, oV, nV) -> {
-            if (nV.nextAction() == OCCUPY_TILE) {
-//                if (oV.nextAction() == RETAKE_PAWN)
-//                    visibleoccupantsP.set(nV.board().occupants());
+        gameStateP.addListener((_, _, nV) -> {
+            HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants()); //visibleoccupantsP.getValue()
+            if (nV.nextAction() == OCCUPY_TILE) newVisibles.addAll(nV.lastTilePotentialOccupants());
+            visibleoccupantsP.set(newVisibles);
 
-                HashSet<Occupant> newVisibles = new HashSet<>(visibleoccupantsP.getValue());
-                newVisibles.addAll(nV.lastTilePotentialOccupants());
-                visibleoccupantsP.set(newVisibles);
-            } else {
-                visibleoccupantsP.set(nV.board().occupants());
-            }
-
-            // TODO occupant is not taken back from board
+            // TODO occupant is not taken back from board, 남의 occupant 클릭
             // place tile -> retake -> occupy
             // place tile -> occupy
         });
@@ -173,7 +166,7 @@ public class Main extends Application {
                             assert o == null; // TODO ?
 
                             if (gameStateP.getValue().nextAction() == OCCUPY_TILE)
-                                update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null));
+                                update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null)); // TODO null/ o
                             else if (gameStateP.getValue().nextAction() == RETAKE_PAWN)
                                 update(gameStateP, actionsP, withOccupantRemoved(gameStateP.getValue(), null));
                         });
