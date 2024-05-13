@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static ch.epfl.chacun.ActionEncoder.*;
+import static ch.epfl.chacun.GameState.Action.*;
 import static ch.epfl.chacun.Tile.Kind.*;
 import static java.lang.Long.parseUnsignedLong;
 
@@ -86,14 +87,20 @@ public class Main extends Application {
         SimpleObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
 
         gameStateP.addListener((_, oV, nV) -> {
-           if (oV.nextAction() == GameState.Action.PLACE_TILE) {
-               HashSet<Occupant> newVisibles = new HashSet<>(visibleoccupantsP.getValue());
-               newVisibles.addAll(nV.lastTilePotentialOccupants());
-               visibleoccupantsP.set(newVisibles);
-           } else {
-               HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
-               visibleoccupantsP.set(newVisibles);
-           }
+            if (nV.nextAction() == OCCUPY_TILE) {
+//                if (oV.nextAction() == RETAKE_PAWN)
+//                    visibleoccupantsP.set(nV.board().occupants());
+
+                HashSet<Occupant> newVisibles = new HashSet<>(visibleoccupantsP.getValue());
+                newVisibles.addAll(nV.lastTilePotentialOccupants());
+                visibleoccupantsP.set(newVisibles);
+            } else {
+                visibleoccupantsP.set(nV.board().occupants());
+            }
+
+            // TODO occupant is not taken back from board
+            // place tile -> retake -> occupy
+            // place tile -> occupy
         });
 
         Node boardNode = BoardUI
@@ -116,11 +123,17 @@ public class Main extends Application {
                         },
                         occupant -> {
                             var state = gameStateP.getValue();
-                            update(gameStateP,
-                                    actionsP,
-                                    state.nextAction() == GameState.Action.PLACE_TILE ?
-                                            withOccupantRemoved(state, occupant) :
-                                            withNewOccupant(state, occupant));
+
+                            if (state.nextAction() == OCCUPY_TILE)
+                                update(gameStateP, actionsP, withNewOccupant(state, occupant));
+                            else if (state.nextAction() == RETAKE_PAWN)
+                                update(gameStateP, actionsP, withOccupantRemoved(state, occupant));
+                            // TODO better ?
+//                            update(gameStateP,
+//                                    actionsP,
+//                                    state.nextAction() == PLACE_TILE ?
+//                                            withOccupantRemoved(state, occupant) :
+//                                            withNewOccupant(state, occupant));
                         });
 
         BorderPane infoPane = new BorderPane();
@@ -156,15 +169,22 @@ public class Main extends Application {
                         normalCount0,
                         menhirCount0,
                         textP,
-                        o -> update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null)));
+                        o -> { // TODO O vs P observable, property
+                            assert o == null; // TODO ?
+
+                            if (gameStateP.getValue().nextAction() == OCCUPY_TILE)
+                                update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null));
+                            else if (gameStateP.getValue().nextAction() == RETAKE_PAWN)
+                                update(gameStateP, actionsP, withOccupantRemoved(gameStateP.getValue(), null));
+                        });
 
         ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
 
         nextActionO.addListener((_, _, nV) -> {
-            if (nV == GameState.Action.RETAKE_PAWN) {
-                textP.set(textMaker.clickToUnoccupy());
-            } else if (nV == GameState.Action.OCCUPY_TILE)
+            if (nV == OCCUPY_TILE) // TODO vs. switch
                 textP.set(textMaker.clickToOccupy());
+            else if (nV == RETAKE_PAWN)
+                textP.set(textMaker.clickToUnoccupy());
             else
                 textP.set("");
         });

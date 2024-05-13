@@ -68,6 +68,8 @@ public final class BoardUI {
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setId("board-scroll-pane");
         scrollPane.getStylesheets().add("/board.css");
+        scrollPane.setHvalue(0.5);
+        scrollPane.setVvalue(0.5);
 
         GridPane gridPane = new GridPane();
         gridPane.setId("board-grid");
@@ -91,9 +93,11 @@ public final class BoardUI {
                 ObservableValue<PlacedTile> tileO = boardO.map(b -> b.tileAt(pos));
 
                 // only cells containing a tile have occupants and cancellation tokens
-                tileO.addListener((_, _, nV) -> {
-                    group.getChildren().addAll(markers(nV, boardO));
-                    group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
+                tileO.addListener((_, oV, nV) -> {
+                    if (oV == null) { // TODo not assert, but if ?
+                        group.getChildren().addAll(markers(nV, boardO));
+                        group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
+                    }
                 });
 
                 BooleanBinding onFringe = Bindings.createBooleanBinding(
@@ -199,9 +203,11 @@ public final class BoardUI {
             icon.visibleProperty()
                     .bind(visibleOccupantsO.map(s -> s.contains(occupant)));
             icon.setOnMouseClicked(e -> {
-                occupantHandler.accept(occupant);
-                icon.visibleProperty().unbind();
-                e.consume();
+                if (e.isStillSincePress()) {
+                    occupantHandler.accept(occupant);
+                    icon.visibleProperty().unbind(); // TODO should be inside if
+                }
+                //e.consume(); // TODO not needed ?
             });
 
             // It should always appear vertical when tile box is rotated

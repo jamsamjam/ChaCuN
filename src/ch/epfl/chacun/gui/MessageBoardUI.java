@@ -50,8 +50,9 @@ public final class MessageBoardUI {
                 text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);
 
-                // not always enough to make the last message visible for unknown reasons
-                runLater(() -> scrollPane.setVvalue(1));
+                // ensure that the last message is always visible
+                scrollPane.layout();
+                scrollPane.setVvalue(1);
 
                 text.setOnMouseEntered(_ -> tileIdsP.setValue(message.tileIds()));
                 text.setOnMouseExited(_ -> tileIdsP.setValue(Set.of()));
@@ -60,6 +61,6 @@ public final class MessageBoardUI {
 
         scrollPane.setContent(messageBox);
 
-        return scrollPane;
+        return scrollPane; // TODO attribute names ? should be specified?
     }
 }
