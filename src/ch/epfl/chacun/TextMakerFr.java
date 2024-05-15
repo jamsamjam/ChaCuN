@@ -19,7 +19,7 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playerName(PlayerColor playerColor) {
-        return nameColorMap.get(playerColor); // TODO return null check
+        return nameColorMap.get(playerColor);
     }
 
     @Override

@@ -94,7 +94,7 @@ public final class BoardUI {
 
                 // only cells containing a tile have occupants and cancellation tokens
                 tileO.addListener((_, oV, nV) -> {
-                    if (oV == null) { // TODo not assert, but if ?
+                    if (oV == null) {
                         group.getChildren().addAll(markers(nV, boardO));
                         group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
                     }
@@ -115,7 +115,6 @@ public final class BoardUI {
 
                             if (onFringe.getValue()
                                     && currentPlayerO.getValue() != null) {
-
                                 PlacedTile tileToPlace = new PlacedTile(tileToPlaceO.getValue(),
                                         currentPlayerO.getValue(),
                                         rotationO.getValue(),
@@ -144,17 +143,17 @@ public final class BoardUI {
                     if (fringeO.getValue().contains(pos)) {
                         switch (e.getButton()) {
                             case PRIMARY -> {
-                                placeHandler.accept(pos);
+                                if (e.isStillSincePress()) placeHandler.accept(pos);
                                 group.rotateProperty().unbind();
-                                e.consume();
+                                //e.consume(); //TODO
                             }
                             case SECONDARY -> {
                                 Rotation oldRotation = rotationO.getValue();
                                 Rotation newRotation = e.isAltDown()
                                         ? oldRotation.add(Rotation.RIGHT)
                                         : oldRotation.add(Rotation.LEFT);
-                                rotateHandler.accept(newRotation);
-                                e.consume();
+                                if (e.isStillSincePress()) rotateHandler.accept(newRotation);
+                                //e.consume();
                             }
                         }
                     }
@@ -203,11 +202,7 @@ public final class BoardUI {
             icon.visibleProperty()
                     .bind(visibleOccupantsO.map(s -> s.contains(occupant)));
             icon.setOnMouseClicked(e -> {
-                if (e.isStillSincePress()) {
-                    occupantHandler.accept(occupant);
-                    icon.visibleProperty().unbind(); // TODO should be inside if
-                }
-                //e.consume(); // TODO not needed ?
+                if (e.isStillSincePress()) occupantHandler.accept(occupant);
             });
 
             // It should always appear vertical when tile box is rotated

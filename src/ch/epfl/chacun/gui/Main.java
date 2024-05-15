@@ -2,6 +2,7 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -18,6 +19,7 @@ import java.util.stream.IntStream;
 
 import static ch.epfl.chacun.ActionEncoder.*;
 import static ch.epfl.chacun.GameState.Action.*;
+import static ch.epfl.chacun.Occupant.Kind.PAWN;
 import static ch.epfl.chacun.Tile.Kind.*;
 import static java.lang.Long.parseUnsignedLong;
 
@@ -45,7 +47,8 @@ public class Main extends Application {
         String seedStr = parameters.getNamed().get("seed");
 
         // shuffle tiles
-        RandomGeneratorFactory<RandomGenerator> generatorFactory = RandomGeneratorFactory.getDefault();
+        RandomGeneratorFactory<RandomGenerator> generatorFactory =
+                RandomGeneratorFactory.getDefault();
         RandomGenerator generator = generatorFactory.create();
 
         if (seedStr != null) {
@@ -70,7 +73,7 @@ public class Main extends Application {
                         PlayerColor.ALL::get,
                         playersNames::get, (_, b) -> b));
         List<PlayerColor> playerColors = playerColorMap.keySet().stream()
-                .sorted().toList(); // TODO
+                .sorted().toList();
 
         TextMakerFr textMaker = new TextMakerFr(playerColorMap);
 
@@ -79,23 +82,21 @@ public class Main extends Application {
                         tileDecks,
                         textMaker);
 
-        SimpleObjectProperty<GameState> gameStateP = new SimpleObjectProperty<>(gameState);
+        ObjectProperty<GameState> gameStateP = new SimpleObjectProperty<>(gameState);
 
-        SimpleObjectProperty<Rotation> tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
-        SimpleObjectProperty<Set<Occupant>> visibleoccupantsP = new SimpleObjectProperty<>(Set.of());
-        SimpleObjectProperty<Set<Integer>> tileIdsP = new SimpleObjectProperty<>(Set.of());
-        SimpleObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
+        ObjectProperty<Rotation> tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
+        ObjectProperty<Set<Occupant>> visibleoccupantsP = new SimpleObjectProperty<>(Set.of());
+        ObjectProperty<Set<Integer>> tileIdsP = new SimpleObjectProperty<>(Set.of());
+        ObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
 
         gameStateP.addListener((_, _, nV) -> {
-            HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants()); //visibleoccupantsP.getValue()
+            HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
             if (nV.nextAction() == OCCUPY_TILE) newVisibles.addAll(nV.lastTilePotentialOccupants());
             visibleoccupantsP.set(newVisibles);
-
-            // TODO occupant is not taken back from board, 남의 occupant 클릭
-            // place tile -> retake -> occupy
-            // place tile -> occupy
         });
 
+        //                            Board board = gameStateP.getValue().board();
+        //                            if (board.couldPlaceTile(board.lastPlacedTile().tile()))
         Node boardNode = BoardUI
                 .create(Board.REACH,
                         gameStateP,
@@ -104,36 +105,40 @@ public class Main extends Application {
                         tileIdsP,
                         tileToPlaceRotationP::set,
                         pos -> {
-                            var state = gameStateP.getValue();
+                            GameState state = gameStateP.getValue();
+
                             if (state.tileToPlace() != null) {
-                                var tile = new PlacedTile(state.tileToPlace(),
+                                var tile = new PlacedTile(state.tileToPlace(), // TODO
                                         state.currentPlayer(),
                                         tileToPlaceRotationP.getValue(),
                                         pos);
 
-                                update(gameStateP, actionsP, withPlacedTile(state, tile));
+                                if (state.board().canAddTile(tile))
+                                    update(gameStateP, actionsP, withPlacedTile(state, tile));
                             }
                         },
                         occupant -> {
-                            var state = gameStateP.getValue();
+                            GameState state = gameStateP.getValue();
 
-                            if (state.nextAction() == OCCUPY_TILE)
-                                update(gameStateP, actionsP, withNewOccupant(state, occupant));
-                            else if (state.nextAction() == RETAKE_PAWN)
-                                update(gameStateP, actionsP, withOccupantRemoved(state, occupant));
-                            // TODO better ?
-//                            update(gameStateP,
-//                                    actionsP,
-//                                    state.nextAction() == PLACE_TILE ?
-//                                            withOccupantRemoved(state, occupant) :
-//                                            withNewOccupant(state, occupant));
+                            if (state.board().tileWithId(occupant.zoneId() / 10).placer() == state.currentPlayer()) {
+                                switch (state.nextAction()) {
+                                    case OCCUPY_TILE ->
+                                            update(gameStateP, actionsP, withNewOccupant(state, occupant));
+                                    case RETAKE_PAWN -> {
+                                            if (occupant.kind() == PAWN)
+                                                update(gameStateP, actionsP, withOccupantRemoved(state, occupant));
+                                    }
+
+                                }
+                            }
                         });
 
         BorderPane infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
         mainPane.setRight(infoPane);
 
-        ObservableValue<List<MessageBoard.Message>> messagesO = gameStateP.map(gs -> gs.messageBoard().messages());
+        ObservableValue<List<MessageBoard.Message>> messagesO =
+                gameStateP.map(gs -> gs.messageBoard().messages());
 
         Node playersNode = PlayersUI
                 .create(gameStateP,
@@ -155,31 +160,30 @@ public class Main extends Application {
         ObservableValue<TileDecks> tileDecksO = gameStateP.map(GameState::tileDecks);
         ObservableValue<Integer> normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
         ObservableValue<Integer> menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
-        SimpleObjectProperty<String> textP = new SimpleObjectProperty<>("");
+        ObjectProperty<String> textP = new SimpleObjectProperty<>("");
 
         Node decksNode = DecksUI
                 .create(tileO,
                         normalCount0,
                         menhirCount0,
                         textP,
-                        o -> { // TODO O vs P observable, property
-                            assert o == null; // TODO ?
-
-                            if (gameStateP.getValue().nextAction() == OCCUPY_TILE)
-                                update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null)); // TODO null/ o
-                            else if (gameStateP.getValue().nextAction() == RETAKE_PAWN)
-                                update(gameStateP, actionsP, withOccupantRemoved(gameStateP.getValue(), null));
+                        _ -> {
+                            switch (gameStateP.getValue().nextAction()) {
+                                case OCCUPY_TILE ->
+                                        update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null));
+                                case RETAKE_PAWN ->
+                                        update(gameStateP, actionsP, withOccupantRemoved(gameStateP.getValue(), null));
+                            }
                         });
 
         ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
 
         nextActionO.addListener((_, _, nV) -> {
-            if (nV == OCCUPY_TILE) // TODO vs. switch
-                textP.set(textMaker.clickToOccupy());
-            else if (nV == RETAKE_PAWN)
-                textP.set(textMaker.clickToUnoccupy());
-            else
-                textP.set("");
+            switch (nV) {
+                case OCCUPY_TILE -> textP.set(textMaker.clickToOccupy());
+                case RETAKE_PAWN -> textP.set(textMaker.clickToUnoccupy());
+                default -> textP.set("");
+            }
         });
 
         vBox.getChildren().addAll(actionsNode, decksNode);
@@ -193,8 +197,8 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    private static void update(SimpleObjectProperty<GameState> gameStateP,
-                               SimpleObjectProperty<List<String>> actionsP,
+    private static void update(ObjectProperty<GameState> gameStateP,
+                               ObjectProperty<List<String>> actionsP,
                                StateAction newState) {
         if (newState != null) {
             gameStateP.set(newState.gameState());

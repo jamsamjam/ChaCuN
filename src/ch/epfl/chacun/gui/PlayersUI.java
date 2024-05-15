@@ -36,11 +36,11 @@ public final class PlayersUI  {
         vBox.setId("players");
         vBox.getStylesheets().add("/players.css");
 
-        List<PlayerColor> participants = gameStateO.getValue().players(); // TODO should be updated ?
+        List<PlayerColor> playerColors = gameStateO.getValue().players();
         ObservableValue<Map<PlayerColor, Integer>> myPoints =
                 gameStateO.map(gs -> gs.messageBoard().points());
 
-        for (var player : participants) {
+        for (var player : playerColors) {
             TextFlow textFlow = new TextFlow();
             textFlow.getStyleClass().add("player");
 

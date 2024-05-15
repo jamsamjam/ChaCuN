@@ -129,15 +129,14 @@ public class ActionEncoder {
                 // ooooo
                 Occupant occupant = null;
 
-                if (bit != 0b11111) {
+                if (bit != 0b11111) { // TODO should check if at least 1 pawn on the board?
                     List<Occupant> occupants = gameState.board().occupants().stream()
                             .filter(o -> o.kind() == PAWN)
                             .sorted(Comparator.comparingInt(Occupant::zoneId))
                             .toList();
                     occupant = occupants.get(bit);
-
-                    // check if the occupant belongs to the current player
-                    if (gameState.board().tileWithId(occupant.zoneId()).placer()
+                    
+                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
                             != gameState.currentPlayer())
                         throw new DecodingException();
                 }
@@ -153,15 +152,14 @@ public class ActionEncoder {
                     int kind = bit >>> 4;
                     int id = bit & 0b01111;
 
-                    occupant = new Occupant(Occupant.Kind.values()[kind], gameState.board().lastPlacedTile().id() * 10 + id);
-
-                    // check if the occupant belongs to the current player
+                    occupant = new Occupant(Occupant.Kind.values()[kind],
+                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO
+                    
                     if (gameState.board().lastPlacedTile().placer() != gameState.currentPlayer())
                         throw new DecodingException();
 
-                    // TODO check if the occupant is being placed in the right zone
-//                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
-//                        throw new DecodingException();
+                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
+                        throw new DecodingException();
                 }
 
                 return new StateAction(gameState.withNewOccupant(occupant), string);

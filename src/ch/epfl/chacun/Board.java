@@ -368,7 +368,7 @@ public final class Board {
             return new Board(myPlacedTiles, tileIndexes, builder.build(), cancelledAnimals);
         }
 
-        throw new IllegalArgumentException(); // TODO thrown when try to retake other players' pawn ?
+        throw new IllegalArgumentException();
     }
 
     /**

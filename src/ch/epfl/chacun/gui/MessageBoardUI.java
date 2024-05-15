@@ -61,6 +61,6 @@ public final class MessageBoardUI {
 
         scrollPane.setContent(messageBox);
 
-        return scrollPane; // TODO attribute names ? should be specified?
+        return scrollPane;
     }
 }
