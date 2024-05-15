@@ -85,8 +85,6 @@ public class Main extends Application {
 
         ObjectProperty<GameState> gameStateP =
                 new SimpleObjectProperty<>(gameState);
-        ObjectProperty<Rotation> tileToPlaceRotationP =
-                new SimpleObjectProperty<>(Rotation.NONE);
         ObjectProperty<Set<Occupant>> visibleoccupantsP =
                 new SimpleObjectProperty<>(Set.of());
         ObjectProperty<Set<Integer>> tileIdsP =
@@ -102,7 +100,11 @@ public class Main extends Application {
         });
 
         Node boardNode =
-                getBoard(gameStateP, tileToPlaceRotationP, visibleoccupantsP, tileIdsP, actionsP);
+                getBoard(gameStateP,
+                        new SimpleObjectProperty<>(Rotation.NONE),
+                        visibleoccupantsP,
+                        tileIdsP,
+                        actionsP);
 
         BorderPane infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
@@ -129,19 +131,18 @@ public class Main extends Application {
                                 actionsP,
                                 decodeAndApply(gameStateP.getValue(), t)));
 
-        ObservableValue<Tile> tileO =
-                gameStateP.map(GameState::tileToPlace);
         ObservableValue<TileDecks> tileDecksO =
                 gameStateP.map(GameState::tileDecks);
-        ObservableValue<Integer> normalCount0 =
-                tileDecksO.map(d -> d.deckSize(NORMAL));
-        ObservableValue<Integer> menhirCount0 =
-                tileDecksO.map(d -> d.deckSize(MENHIR));
         ObjectProperty<String> textP =
                 new SimpleObjectProperty<>("");
 
         Node decksNode =
-                getDecks(tileO, normalCount0, menhirCount0, textP, gameStateP, actionsP);
+                getDecks(gameStateP.map(GameState::tileToPlace),
+                        tileDecksO.map(d -> d.deckSize(NORMAL)),
+                        tileDecksO.map(d -> d.deckSize(MENHIR)),
+                        textP,
+                        gameStateP,
+                        actionsP);
 
         ObservableValue<GameState.Action> nextActionO =
                 gameStateP.map(GameState::nextAction);
@@ -204,7 +205,7 @@ public class Main extends Application {
                             GameState state = gameStateP.getValue();
 
                             if (state.tileToPlace() != null) {
-                                var tile = new PlacedTile(state.tileToPlace(), // TODO
+                                PlacedTile tile = new PlacedTile(state.tileToPlace(), // TODO
                                         state.currentPlayer(),
                                         tileToPlaceRotationP.getValue(),
                                         pos);
@@ -243,7 +244,7 @@ public class Main extends Application {
         if (newState != null) {
             gameStateP.set(newState.gameState());
 
-            var newActions = new ArrayList<>(actionsP.get());
+            List<String> newActions = new ArrayList<>(actionsP.get());
             newActions.add(newState.string());
             actionsP.set(newActions);
         }

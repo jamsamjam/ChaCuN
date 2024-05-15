@@ -10,7 +10,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker {
+public final class TextMakerFr implements TextMaker { // TODO check again
     Map<PlayerColor, String> nameColorMap;
 
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
@@ -42,7 +42,7 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
-        String fish = fishCount == 0 ? "." : STR." et contenant \{fishCount} poissons";
+        String fish = fishCount == 0 ? "" : STR." et contenant \{fishCount} poissons";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}.";
     }
 
@@ -63,7 +63,8 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fishCount} poissons.";
+        String fish = fishCount == 0 ? "1 poisson" : STR."\{fishCount} poissons";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
     }
 
     @Override

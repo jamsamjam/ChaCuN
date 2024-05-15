@@ -144,8 +144,8 @@ public final class BoardUI {
                         switch (e.getButton()) {
                             case PRIMARY -> {
                                 if (e.isStillSincePress()) placeHandler.accept(pos);
-                                group.rotateProperty().unbind();
-                                //e.consume(); //TODO
+                                if (!fringeO.getValue().contains(pos)) // TODO, consume() not needed
+                                    group.rotateProperty().unbind();
                             }
                             case SECONDARY -> {
                                 Rotation oldRotation = rotationO.getValue();
@@ -153,7 +153,6 @@ public final class BoardUI {
                                         ? oldRotation.add(Rotation.RIGHT)
                                         : oldRotation.add(Rotation.LEFT);
                                 if (e.isStillSincePress()) rotateHandler.accept(newRotation);
-                                //e.consume();
                             }
                         }
                     }

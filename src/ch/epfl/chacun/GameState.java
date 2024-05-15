@@ -269,11 +269,11 @@ public record GameState(List<PlayerColor> players,
             myMessageBoard = myMessageBoard.withScoredForest(forest);
 
             if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) {
-                myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest); // TODO called when 0 menhir tile
                 myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
                 if (myTileDecks.topTile(MENHIR) != null) {
                     myBoard = myBoard.withoutGatherersOrFishersIn(myBoard.forestsClosedByLastTile(), myBoard.riversClosedByLastTile());
+                    myMessageBoard = myMessageBoard.withClosedForestWithMenhir(currentPlayer(), forest);
 
                     return new GameState(myPlayers,
                             myTileDecks.withTopTileDrawn(MENHIR),
