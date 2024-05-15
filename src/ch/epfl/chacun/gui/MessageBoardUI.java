@@ -41,13 +41,13 @@ public final class MessageBoardUI {
         VBox messageBox = new VBox();
 
         messagesO.addListener((_, oV, nV) -> {
-            //assert oV.size() != nV.size();
+            //assert oV.size() != nV.size(); // TODO
 
             for (int i = oV.size(); i < nV.size(); i++) {
                 Message message = nV.get(i);
 
                 Text text = new Text(message.text());
-                text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
+                text.setWrappingWidth(LARGE_TILE_FIT_SIZE); // TODO
                 messageBox.getChildren().add(text);
 
                 // ensure that the last message is always visible

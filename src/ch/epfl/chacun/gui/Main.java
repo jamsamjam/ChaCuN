@@ -218,9 +218,11 @@ public class Main extends Application {
                         },
                         occupant -> {
                             GameState state = gameStateP.getValue();
+                            PlacedTile tile = state.board().tileWithId(occupant.zoneId() / 10);
 
-                            if (state.board()
-                                    .tileWithId(occupant.zoneId() / 10).placer() == state.currentPlayer()) {
+                            if (tile.potentialOccupants().contains(occupant)
+                                    && tile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
+                                //placer() == state.currentPlayer() // TODO
                                 switch (state.nextAction()) {
                                     case OCCUPY_TILE ->
                                             update(gameStateP,

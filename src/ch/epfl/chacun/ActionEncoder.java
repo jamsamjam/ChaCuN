@@ -122,6 +122,9 @@ public class ActionEncoder {
                         Rotation.ALL.get(rotation),
                         positions.get(index));
 
+                if (!gameState.board().canAddTile(tile))
+                    throw new DecodingException();
+
                 return new StateAction(gameState.withPlacedTile(tile), string);
             }
 
@@ -129,15 +132,21 @@ public class ActionEncoder {
                 // ooooo
                 Occupant occupant = null;
 
-                if (bit != 0b11111) { // TODO should check if at least 1 pawn on the board?
+                if (bit != 0b11111) { // TODO should check if at least 1 pawn on the board?, 둘중에 뭐가 더나은지 아래에서
                     List<Occupant> occupants = gameState.board().occupants().stream()
                             .filter(o -> o.kind() == PAWN)
                             .sorted(Comparator.comparingInt(Occupant::zoneId))
                             .toList();
                     occupant = occupants.get(bit);
                     
-                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
-                            != gameState.currentPlayer())
+//                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
+//                            != gameState.currentPlayer())
+//                        throw new DecodingException();
+
+                    PlacedTile tile = gameState.board().tileWithId(occupant.zoneId() / 10);
+
+                    if (!tile.potentialOccupants().contains(occupant)
+                            && tile.idOfZoneOccupiedBy(occupant.kind()) != -1)
                         throw new DecodingException();
                 }
 

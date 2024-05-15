@@ -144,7 +144,7 @@ public final class BoardUI {
                         switch (e.getButton()) {
                             case PRIMARY -> {
                                 if (e.isStillSincePress()) placeHandler.accept(pos);
-                                if (!fringeO.getValue().contains(pos)) // TODO, consume() not needed
+                                if (!fringeO.getValue().contains(pos)) // TODO, consume() not needed, tile ㄱㅓ꾸로 나타남
                                     group.rotateProperty().unbind();
                             }
                             case SECONDARY -> {
