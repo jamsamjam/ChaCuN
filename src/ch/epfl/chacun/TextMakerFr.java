@@ -29,9 +29,8 @@ public final class TextMakerFr implements TextMaker {
     }
 
     @Override
-    public String playerClosedForestWithMenhir(PlayerColor player) {
-        String name = playerName(player);
-        return STR."\{name} a fermé une forêt contenant un menhir et peut donc placer une tuile menhir.";
+    public String playerClosedForestWithMenhir(PlayerColor scorer) {
+        return STR."\{playerName(scorer)} a fermé une forêt contenant un menhir et peut donc placer une tuile menhir.";
     }
 
 
@@ -49,12 +48,12 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playerScoredHuntingTrap(PlayerColor scorer, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{scorer} a remporté \{points} points en plaçant la fosse à pieux dans un pré dans lequel elle est entourée de \{animal(animals)}.";
+        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la fosse à pieux dans un pré dans lequel elle est entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
-        return STR."\{scorer} a remporté \{points} points en plaçant la pirogue dans un réseau hydrographique contenant \{lakeCount} lacs.";
+        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la pirogue dans un réseau hydrographique contenant \{lakeCount} lacs.";
     }
 
     @Override

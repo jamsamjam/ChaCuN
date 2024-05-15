@@ -68,10 +68,11 @@ public class Main extends Application {
                         tilesByKind.get(NORMAL),
                         tilesByKind.get(MENHIR));
 
-        Map<PlayerColor, String> playerColorMap = IntStream.range(0, playersNames.size()).boxed()
-                .collect(Collectors.toMap(
-                        PlayerColor.ALL::get,
-                        playersNames::get, (_, b) -> b));
+        Map<PlayerColor, String> playerColorMap =
+                IntStream.range(0, playersNames.size()).boxed()
+                        .collect(Collectors.toMap(
+                                PlayerColor.ALL::get,
+                                playersNames::get, (_, b) -> b)); // TODO
         List<PlayerColor> playerColors = playerColorMap.keySet().stream()
                 .sorted().toList();
 
@@ -82,56 +83,26 @@ public class Main extends Application {
                         tileDecks,
                         textMaker);
 
-        ObjectProperty<GameState> gameStateP = new SimpleObjectProperty<>(gameState);
-
-        ObjectProperty<Rotation> tileToPlaceRotationP = new SimpleObjectProperty<>(Rotation.NONE);
-        ObjectProperty<Set<Occupant>> visibleoccupantsP = new SimpleObjectProperty<>(Set.of());
-        ObjectProperty<Set<Integer>> tileIdsP = new SimpleObjectProperty<>(Set.of());
-        ObjectProperty<List<String>> actionsP = new SimpleObjectProperty<>(List.of());
+        ObjectProperty<GameState> gameStateP =
+                new SimpleObjectProperty<>(gameState);
+        ObjectProperty<Rotation> tileToPlaceRotationP =
+                new SimpleObjectProperty<>(Rotation.NONE);
+        ObjectProperty<Set<Occupant>> visibleoccupantsP =
+                new SimpleObjectProperty<>(Set.of());
+        ObjectProperty<Set<Integer>> tileIdsP =
+                new SimpleObjectProperty<>(Set.of());
+        ObjectProperty<List<String>> actionsP =
+                new SimpleObjectProperty<>(List.of());
 
         gameStateP.addListener((_, _, nV) -> {
             HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
-            if (nV.nextAction() == OCCUPY_TILE) newVisibles.addAll(nV.lastTilePotentialOccupants());
+            if (nV.nextAction() == OCCUPY_TILE)
+                newVisibles.addAll(nV.lastTilePotentialOccupants());
             visibleoccupantsP.set(newVisibles);
         });
 
-        //                            Board board = gameStateP.getValue().board();
-        //                            if (board.couldPlaceTile(board.lastPlacedTile().tile()))
-        Node boardNode = BoardUI
-                .create(Board.REACH,
-                        gameStateP,
-                        tileToPlaceRotationP,
-                        visibleoccupantsP,
-                        tileIdsP,
-                        tileToPlaceRotationP::set,
-                        pos -> {
-                            GameState state = gameStateP.getValue();
-
-                            if (state.tileToPlace() != null) {
-                                var tile = new PlacedTile(state.tileToPlace(), // TODO
-                                        state.currentPlayer(),
-                                        tileToPlaceRotationP.getValue(),
-                                        pos);
-
-                                if (state.board().canAddTile(tile))
-                                    update(gameStateP, actionsP, withPlacedTile(state, tile));
-                            }
-                        },
-                        occupant -> {
-                            GameState state = gameStateP.getValue();
-
-                            if (state.board().tileWithId(occupant.zoneId() / 10).placer() == state.currentPlayer()) {
-                                switch (state.nextAction()) {
-                                    case OCCUPY_TILE ->
-                                            update(gameStateP, actionsP, withNewOccupant(state, occupant));
-                                    case RETAKE_PAWN -> {
-                                            if (occupant.kind() == PAWN)
-                                                update(gameStateP, actionsP, withOccupantRemoved(state, occupant));
-                                    }
-
-                                }
-                            }
-                        });
+        Node boardNode =
+                getBoard(gameStateP, tileToPlaceRotationP, visibleoccupantsP, tileIdsP, actionsP);
 
         BorderPane infoPane = new BorderPane();
         mainPane.setCenter(boardNode);
@@ -154,31 +125,28 @@ public class Main extends Application {
 
         Node actionsNode = ActionsUI
                 .create(actionsP,
-                        t -> update(gameStateP, actionsP, decodeAndApply(gameStateP.getValue(), t)));
+                        t -> update(gameStateP,
+                                actionsP,
+                                decodeAndApply(gameStateP.getValue(), t)));
 
-        ObservableValue<Tile> tileO = gameStateP.map(GameState::tileToPlace);
-        ObservableValue<TileDecks> tileDecksO = gameStateP.map(GameState::tileDecks);
-        ObservableValue<Integer> normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
-        ObservableValue<Integer> menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
-        ObjectProperty<String> textP = new SimpleObjectProperty<>("");
+        ObservableValue<Tile> tileO =
+                gameStateP.map(GameState::tileToPlace);
+        ObservableValue<TileDecks> tileDecksO =
+                gameStateP.map(GameState::tileDecks);
+        ObservableValue<Integer> normalCount0 =
+                tileDecksO.map(d -> d.deckSize(NORMAL));
+        ObservableValue<Integer> menhirCount0 =
+                tileDecksO.map(d -> d.deckSize(MENHIR));
+        ObjectProperty<String> textP =
+                new SimpleObjectProperty<>("");
 
-        Node decksNode = DecksUI
-                .create(tileO,
-                        normalCount0,
-                        menhirCount0,
-                        textP,
-                        _ -> {
-                            switch (gameStateP.getValue().nextAction()) {
-                                case OCCUPY_TILE ->
-                                        update(gameStateP, actionsP, withNewOccupant(gameStateP.getValue(), null));
-                                case RETAKE_PAWN ->
-                                        update(gameStateP, actionsP, withOccupantRemoved(gameStateP.getValue(), null));
-                            }
-                        });
+        Node decksNode =
+                getDecks(tileO, normalCount0, menhirCount0, textP, gameStateP, actionsP);
 
-        ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
+        ObservableValue<GameState.Action> nextActionO =
+                gameStateP.map(GameState::nextAction);
 
-        nextActionO.addListener((_, _, nV) -> {
+        nextActionO.addListener((_, _, nV) -> { // TODO should be integrated to gameState.listener?
             switch (nV) {
                 case OCCUPY_TILE -> textP.set(textMaker.clickToOccupy());
                 case RETAKE_PAWN -> textP.set(textMaker.clickToUnoccupy());
@@ -190,11 +158,83 @@ public class Main extends Application {
 
         gameStateP.set(gameStateP.getValue().withStartingTilePlaced());
 
-        primaryStage.setScene(new Scene(mainPane));
-        primaryStage.setWidth(1440);
-        primaryStage.setHeight(1080);
+        primaryStage.setScene(new Scene(mainPane, 1440, 1080));
         primaryStage.setTitle("ChaCuN");
         primaryStage.show();
+    }
+
+    private static Node getDecks(ObservableValue<Tile> tileO,
+                                 ObservableValue<Integer> normalCount0,
+                                 ObservableValue<Integer> menhirCount0,
+                                 ObjectProperty<String> textP,
+                                 ObjectProperty<GameState> gameStateP,
+                                 ObjectProperty<List<String>> actionsP) {
+        return DecksUI
+                .create(tileO,
+                        normalCount0,
+                        menhirCount0,
+                        textP,
+                        _ -> {
+                            switch (gameStateP.getValue().nextAction()) {
+                                case OCCUPY_TILE ->
+                                        update(gameStateP,
+                                                actionsP,
+                                                withNewOccupant(gameStateP.getValue(), null));
+                                case RETAKE_PAWN ->
+                                        update(gameStateP,
+                                                actionsP,
+                                                withOccupantRemoved(gameStateP.getValue(), null));
+                            }
+                        });
+    }
+
+    private static Node getBoard(ObjectProperty<GameState> gameStateP,
+                                 ObjectProperty<Rotation> tileToPlaceRotationP,
+                                 ObjectProperty<Set<Occupant>> visibleoccupantsP,
+                                 ObjectProperty<Set<Integer>> tileIdsP,
+                                 ObjectProperty<List<String>> actionsP) {
+        return BoardUI
+                .create(Board.REACH,
+                        gameStateP,
+                        tileToPlaceRotationP,
+                        visibleoccupantsP,
+                        tileIdsP,
+                        tileToPlaceRotationP::set,
+                        pos -> {
+                            GameState state = gameStateP.getValue();
+
+                            if (state.tileToPlace() != null) {
+                                var tile = new PlacedTile(state.tileToPlace(), // TODO
+                                        state.currentPlayer(),
+                                        tileToPlaceRotationP.getValue(),
+                                        pos);
+
+                                if (state.board().canAddTile(tile))
+                                    update(gameStateP,
+                                            actionsP,
+                                            withPlacedTile(state, tile));
+                            }
+                        },
+                        occupant -> {
+                            GameState state = gameStateP.getValue();
+
+                            if (state.board()
+                                    .tileWithId(occupant.zoneId() / 10).placer() == state.currentPlayer()) {
+                                switch (state.nextAction()) {
+                                    case OCCUPY_TILE ->
+                                            update(gameStateP,
+                                                    actionsP,
+                                                    withNewOccupant(state, occupant));
+                                    case RETAKE_PAWN -> {
+                                            if (occupant.kind() == PAWN)
+                                                update(gameStateP,
+                                                        actionsP,
+                                                        withOccupantRemoved(state, occupant));
+                                    }
+
+                                }
+                            }
+                        });
     }
 
     private static void update(ObjectProperty<GameState> gameStateP,
