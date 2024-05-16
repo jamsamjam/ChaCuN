@@ -220,21 +220,19 @@ public class Main extends Application {
                             GameState state = gameStateP.getValue();
                             PlacedTile tile = state.board().tileWithId(occupant.zoneId() / 10);
 
-                            if (tile.potentialOccupants().contains(occupant)
-                                    && tile.idOfZoneOccupiedBy(occupant.kind()) == -1) {
-                                //placer() == state.currentPlayer() // TODO
-                                switch (state.nextAction()) {
-                                    case OCCUPY_TILE ->
-                                            update(gameStateP,
-                                                    actionsP,
-                                                    withNewOccupant(state, occupant));
-                                    case RETAKE_PAWN -> {
-                                            if (occupant.kind() == PAWN)
-                                                update(gameStateP,
-                                                        actionsP,
-                                                        withOccupantRemoved(state, occupant));
-                                    }
-
+                            switch (state.nextAction()) {
+                                case OCCUPY_TILE -> {
+                                    if (state.lastTilePotentialOccupants().contains(occupant))
+                                        update(gameStateP,
+                                                actionsP,
+                                                withNewOccupant(state, occupant));
+                                }
+                                case RETAKE_PAWN -> {
+                                    if (occupant.kind() == PAWN
+                                            && tile.placer() == state.currentPlayer())
+                                        update(gameStateP,
+                                                actionsP,
+                                                withOccupantRemoved(state, occupant));
                                 }
                             }
                         });

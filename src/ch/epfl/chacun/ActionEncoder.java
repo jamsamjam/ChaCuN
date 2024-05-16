@@ -132,21 +132,19 @@ public class ActionEncoder {
                 // ooooo
                 Occupant occupant = null;
 
-                if (bit != 0b11111) { // TODO should check if at least 1 pawn on the board?, 둘중에 뭐가 더나은지 아래에서
+                if (bit != 0b11111) {
                     List<Occupant> occupants = gameState.board().occupants().stream()
                             .filter(o -> o.kind() == PAWN)
                             .sorted(Comparator.comparingInt(Occupant::zoneId))
                             .toList();
+
+                    if (bit >= occupants.size())
+                        throw new DecodingException();
+
                     occupant = occupants.get(bit);
-                    
-//                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
-//                            != gameState.currentPlayer())
-//                        throw new DecodingException();
 
-                    PlacedTile tile = gameState.board().tileWithId(occupant.zoneId() / 10);
-
-                    if (!tile.potentialOccupants().contains(occupant)
-                            && tile.idOfZoneOccupiedBy(occupant.kind()) != -1)
+                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
+                            != gameState.currentPlayer())
                         throw new DecodingException();
                 }
 
@@ -162,10 +160,10 @@ public class ActionEncoder {
                     int id = bit & 0b01111;
 
                     occupant = new Occupant(Occupant.Kind.values()[kind],
-                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO
+                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO 다른 method 있는지, 둘중에 뭐가 나은지
                     
-                    if (gameState.board().lastPlacedTile().placer() != gameState.currentPlayer())
-                        throw new DecodingException();
+//                    if (gameState.board().lastPlacedTile().placer() != gameState.currentPlayer())
+//                        throw new DecodingException();
 
                     if (!gameState.lastTilePotentialOccupants().contains(occupant))
                         throw new DecodingException();
