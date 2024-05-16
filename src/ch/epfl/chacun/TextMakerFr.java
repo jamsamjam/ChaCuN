@@ -10,11 +10,11 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker { // TODO check again
-    Map<PlayerColor, String> nameColorMap;
+public final class TextMakerFr implements TextMaker { // TODO check again, private final, string length
+    private final Map<PlayerColor, String> nameColorMap;
 
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
-        this.nameColorMap = Map.copyOf(nameColorMap);
+        this.nameColorMap = Map.copyOf(nameColorMap); // TODO immut ?
     }
 
     @Override
@@ -141,17 +141,16 @@ public final class TextMakerFr implements TextMaker { // TODO check again
             if (counts.get(i) != 0) index.add(i);
         }
 
-        StringBuilder sb = getStringBuilder(index, counts, kinds);
-
-        return sb.toString();
+        return getAnimalString(index, counts, kinds);
     }
 
-    private StringBuilder getStringBuilder(List<Integer> index, List<Integer> counts, List<String> kinds) {
+    private String getAnimalString(List<Integer> index, List<Integer> counts, List<String> kinds) {
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < index.size(); i++) {
             sb.append(STR."\{counts.get(index.get(i))} \{kinds.get(index.get(i))}");
-            if ((counts.get(index.get(i)) > 1) && !kinds.get(index.get(i)).equals("aurochs")) sb.append("s");
+            if ((counts.get(index.get(i)) > 1) && !kinds.get(index.get(i)).equals("aurochs"))
+                sb.append("s");
 
             if (index.size() == 2 && i == 0)
                 sb.append(" et ");
@@ -160,6 +159,7 @@ public final class TextMakerFr implements TextMaker { // TODO check again
             else if (i == index.size() - 2)
                 sb.append(" et ");
         }
-        return sb;
+
+        return sb.toString();
     }
 }

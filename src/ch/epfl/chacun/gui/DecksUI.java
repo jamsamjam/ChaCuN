@@ -71,22 +71,23 @@ public final class DecksUI {
 
     private static HBox getTileDecks(ObservableValue<Integer> normalTileCountO,
                                      ObservableValue<Integer> menhirTileCountO) {
-        ImageView normalTileImage = new ImageView("/256/NORMAL.jpg");
-        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
-        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
-        Text text1 = new Text();
-        text1.textProperty().bind(normalTileCountO.map(Objects::toString));
-        StackPane normalStack = new StackPane(normalTileImage, text1);
-
-        ImageView menhirTileImage = new ImageView("/256/MENHIR.jpg");
-        menhirTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
-        menhirTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
-        Text text2 = new Text();
-        text2.textProperty().bind(menhirTileCountO.map(Objects::toString));
-        StackPane menhirStack = new StackPane(menhirTileImage, text2);
+        StackPane normalStack = getTilePane("/256/NORMAL.jpg", normalTileCountO);
+        StackPane menhirStack = getTilePane("/256/MENHIR.jpg", menhirTileCountO);
 
         HBox hBox = new HBox(normalStack, menhirStack);
         hBox.setId("decks");
+
         return hBox;
+    }
+
+    private static StackPane getTilePane(String url, ObservableValue<Integer> normalTileCountO) {
+        ImageView normalTileImage = new ImageView(url);
+        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
+        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
+
+        Text count = new Text();
+        count.textProperty().bind(normalTileCountO.map(Objects::toString));
+
+        return new StackPane(normalTileImage, count);
     }
 }

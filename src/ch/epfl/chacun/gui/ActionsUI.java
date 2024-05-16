@@ -10,6 +10,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 /**
@@ -37,13 +38,12 @@ public class ActionsUI {
         Text text = new Text();
         text.textProperty().bind(Bindings.createStringBinding(() -> {
             int size = actionsO.getValue().size();
-            StringBuilder sb = new StringBuilder();
+            StringJoiner sj = new StringJoiner(", ");
 
-            for (int i = Math.max(0, size - 4); i < size; i++) {
-                sb.append(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
-                if (i != size - 1) sb.append(", ");
-            }
-            return sb.toString();
+            for (int i = Math.max(0, size - 4); i < size; i++)
+                sj.add(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
+
+            return sj.toString();
         }, actionsO));
 
         TextField textField = getTextField(eventHandler);
@@ -57,7 +57,7 @@ public class ActionsUI {
         textField.setId("actions-field");
         textField.setPrefWidth(60);
 
-        textField.setTextFormatter(new TextFormatter<>(change -> {
+        textField.setTextFormatter(new TextFormatter<>(change -> { // TODO
             StringBuilder filteredText = new StringBuilder();
             change.getText().chars()
                     .forEach(u -> {
