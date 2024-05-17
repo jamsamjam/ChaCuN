@@ -159,10 +159,12 @@ public class ActionEncoder {
                     int kind = bit >>> 4;
                     int id = bit & 0b01111;
 
-                    occupant = new Occupant(Occupant.Kind.values()[kind],
-                                    gameState.board().lastPlacedTile().id() * 10 + id); //TODO
+                    for (Occupant o : gameState.lastTilePotentialOccupants()) {
+                        if (o.kind().ordinal() == kind && Zone.localId(o.zoneId()) == id)
+                            occupant = o;
+                    }
 
-                    if (!gameState.lastTilePotentialOccupants().contains(occupant))
+                    if (occupant == null)
                         throw new DecodingException();
                 }
 
