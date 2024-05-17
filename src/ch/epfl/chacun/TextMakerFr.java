@@ -38,7 +38,7 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
         String mushroom = mushroomGroupCount == 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR."en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}.";
+                + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}.";
     }
 
     @Override
@@ -51,38 +51,38 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
     @Override
     public String playerScoredHuntingTrap(PlayerColor scorer, int points, Map<Animal.Kind, Integer> animals) {
         return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la fosse à pieux"
-                + STR."dans un pré dans lequel elle est entourée de \{animal(animals)}.";
+                + STR." dans un pré dans lequel elle est entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
         return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la pirogue"
-                + STR."dans un réseau hydrographique contenant \{lakeCount} lacs.";
+                + STR." dans un réseau hydrographique contenant \{lakeCount} lacs.";
     }
 
     @Override
     public String playersScoredMeadow(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR."en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
         String fish = fishCount == 0 ? "1 poisson" : STR."\{fishCount} poissons";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR."en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
     }
 
     @Override
     public String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR."en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR."en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
+                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
     }
 
     @Override

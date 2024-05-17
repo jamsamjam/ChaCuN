@@ -160,7 +160,7 @@ public class ActionEncoder {
                     int id = bit & 0b01111;
 
                     occupant = new Occupant(Occupant.Kind.values()[kind],
-                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO
+                                    gameState.board().lastPlacedTile().id() * 10 + id); //TODO
 
                     if (!gameState.lastTilePotentialOccupants().contains(occupant))
                         throw new DecodingException();

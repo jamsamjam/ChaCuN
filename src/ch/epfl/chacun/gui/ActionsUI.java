@@ -62,7 +62,7 @@ public class ActionsUI {
             StringBuilder filteredText = new StringBuilder();
             change.getText().chars()
                     .forEach(c -> {
-                        String u = (String.valueOf((char) c)).toUpperCase(); // TODO
+                        String u = (String.valueOf((char) c)).toUpperCase();
                         if (isValid(u)) filteredText.append(u);
                     });
             change.setText(filteredText.toString());

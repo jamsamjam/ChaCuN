@@ -5,6 +5,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
@@ -41,6 +43,7 @@ public final class MessageBoardUI {
             for (int i = oV.size(); i < nV.size(); i++) {
                 Message message = nV.get(i);
 
+
                 Text text = new Text(message.text());
                 text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);
@@ -51,6 +54,14 @@ public final class MessageBoardUI {
 
                 text.setOnMouseEntered(_ -> tileIdsP.setValue(message.tileIds()));
                 text.setOnMouseExited(_ -> tileIdsP.setValue(Set.of()));
+
+                // Todo to be removed !
+//                text.setOnMouseClicked(event -> {
+//                    final Clipboard clipboard = Clipboard.getSystemClipboard();
+//                    final ClipboardContent content = new ClipboardContent();
+//                    content.putString(message.text());
+//                    clipboard.setContent(content);
+//                });
             }
         });
 
