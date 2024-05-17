@@ -10,11 +10,11 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker { // TODO check again, private final, string length
+public final class TextMakerFr implements TextMaker { // TODO check again - when action changes copy it to clipboard (readonly)
     private final Map<PlayerColor, String> nameColorMap;
 
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
-        this.nameColorMap = Map.copyOf(nameColorMap); // TODO immut ?
+        this.nameColorMap = Map.copyOf(nameColorMap);
     }
 
     @Override
@@ -37,44 +37,52 @@ public final class TextMakerFr implements TextMaker { // TODO check again, priva
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
         String mushroom = mushroomGroupCount == 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR."en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}.";
     }
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
         String fish = fishCount == 0 ? "" : STR." et contenant \{fishCount} poissons";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR." en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}.";
     }
 
     @Override
     public String playerScoredHuntingTrap(PlayerColor scorer, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la fosse à pieux dans un pré dans lequel elle est entourée de \{animal(animals)}.";
+        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la fosse à pieux"
+                + STR."dans un pré dans lequel elle est entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
-        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la pirogue dans un réseau hydrographique contenant \{lakeCount} lacs.";
+        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la pirogue"
+                + STR."dans un réseau hydrographique contenant \{lakeCount} lacs.";
     }
 
     @Override
     public String playersScoredMeadow(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR."en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
         String fish = fishCount == 0 ? "1 poisson" : STR."\{fishCount} poissons";
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR."en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
     }
 
     @Override
     public String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR."en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)} en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
+        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+                + STR."en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
     }
 
     @Override

@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.random.RandomGenerator;
 import java.util.random.RandomGeneratorFactory;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class Main extends Application {
                 IntStream.range(0, playersNames.size()).boxed()
                         .collect(Collectors.toMap(
                                 PlayerColor.ALL::get,
-                                playersNames::get, (_, b) -> b)); // TODO
+                                playersNames::get));
         List<PlayerColor> playerColors = playerColorMap.keySet().stream()
                 .sorted().toList();
 
@@ -93,15 +94,17 @@ public class Main extends Application {
                 new SimpleObjectProperty<>(List.of());
 
         gameStateP.addListener((_, _, nV) -> {
-            HashSet<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
+            Set<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
             if (nV.nextAction() == OCCUPY_TILE)
                 newVisibles.addAll(nV.lastTilePotentialOccupants());
             visibleoccupantsP.set(newVisibles);
         });
 
+        ObjectProperty<Rotation> rotationHandler = new SimpleObjectProperty<>(Rotation.NONE);
+
         Node boardNode =
                 getBoard(gameStateP,
-                        new SimpleObjectProperty<>(Rotation.NONE),
+                        rotationHandler,
                         visibleoccupantsP,
                         tileIdsP,
                         actionsP);
@@ -147,17 +150,17 @@ public class Main extends Application {
         ObservableValue<GameState.Action> nextActionO =
                 gameStateP.map(GameState::nextAction);
 
-        nextActionO.addListener((_, _, nV) -> { // TODO should be integrated to gameState.listener?
+        nextActionO.addListener((_, _, nV) -> {
             switch (nV) {
-                case OCCUPY_TILE -> textP.set(textMaker.clickToOccupy());
-                case RETAKE_PAWN -> textP.set(textMaker.clickToUnoccupy());
-                default -> textP.set("");
+                case OCCUPY_TILE -> textP.setValue(textMaker.clickToOccupy());
+                case RETAKE_PAWN -> textP.setValue(textMaker.clickToUnoccupy());
+                default -> textP.setValue("");
             }
         });
 
         vBox.getChildren().addAll(actionsNode, decksNode);
 
-        gameStateP.set(gameStateP.getValue().withStartingTilePlaced());
+        gameStateP.setValue(gameStateP.getValue().withStartingTilePlaced());
 
         primaryStage.setScene(new Scene(mainPane, 1440, 1080));
         primaryStage.setTitle("ChaCuN");
@@ -170,23 +173,25 @@ public class Main extends Application {
                                  ObjectProperty<String> textP,
                                  ObjectProperty<GameState> gameStateP,
                                  ObjectProperty<List<String>> actionsP) {
+        Consumer<Occupant> occupantHandler = _ -> {
+            switch (gameStateP.getValue().nextAction()) {
+                case OCCUPY_TILE ->
+                        update(gameStateP,
+                                actionsP,
+                                withNewOccupant(gameStateP.getValue(), null));
+                case RETAKE_PAWN ->
+                        update(gameStateP,
+                                actionsP,
+                                withOccupantRemoved(gameStateP.getValue(), null));
+            }
+        };
+
         return DecksUI
                 .create(tileO,
                         normalCount0,
                         menhirCount0,
                         textP,
-                        _ -> {
-                            switch (gameStateP.getValue().nextAction()) {
-                                case OCCUPY_TILE ->
-                                        update(gameStateP,
-                                                actionsP,
-                                                withNewOccupant(gameStateP.getValue(), null));
-                                case RETAKE_PAWN ->
-                                        update(gameStateP,
-                                                actionsP,
-                                                withOccupantRemoved(gameStateP.getValue(), null));
-                            }
-                        });
+                        occupantHandler);
     }
 
     private static Node getBoard(ObjectProperty<GameState> gameStateP,
@@ -194,59 +199,68 @@ public class Main extends Application {
                                  ObjectProperty<Set<Occupant>> visibleoccupantsP,
                                  ObjectProperty<Set<Integer>> tileIdsP,
                                  ObjectProperty<List<String>> actionsP) {
+        Consumer<Rotation> rotateHandler =
+                value -> tileToPlaceRotationP.setValue(value.add(tileToPlaceRotationP.getValue()));
+
+        Consumer<Pos> placeHandler = pos -> {
+            GameState state = gameStateP.getValue();
+
+            if (state.tileToPlace() != null) {
+                PlacedTile tile = new PlacedTile(state.tileToPlace(),
+                        state.currentPlayer(),
+                        tileToPlaceRotationP.getValue(),
+                        pos);
+
+                if (state.board().canAddTile(tile)) {
+                    tileToPlaceRotationP.setValue(Rotation.NONE);
+                    update(gameStateP,
+                            actionsP,
+                            withPlacedTile(state, tile));
+                }
+            }
+        };
+
+        Consumer<Occupant> occupantHandler = occupant -> {
+            GameState state = gameStateP.getValue();
+            PlacedTile tile = state.board().tileWithId(occupant.zoneId() / 10);
+
+            switch (state.nextAction()) {
+                case OCCUPY_TILE -> {
+                    if (state.lastTilePotentialOccupants().contains(occupant))
+                        update(gameStateP,
+                                actionsP,
+                                withNewOccupant(state, occupant));
+                }
+                case RETAKE_PAWN -> {
+                    if (occupant.kind() == PAWN
+                            && tile.placer() == state.currentPlayer())
+                        update(gameStateP,
+                                actionsP,
+                                withOccupantRemoved(state, occupant));
+                }
+            }
+        };
+
         return BoardUI
                 .create(Board.REACH,
                         gameStateP,
                         tileToPlaceRotationP,
                         visibleoccupantsP,
                         tileIdsP,
-                        tileToPlaceRotationP::set,
-                        pos -> {
-                            GameState state = gameStateP.getValue();
-
-                            if (state.tileToPlace() != null) {
-                                PlacedTile tile = new PlacedTile(state.tileToPlace(), // TODO
-                                        state.currentPlayer(),
-                                        tileToPlaceRotationP.getValue(),
-                                        pos);
-
-                                if (state.board().canAddTile(tile))
-                                    update(gameStateP,
-                                            actionsP,
-                                            withPlacedTile(state, tile));
-                            }
-                        },
-                        occupant -> {
-                            GameState state = gameStateP.getValue();
-                            PlacedTile tile = state.board().tileWithId(occupant.zoneId() / 10);
-
-                            switch (state.nextAction()) {
-                                case OCCUPY_TILE -> {
-                                    if (state.lastTilePotentialOccupants().contains(occupant))
-                                        update(gameStateP,
-                                                actionsP,
-                                                withNewOccupant(state, occupant));
-                                }
-                                case RETAKE_PAWN -> {
-                                    if (occupant.kind() == PAWN
-                                            && tile.placer() == state.currentPlayer())
-                                        update(gameStateP,
-                                                actionsP,
-                                                withOccupantRemoved(state, occupant));
-                                }
-                            }
-                        });
+                        rotateHandler,
+                        placeHandler,
+                        occupantHandler);
     }
 
     private static void update(ObjectProperty<GameState> gameStateP,
                                ObjectProperty<List<String>> actionsP,
                                StateAction newState) {
         if (newState != null) {
-            gameStateP.set(newState.gameState());
+            gameStateP.setValue(newState.gameState());
 
-            List<String> newActions = new ArrayList<>(actionsP.get());
+            List<String> newActions = new ArrayList<>(actionsP.getValue());
             newActions.add(newState.string());
-            actionsP.set(newActions);
+            actionsP.setValue(newActions);
         }
     }
 }

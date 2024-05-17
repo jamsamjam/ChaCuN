@@ -1,6 +1,5 @@
 package ch.epfl.chacun.gui;
 
-import ch.epfl.chacun.Base32;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -12,6 +11,8 @@ import javafx.scene.text.Text;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+
+import static ch.epfl.chacun.Base32.isValid;
 
 /**
  * Creates the graphical interface that allows remote play.
@@ -57,17 +58,13 @@ public class ActionsUI {
         textField.setId("actions-field");
         textField.setPrefWidth(60);
 
-        textField.setTextFormatter(new TextFormatter<>(change -> { // TODO
+        textField.setTextFormatter(new TextFormatter<>(change -> {
             StringBuilder filteredText = new StringBuilder();
             change.getText().chars()
-                    .forEach(u -> {
-                        char c = (char) u;
-                        if (Character.isLowerCase(c))
-                            filteredText.append(Character.toUpperCase(c));
-                        else if (Base32.ALPHABET.indexOf(c) != -1)
-                            filteredText.append(c);
+                    .forEach(c -> {
+                        String u = (String.valueOf((char) c)).toUpperCase(); // TODO
+                        if (isValid(u)) filteredText.append(u);
                     });
-
             change.setText(filteredText.toString());
 
             return change;

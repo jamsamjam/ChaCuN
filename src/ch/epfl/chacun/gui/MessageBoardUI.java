@@ -1,9 +1,7 @@
 package ch.epfl.chacun.gui;
 
-import ch.epfl.chacun.MessageBoard;
 import ch.epfl.chacun.MessageBoard.Message;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
@@ -14,7 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 import static ch.epfl.chacun.gui.ImageLoader.LARGE_TILE_FIT_SIZE;
-import static javafx.application.Platform.runLater;
 
 /**
  * Creates the part of the graphical interface of the message board.
@@ -41,13 +38,11 @@ public final class MessageBoardUI {
         VBox messageBox = new VBox();
 
         messagesO.addListener((_, oV, nV) -> {
-            //assert oV.size() != nV.size(); // TODO
-
             for (int i = oV.size(); i < nV.size(); i++) {
                 Message message = nV.get(i);
 
                 Text text = new Text(message.text());
-                text.setWrappingWidth(LARGE_TILE_FIT_SIZE); // TODO
+                text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);
 
                 // ensure that the last message is always visible

@@ -80,7 +80,7 @@ public final class BoardUI {
                 ObjectProperty<CellData> cellData = new SimpleObjectProperty<>();
 
                 Group group = new Group();
-                group.rotateProperty().bind(cellData.map(CellData::rotation));
+                //group.rotateProperty().bind(cellData.map(CellData::rotation));
                 gridPane.add(group, x + scope, y + scope);
 
                 ImageView imageView = new ImageView();
@@ -144,19 +144,16 @@ public final class BoardUI {
                         switch (e.getButton()) {
                             case PRIMARY -> {
                                 if (e.isStillSincePress()) placeHandler.accept(pos);
-                                if (!fringeO.getValue().contains(pos)) // TODO, consume() not neede
-                                    group.rotateProperty().unbind();
                             }
                             case SECONDARY -> {
-                                Rotation oldRotation = rotationO.getValue();
-                                Rotation newRotation = e.isAltDown()
-                                        ? oldRotation.add(Rotation.RIGHT)
-                                        : oldRotation.add(Rotation.LEFT);
-                                if (e.isStillSincePress()) rotateHandler.accept(newRotation);
+                                if (e.isStillSincePress())
+                                    rotateHandler.accept(e.isAltDown() ? Rotation.RIGHT : Rotation.LEFT);
                             }
                         }
                     }
                 });
+
+                group.rotateProperty().bind(cellData.map(CellData::rotation));
 
                 group.effectProperty().bind(cellData.map(c -> {
                     ColorInput color =

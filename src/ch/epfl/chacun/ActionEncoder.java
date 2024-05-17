@@ -142,9 +142,9 @@ public class ActionEncoder {
                         throw new DecodingException();
 
                     occupant = occupants.get(bit);
+                    int tileId = Zone.tileId(occupant.zoneId());
 
-                    if (gameState.board().tileWithId(occupant.zoneId() / 10).placer()
-                            != gameState.currentPlayer())
+                    if (gameState.board().tileWithId(tileId).placer() != gameState.currentPlayer())
                         throw new DecodingException();
                 }
 
@@ -160,10 +160,7 @@ public class ActionEncoder {
                     int id = bit & 0b01111;
 
                     occupant = new Occupant(Occupant.Kind.values()[kind],
-                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO 다른 method 있는지, 둘중에 뭐가 나은지
-                    
-//                    if (gameState.board().lastPlacedTile().placer() != gameState.currentPlayer())
-//                        throw new DecodingException();
+                                    gameState.board().lastPlacedTile().id() * 10 + id); // TODO
 
                     if (!gameState.lastTilePotentialOccupants().contains(occupant))
                         throw new DecodingException();

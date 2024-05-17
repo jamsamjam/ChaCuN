@@ -9,7 +9,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Occupant.occupantsCount;
 import static ch.epfl.chacun.gui.ColorMap.fillColor;
