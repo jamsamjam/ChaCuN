@@ -10,7 +10,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker { // TODO check again - when action changes copy it to clipboard (readonly)
+public final class TextMakerFr implements TextMaker {
     private final Map<PlayerColor, String> nameColorMap;
 
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
@@ -33,31 +33,30 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
         return STR."\{playerName(scorer)} a fermé une forêt contenant un menhir et peut donc placer une tuile menhir.";
     }
 
-
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
-        String mushroom = mushroomGroupCount == 0 ? "." : STR." et de \{mushroomGroupCount} groupe de champignons.";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom}.";
+                + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom(mushroomGroupCount)}.";
     }
+
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
-        String fish = fishCount == 0 ? "" : STR." et contenant \{fishCount} poissons";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles\{fish}.";
+                + STR." en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles"
+                + STR."\{fish(" et contenant ", fishCount)}.";
     }
 
     @Override
     public String playerScoredHuntingTrap(PlayerColor scorer, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la fosse à pieux"
+        return STR."\{playerName(scorer)} a remporté \{points(points)} en plaçant la fosse à pieux"
                 + STR." dans un pré dans lequel elle est entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playerScoredLogboat(PlayerColor scorer, int points, int lakeCount) {
-        return STR."\{playerName(scorer)} a remporté \{points} points en plaçant la pirogue"
-                + STR." dans un réseau hydrographique contenant \{lakeCount} lacs.";
+        return STR."\{playerName(scorer)} a remporté \{points(points)} en plaçant la pirogue"
+                + STR." dans un réseau hydrographique contenant \{lake(lakeCount)}.";
     }
 
     @Override
@@ -68,9 +67,9 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
-        String fish = fishCount == 0 ? "1 poisson" : STR."\{fishCount} poissons";
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant \{fish}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique"
+                + STR."\{fish(" contenant ", fishCount)}.";
     }
 
     @Override
@@ -82,12 +81,12 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lakeCount} lac.";
+                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lake(lakeCount)}.";
     }
 
     @Override
     public String playersWon(Set<PlayerColor> winners, int points) {
-        return STR."\{name(winners)} \{verb(winners)} remporté la partie avec \{points(points)}!";
+        return STR."\{name(winners)} \{verb(winners)} remporté la partie avec \{points(points)} !";
     }
 
     @Override
@@ -134,11 +133,33 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
 
     private String occupant(Set<PlayerColor> scorers) {
         List<String> names = playerNames(scorers);
-        return names.size() == 1 ? "occupant·e majoritaire" : "occupant·es majoritaires";
+        return names.size() == 1 ? "occupant·e majoritaire" : "occupant·e·s majoritaires";
     }
 
+    private String mushroom(int mushroomGroupCount) {
+        String text;
+        if (mushroomGroupCount == 0) text = "";
+        else if (mushroomGroupCount == 1) text = " et de 1 groupe de champignons";
+        else text = STR." et de \{mushroomGroupCount} groupes de champignons";
+
+        return text;
+    }
+
+    private String fish(String prefix, int fishCount) {
+        String text;
+        if (fishCount == 0) text = "";
+        else if (fishCount == 1) text = STR."\{prefix}1 poisson";
+        else text = STR."\{prefix}\{fishCount} poissons";
+
+        return text;
+    }
+
+   private String lake(int lakeCount) {
+        return lakeCount == 1 ? "1 lac" : STR."\{lakeCount} lacs";
+   }
+
     private String animal(Map<Animal.Kind, Integer> animals) {
-        List<String> kinds = List.of("mammouth", "aurochs", "cerf");
+        List<String> kinds = List.of("mammouth", "auroch", "cerf");
         List<Integer> counts = List.of(animals.getOrDefault(MAMMOTH, 0),
                 animals.getOrDefault(AUROCHS, 0),
                 animals.getOrDefault(DEER, 0));
@@ -157,15 +178,11 @@ public final class TextMakerFr implements TextMaker { // TODO check again - when
 
         for (int i = 0; i < index.size(); i++) {
             sb.append(STR."\{counts.get(index.get(i))} \{kinds.get(index.get(i))}");
-            if ((counts.get(index.get(i)) > 1) && !kinds.get(index.get(i)).equals("aurochs"))
-                sb.append("s");
+            if ((counts.get(index.get(i)) > 1)) sb.append("s");
 
-            if (index.size() == 2 && i == 0)
-                sb.append(" et ");
-            else if (i < index.size() - 2)
-                sb.append(", ");
-            else if (i == index.size() - 2)
-                sb.append(" et ");
+            if (index.size() == 2 && i == 0) sb.append(" et ");
+            else if (i < index.size() - 2) sb.append(", ");
+            else if (i == index.size() - 2) sb.append(" et ");
         }
 
         return sb.toString();

@@ -54,14 +54,6 @@ public final class MessageBoardUI {
 
                 text.setOnMouseEntered(_ -> tileIdsP.setValue(message.tileIds()));
                 text.setOnMouseExited(_ -> tileIdsP.setValue(Set.of()));
-
-                // Todo to be removed !
-//                text.setOnMouseClicked(event -> {
-//                    final Clipboard clipboard = Clipboard.getSystemClipboard();
-//                    final ClipboardContent content = new ClipboardContent();
-//                    content.putString(message.text());
-//                    clipboard.setContent(content);
-//                });
             }
         });
 
