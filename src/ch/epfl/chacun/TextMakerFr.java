@@ -117,7 +117,7 @@ public final class TextMakerFr implements TextMaker {
         return playerNames;
     }
 
-    private String name(Set<PlayerColor> scorers) {
+    private String name(Set<PlayerColor> scorers) { // TODO merge?
         List<String> names = playerNames(scorers);
 
         if (names.size() == 1)
@@ -174,7 +174,6 @@ public final class TextMakerFr implements TextMaker {
         kinds.forEach(k -> counts.add(animals.get(k)));
 
         StringBuilder sb = new StringBuilder();
-
         for (int i = 0; i < kinds.size(); i++) {
             sb.append(STR."\{counts.get(i)} \{dict.get(kinds.get(i).ordinal())}");
             if (counts.get(i) > 1) sb.append("s");
@@ -185,4 +184,17 @@ public final class TextMakerFr implements TextMaker {
 
         return sb.toString();
     }
+
+    // TODo better ?
+//    if (names.size() == 1)
+//            return names.get(0);
+//        else if (names.size() == 2)
+//                return STR."\{names.get(0)} et \{names.get(1)}";
+//        else {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(names.getFirst());
+//        for (int i = 1; i < names.size() - 1; i++)
+//            sb.append(", ").append(names.get(i));
+//        sb.append(" et ").append(names.getLast());
+//        return sb.toString();
 }
