@@ -29,7 +29,7 @@ import static java.lang.Long.parseUnsignedLong;
  *
  * @author Sam Lee (375535)
  */
-public class Main extends Application {
+public final class Main extends Application {
     /**
      * Launches the program.
      *

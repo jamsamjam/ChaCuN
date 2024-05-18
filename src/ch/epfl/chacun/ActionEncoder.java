@@ -11,7 +11,7 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
  *
  * @author Sam Lee (375535)
  */
-public class ActionEncoder {
+public final class ActionEncoder {
     private ActionEncoder() {}
 
     /**

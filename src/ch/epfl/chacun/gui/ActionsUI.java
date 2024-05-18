@@ -19,7 +19,7 @@ import static ch.epfl.chacun.Base32.isValid;
  *
  * @author Sam Lee (375535)
  */
-public class ActionsUI {
+public final class ActionsUI {
     private ActionsUI() {}
 
     /**

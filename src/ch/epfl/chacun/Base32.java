@@ -1,13 +1,11 @@
 package ch.epfl.chacun;
 
-import static ch.epfl.chacun.Preconditions.checkArgument;
-
 /**
  * Contains methods for encoding and decoding base32 binary values.
  *
  * @author Sam Lee (375535)
  */
-public class Base32 {
+public final class Base32 {
     private Base32() {}
 
     /**
@@ -22,7 +20,8 @@ public class Base32 {
      * @return true iff the given string is only composed of characters from the base32 alphabet
      */
     public static boolean isValid(String string) {
-        checkArgument(string != null);
+        if (string == null || string.isEmpty() || string.length() > 2)
+            return false;
 
         for (int i = 0; i < string.length(); i++) {
             char chr = string.charAt(i);
@@ -63,9 +62,6 @@ public class Base32 {
      * @return the corresponding integer from a string of length 1 or 2 representing a base32 number
      */
     public static int decode(String string) {
-        checkArgument(isValid(string));
-        checkArgument(!string.isEmpty() && string.length() < 3);
-
         char chr0 = string.charAt(0);
         int bit = ALPHABET.indexOf(chr0);
 

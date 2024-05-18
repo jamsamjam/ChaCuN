@@ -13,6 +13,11 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
 public final class TextMakerFr implements TextMaker {
     private final Map<PlayerColor, String> nameColorMap;
 
+    /**
+     * Constructor of TextMakerFr.
+     *
+     * @param nameColorMap a table associating their name with the colors of the players
+     */
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
         this.nameColorMap = Map.copyOf(nameColorMap);
     }
@@ -25,18 +30,20 @@ public final class TextMakerFr implements TextMaker {
     @Override
     public String points(int points) {
         checkArgument(points >= 0);
-        return points == 0 || points == 1 ? STR."\{points} point" : STR."\{points} points";
+        return (points == 0 || points == 1) ? STR."\{points} point" : STR."\{points} points";
     }
 
     @Override
     public String playerClosedForestWithMenhir(PlayerColor scorer) {
-        return STR."\{playerName(scorer)} a fermé une forêt contenant un menhir et peut donc placer une tuile menhir.";
+        return STR."\{playerName(scorer)} a fermé une forêt contenant un menhir et peut donc placer"
+                + " une tuile menhir.";
     }
 
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles\{mushroom(mushroomGroupCount)}.";
+                + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles"
+                + STR."\{mushroom(mushroomGroupCount)}.";
     }
 
 
@@ -75,13 +82,15 @@ public final class TextMakerFr implements TextMaker {
     @Override
     public String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'un pré contenant la grande fosse à pieux entourée de \{animal(animals)}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un pré"
+                + STR." contenant la grande fosse à pieux entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
         return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
-                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique contenant le radeau et \{lake(lakeCount)}.";
+                + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique"
+                + STR." contenant le radeau et \{lake(lakeCount)}.";
     }
 
     @Override
@@ -118,9 +127,8 @@ public final class TextMakerFr implements TextMaker {
         else {
             StringBuilder sb = new StringBuilder();
             sb.append(names.getFirst());
-            for (int i = 1; i < names.size() - 1; i++) {
+            for (int i = 1; i < names.size() - 1; i++)
                 sb.append(", ").append(names.get(i));
-            }
             sb.append(" et ").append(names.getLast());
             return sb.toString();
         }
@@ -159,30 +167,20 @@ public final class TextMakerFr implements TextMaker {
    }
 
     private String animal(Map<Animal.Kind, Integer> animals) {
-        List<String> kinds = List.of("mammouth", "auroch", "cerf");
-        List<Integer> counts = List.of(animals.getOrDefault(MAMMOTH, 0),
-                animals.getOrDefault(AUROCHS, 0),
-                animals.getOrDefault(DEER, 0));
+        List<String> dict = List.of("mammouth", "auroch", "cerf");
 
-        // get the indexes of non-zero animal
-        List<Integer> index = new ArrayList<>();
-        for (int i = 0; i < counts.size(); i++) {
-            if (counts.get(i) != 0) index.add(i);
-        }
+        List<Animal.Kind> kinds = animals.keySet().stream().filter(a -> a != TIGER).sorted().toList();
+        List<Integer> counts = new ArrayList<>();
+        kinds.forEach(k -> counts.add(animals.get(k)));
 
-        return getAnimalString(index, counts, kinds);
-    }
-
-    private String getAnimalString(List<Integer> index, List<Integer> counts, List<String> kinds) {
         StringBuilder sb = new StringBuilder();
 
-        for (int i = 0; i < index.size(); i++) {
-            sb.append(STR."\{counts.get(index.get(i))} \{kinds.get(index.get(i))}");
-            if ((counts.get(index.get(i)) > 1)) sb.append("s");
+        for (int i = 0; i < kinds.size(); i++) {
+            sb.append(STR."\{counts.get(i)} \{dict.get(kinds.get(i).ordinal())}");
+            if (counts.get(i) > 1) sb.append("s");
 
-            if (index.size() == 2 && i == 0) sb.append(" et ");
-            else if (i < index.size() - 2) sb.append(", ");
-            else if (i == index.size() - 2) sb.append(" et ");
+            if (i == kinds.size() - 2) sb.append(" et ");
+            else if (i < kinds.size() - 2) sb.append(", ");
         }
 
         return sb.toString();

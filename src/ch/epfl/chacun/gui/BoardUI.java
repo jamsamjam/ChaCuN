@@ -80,7 +80,6 @@ public final class BoardUI {
                 ObjectProperty<CellData> cellData = new SimpleObjectProperty<>();
 
                 Group group = new Group();
-                //group.rotateProperty().bind(cellData.map(CellData::rotation));
                 gridPane.add(group, x + scope, y + scope);
 
                 ImageView imageView = new ImageView();
