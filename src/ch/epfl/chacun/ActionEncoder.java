@@ -14,7 +14,7 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
 public final class ActionEncoder {
     private ActionEncoder() {}
 
-    private static final int NONE = 0b11111; // TODO int -> String, '31'?
+    private static final int NONE = 31; // TODO
 
     /**
      * Returns a StateAction composed of the game state with the given tile placed and the base32
