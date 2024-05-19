@@ -162,11 +162,11 @@ public final class TextMakerFr implements TextMaker {
         return text;
     }
 
-   private String lake(int lakeCount) {
+    private String lake(int lakeCount) {
         return lakeCount == 1 ? "1 lac" : STR."\{lakeCount} lacs";
-   }
+    }
 
-    private String animal(Map<Animal.Kind, Integer> animals) {
+    private String animal(Map<Animal.Kind, Integer> animals) { // TOdo vs names - merge
         List<String> dict = List.of("mammouth", "auroch", "cerf");
 
         List<Animal.Kind> kinds = animals.keySet().stream().filter(a -> a != TIGER).sorted().toList();
@@ -184,17 +184,4 @@ public final class TextMakerFr implements TextMaker {
 
         return sb.toString();
     }
-
-    // TODo better ?
-//    if (names.size() == 1)
-//            return names.get(0);
-//        else if (names.size() == 2)
-//                return STR."\{names.get(0)} et \{names.get(1)}";
-//        else {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(names.getFirst());
-//        for (int i = 1; i < names.size() - 1; i++)
-//            sb.append(", ").append(names.get(i));
-//        sb.append(" et ").append(names.getLast());
-//        return sb.toString();
 }

@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Contains methods for encoding and decoding base32 binary values.
  *
@@ -39,6 +41,8 @@ public final class Base32 {
      * bits of the given integer
      */
     public static String encodeBits5(int bit) {
+        checkArgument(bit > 0 && bit < 32);
+
         char chr = ALPHABET.charAt(bit & 0b11111);
         return String.valueOf(chr);
     }

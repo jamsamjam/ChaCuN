@@ -41,7 +41,6 @@ public final class MessageBoardUI {
             for (int i = oV.size(); i < nV.size(); i++) {
                 Message message = nV.get(i);
 
-
                 Text text = new Text(message.text());
                 text.setWrappingWidth(LARGE_TILE_FIT_SIZE);
                 messageBox.getChildren().add(text);

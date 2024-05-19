@@ -14,6 +14,8 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
 public final class ActionEncoder {
     private ActionEncoder() {}
 
+    private static final int NONE = 0b11111; // TODO int -> String, '31'?
+
     /**
      * Returns a StateAction composed of the game state with the given tile placed and the base32
      * string of length 2, representing this action.
@@ -49,7 +51,7 @@ public final class ActionEncoder {
      */
     public static StateAction withNewOccupant(GameState gameState,
                                               Occupant occupant){
-        int bit = 11111; // no occupant is placed
+        int bit = NONE; // no occupant is placed
         if (occupant != null) {
             bit = occupant.kind().ordinal();
             bit = (bit << 4) | Zone.localId(occupant.zoneId());
@@ -68,7 +70,7 @@ public final class ActionEncoder {
      */
     public static StateAction withOccupantRemoved(GameState gameState,
                                                   Occupant occupant){
-        int bit = 11111; // no pawn must be taken back
+        int bit = NONE; // no pawn must be taken back
         if (occupant != null) {
             List<Occupant> occupants = gameState.board().occupants().stream()
                     .filter(o -> o.kind() == PAWN)
@@ -132,7 +134,7 @@ public final class ActionEncoder {
                 // ooooo
                 Occupant occupant = null;
 
-                if (bit != 0b11111) {
+                if (bit != NONE) {
                     List<Occupant> occupants = gameState.board().occupants().stream()
                             .filter(o -> o.kind() == PAWN)
                             .sorted(Comparator.comparingInt(Occupant::zoneId))
@@ -155,7 +157,7 @@ public final class ActionEncoder {
                 // kzzzz
                 Occupant occupant = null;
 
-                if (bit != 0b11111) {
+                if (bit != NONE) {
                     int kind = bit >>> 4;
                     int id = bit & 0b01111;
 
