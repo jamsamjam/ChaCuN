@@ -164,7 +164,6 @@ public final class Main extends Application {
             }
         });
 
-
         vBox.getChildren().addAll(actionsNode, decksNode);
 
         gameStateP.setValue(gameStateP.getValue().withStartingTilePlaced());
