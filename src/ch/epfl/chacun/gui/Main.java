@@ -156,6 +156,15 @@ public final class Main extends Application {
         ObservableValue<GameState.Action> nextActionO =
                 gameStateP.map(GameState::nextAction);
 
+        nextActionO.addListener((_, _, nV) -> {
+            switch (nV) {
+                case OCCUPY_TILE -> textP.setValue(textMaker.clickToOccupy());
+                case RETAKE_PAWN -> textP.setValue(textMaker.clickToUnoccupy());
+                default -> textP.setValue("");
+            }
+        });
+
+
         vBox.getChildren().addAll(actionsNode, decksNode);
 
         gameStateP.setValue(gameStateP.getValue().withStartingTilePlaced());
