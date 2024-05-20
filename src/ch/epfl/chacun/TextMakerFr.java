@@ -117,7 +117,7 @@ public final class TextMakerFr implements TextMaker {
         return playerNames;
     }
 
-    private String name(Set<PlayerColor> scorers) { // TODO merge?
+    private String name(Set<PlayerColor> scorers) {
         List<String> names = playerNames(scorers);
 
         if (names.size() == 1)
