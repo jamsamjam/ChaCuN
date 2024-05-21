@@ -41,7 +41,7 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredForest(Set<PlayerColor> scorers, int points, int mushroomGroupCount, int tileCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'une forêt composée de \{tileCount} tuiles"
                 + STR."\{mushroom(mushroomGroupCount)}.";
     }
@@ -49,7 +49,7 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredRiver(Set<PlayerColor> scorers, int points, int fishCount, int tileCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'une rivière composée de \{tileCount} tuiles"
                 + STR."\{fish(" et contenant ", fishCount)}.";
     }
@@ -68,34 +68,34 @@ public final class TextMakerFr implements TextMaker {
 
     @Override
     public String playersScoredMeadow(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'un pré contenant \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRiverSystem(Set<PlayerColor> scorers, int points, int fishCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique"
                 + STR."\{fish(" contenant ", fishCount)}.";
     }
 
     @Override
     public String playersScoredPitTrap(Set<PlayerColor> scorers, int points, Map<Animal.Kind, Integer> animals) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'un pré"
                 + STR." contenant la grande fosse à pieux entourée de \{animal(animals)}.";
     }
 
     @Override
     public String playersScoredRaft(Set<PlayerColor> scorers, int points, int lakeCount) {
-        return STR."\{name(scorers)} \{verb(scorers)} remporté \{points(points)}"
+        return STR."\{subject(scorers)} \{verb(scorers)} remporté \{points(points)}"
                 + STR." en tant qu'\{occupant(scorers)} d'un réseau hydrographique"
                 + STR." contenant le radeau et \{lake(lakeCount)}.";
     }
 
     @Override
     public String playersWon(Set<PlayerColor> winners, int points) {
-        return STR."\{name(winners)} \{verb(winners)} remporté la partie avec \{points(points)} !";
+        return STR."\{subject(winners)} \{verb(winners)} remporté la partie avec \{points(points)} !";
     }
 
     @Override
@@ -108,40 +108,30 @@ public final class TextMakerFr implements TextMaker {
         return "Cliquez sur le pion que vous désirez reprendre, ou ici pour ne pas en reprendre.";
     }
 
-    private List<String> playerNames(Set<PlayerColor> scorers) {
+    private String subject(Set<PlayerColor> scorers) {
         List<PlayerColor> sortedScorers = new ArrayList<>(scorers);
         Collections.sort(sortedScorers);
 
-        List<String> playerNames = new ArrayList<>();
-        sortedScorers.forEach(scorer -> playerNames.add(playerName(scorer)));
-        return playerNames;
-    }
+        List<String> names = new ArrayList<>();
+        sortedScorers.forEach(scorer -> names.add(playerName(scorer)));
 
-    private String name(Set<PlayerColor> scorers) {
-        List<String> names = playerNames(scorers);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < names.size(); i++) {
+            sb.append(STR."\{names.get(i)}");
 
-        if (names.size() == 1)
-            return names.get(0);
-        else if (names.size() == 2)
-            return STR."\{names.get(0)} et \{names.get(1)}";
-        else {
-            StringBuilder sb = new StringBuilder();
-            sb.append(names.getFirst());
-            for (int i = 1; i < names.size() - 1; i++)
-                sb.append(", ").append(names.get(i));
-            sb.append(" et ").append(names.getLast());
-            return sb.toString();
+            if (i == names.size() - 2) sb.append(" et ");
+            else if (i < names.size() - 2) sb.append(", ");
         }
+
+        return sb.toString();
     }
 
     private String verb(Set<PlayerColor> scorers) {
-        List<String> names = playerNames(scorers);
-        return names.size() == 1 ? "a" : "ont";
+        return scorers.size() == 1 ? "a" : "ont";
     }
 
     private String occupant(Set<PlayerColor> scorers) {
-        List<String> names = playerNames(scorers);
-        return names.size() == 1 ? "occupant·e majoritaire" : "occupant·e·s majoritaires";
+        return scorers.size() == 1 ? "occupant·e majoritaire" : "occupant·e·s majoritaires";
     }
 
     private String mushroom(int mushroomGroupCount) {
@@ -166,10 +156,11 @@ public final class TextMakerFr implements TextMaker {
         return lakeCount == 1 ? "1 lac" : STR."\{lakeCount} lacs";
     }
 
-    private String animal(Map<Animal.Kind, Integer> animals) { // TOdo vs names - merge
+    private String animal(Map<Animal.Kind, Integer> animals) {
         List<String> dict = List.of("mammouth", "auroch", "cerf");
 
-        List<Animal.Kind> kinds = animals.keySet().stream().filter(a -> a != TIGER).sorted().toList();
+        List<Animal.Kind> kinds = animals.keySet().stream()
+                .filter(a -> a != TIGER).sorted().toList();
         List<Integer> counts = new ArrayList<>();
         kinds.forEach(k -> counts.add(animals.get(k)));
 

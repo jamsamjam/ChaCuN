@@ -73,7 +73,7 @@ public final class Main extends Application {
         TileDecks tileDecks =
                 new TileDecks(tilesByKind.get(START),
                         tilesByKind.get(NORMAL),
-                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of())); // TODO
+                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of()));
 
         Map<PlayerColor, String> playerColorMap =
                 IntStream.range(0, playersNames.size()).boxed()
@@ -267,6 +267,6 @@ public final class Main extends Application {
             List<String> newActions = new ArrayList<>(actionsP.getValue());
             newActions.add(newState.string());
             actionsP.setValue(newActions);
-        } // TODO
+        }
     }
 }
