@@ -62,11 +62,11 @@ public final class ActionsUI {
                 return null;
 
             StringBuilder filteredText = new StringBuilder();
-            change.getText().chars()
-                    .forEach(c -> {
-                        String u = (String.valueOf((char) c)).toUpperCase(); // TODO casting
-                        if (isValid(u)) filteredText.append(u);
-                    });
+            change.getText().chars().forEach(c -> {
+                String u = new String(Character.toChars(c)).toUpperCase();
+                //String u = (String.valueOf((char) c)).toUpperCase(); // TODO casting x ?? 뭐가 더 나은지
+                if (isValid(u)) filteredText.append(u);
+            });
             change.setText(filteredText.toString());
 
             return change;
