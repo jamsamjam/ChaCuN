@@ -19,7 +19,7 @@ public final class TextMakerFr implements TextMaker {
      * @param nameColorMap a table associating their name with the colors of the players
      */
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
-        this.nameColorMap = Map.copyOf(nameColorMap);
+        this.nameColorMap = Map.copyOf(nameColorMap); // TODO
     }
 
     @Override
@@ -110,19 +110,17 @@ public final class TextMakerFr implements TextMaker {
 
     private String subject(Set<PlayerColor> scorers) {
         List<PlayerColor> sortedScorers = new ArrayList<>(scorers);
-        Collections.sort(sortedScorers);
-
-        List<String> names = new ArrayList<>();
-        sortedScorers.forEach(scorer -> names.add(playerName(scorer)));
+        Collections.sort(sortedScorers); // TODO Collections.sort(scorers) ?
 
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < names.size(); i++) {
-            sb.append(STR."\{names.get(i)}");
-
-            if (i == names.size() - 2) sb.append(" et ");
-            else if (i < names.size() - 2) sb.append(", ");
+        int size = sortedScorers.size();
+        int i = 0;
+        for (PlayerColor scorer : sortedScorers) {
+            sb.append(playerName(scorer));
+            if (i < size - 2) sb.append(", ");
+            else if (i == size - 2) sb.append(" et ");
+            i++;
         }
-
         return sb.toString();
     }
 
@@ -135,21 +133,15 @@ public final class TextMakerFr implements TextMaker {
     }
 
     private String mushroom(int mushroomGroupCount) {
-        String text;
-        if (mushroomGroupCount == 0) text = "";
-        else if (mushroomGroupCount == 1) text = " et de 1 groupe de champignons";
-        else text = STR." et de \{mushroomGroupCount} groupes de champignons";
-
-        return text;
+        if (mushroomGroupCount == 0) return "";
+        else if (mushroomGroupCount == 1) return " et de 1 groupe de champignons";
+        else return STR." et de \{mushroomGroupCount} groupes de champignons";
     }
 
     private String fish(String prefix, int fishCount) {
-        String text;
-        if (fishCount == 0) text = "";
-        else if (fishCount == 1) text = STR."\{prefix}1 poisson";
-        else text = STR."\{prefix}\{fishCount} poissons";
-
-        return text;
+        if (fishCount == 0) return  "";
+        else if (fishCount == 1) return STR."\{prefix}1 poisson";
+        else return STR."\{prefix}\{fishCount} poissons";
     }
 
     private String lake(int lakeCount) {
@@ -157,22 +149,23 @@ public final class TextMakerFr implements TextMaker {
     }
 
     private String animal(Map<Animal.Kind, Integer> animals) {
+        animals.remove(Animal.Kind.TIGER); // TODO animals : could be modified ?
         List<String> dict = List.of("mammouth", "auroch", "cerf");
 
-        List<Animal.Kind> kinds = animals.keySet().stream()
-                .filter(a -> a != TIGER).sorted().toList();
-        List<Integer> counts = new ArrayList<>();
-        kinds.forEach(k -> counts.add(animals.get(k)));
-
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < kinds.size(); i++) {
-            sb.append(STR."\{counts.get(i)} \{dict.get(kinds.get(i).ordinal())}");
-            if (counts.get(i) > 1) sb.append("s");
+        int size = animals.size();
+        int i = 0;
+        for (Map.Entry<Animal.Kind, Integer> entry : animals.entrySet()) {
+            Animal.Kind kind = entry.getKey();
+            int count = entry.getValue();
 
-            if (i == kinds.size() - 2) sb.append(" et ");
-            else if (i < kinds.size() - 2) sb.append(", ");
+            sb.append(STR."\{count} \{dict.get(kind.ordinal())}");
+            if (count > 1) sb.append("s");
+
+            if (i == size - 2) sb.append(" et ");
+            else if (i < size - 2) sb.append(", ");
+            i++;
         }
-
         return sb.toString();
     }
 }
