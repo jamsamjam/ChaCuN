@@ -1,7 +1,5 @@
 package ch.epfl.chacun;
 
-import static ch.epfl.chacun.Preconditions.checkArgument;
-
 /**
  * Contains methods for encoding and decoding base32 binary values.
  *
