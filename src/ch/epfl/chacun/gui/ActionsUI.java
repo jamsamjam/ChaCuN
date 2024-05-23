@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
@@ -37,7 +38,7 @@ public final class ActionsUI {
         hBox.setId("actions");
 
         Text text = new Text();
-        text.textProperty().bind(Bindings.createStringBinding(() -> {
+        text.textProperty().bind(actionsO.map(_ -> {
             int size = actionsO.getValue().size();
             StringJoiner sj = new StringJoiner(", ");
 
@@ -45,7 +46,7 @@ public final class ActionsUI {
                 sj.add(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
 
             return sj.toString();
-        }, actionsO));
+        }));
 
         TextField textField = getTextField(eventHandler);
         hBox.getChildren().addAll(text, textField);
@@ -59,20 +60,19 @@ public final class ActionsUI {
         textField.setPrefWidth(60);
 
         textField.setTextFormatter(new TextFormatter<>(change -> {
+            if (change.getControlNewText().length() > 2)
+                return null;
+
             StringBuilder filteredText = new StringBuilder();
             change.getText().chars()
                     .forEach(c -> {
-                        String u = (String.valueOf((char) c)).toUpperCase();
+                        String u = (String.valueOf((char) c)).toUpperCase(); // TODO casting
                         if (isValid(u)) filteredText.append(u);
                     });
             change.setText(filteredText.toString());
 
             return change;
         }));
-
-        textField.textProperty().addListener((_, oV, nV) -> {
-            if (nV.length() > 2) textField.setText(oV);
-        });
 
         textField.setOnAction(_ -> {
             eventHandler.accept(textField.getText());

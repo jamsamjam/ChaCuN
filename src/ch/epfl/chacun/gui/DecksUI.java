@@ -46,9 +46,7 @@ public final class DecksUI {
         ImageView nextTileImage = new ImageView();
         nextTileImage.setFitWidth(LARGE_TILE_FIT_SIZE);
         nextTileImage.setFitHeight(LARGE_TILE_FIT_SIZE);
-        nextTileImage.imageProperty().bind(tileO.map(t -> t == null ?
-                null :
-                largeImageForTile(t.id())));
+        nextTileImage.imageProperty().bind(tileO.map(t -> t == null ? null : largeImageForTile(t.id())));
 
         Text text = new Text();
         text.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
@@ -71,23 +69,23 @@ public final class DecksUI {
 
     private static HBox getTileDecks(ObservableValue<Integer> normalTileCountO,
                                      ObservableValue<Integer> menhirTileCountO) {
-        StackPane normalStack = getTilePane("/256/NORMAL.jpg", normalTileCountO);
-        StackPane menhirStack = getTilePane("/256/MENHIR.jpg", menhirTileCountO);
+        StackPane normalPane = getTilePane("/256/NORMAL.jpg", normalTileCountO);
+        StackPane menhirPane = getTilePane("/256/MENHIR.jpg", menhirTileCountO);
 
-        HBox hBox = new HBox(normalStack, menhirStack);
+        HBox hBox = new HBox(normalPane, menhirPane);
         hBox.setId("decks");
 
         return hBox;
     }
 
-    private static StackPane getTilePane(String url, ObservableValue<Integer> normalTileCountO) {
-        ImageView normalTileImage = new ImageView(url);
-        normalTileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
-        normalTileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
+    private static StackPane getTilePane(String url, ObservableValue<Integer> tileCountO) {
+        ImageView tileImage = new ImageView(url);
+        tileImage.setFitWidth(NORMAL_TILE_FIT_SIZE);
+        tileImage.setFitHeight(NORMAL_TILE_FIT_SIZE);
 
         Text count = new Text();
-        count.textProperty().bind(normalTileCountO.map(Objects::toString));
+        count.textProperty().bind(tileCountO.map(Objects::toString));
 
-        return new StackPane(normalTileImage, count);
+        return new StackPane(tileImage, count);
     }
 }

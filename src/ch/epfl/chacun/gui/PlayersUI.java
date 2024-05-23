@@ -45,7 +45,7 @@ public final class PlayersUI  {
 
             // current player is surrounded by a gray frame
             ObservableValue<PlayerColor> currentPlayer = gameStateO.map(GameState::currentPlayer);
-            currentPlayer.addListener((_, _, nV) -> {
+            currentPlayer.addListener((_, _, nV) -> { // TODO addLIstenter here ?
                 if (player == nV)
                     textFlow.getStyleClass().add("current");
                 else

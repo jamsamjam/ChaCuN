@@ -40,9 +40,7 @@ public final class Base32 {
      * @return the string of length 1 corresponding to the base32 encoding of the 5 least significant
      * bits of the given integer
      */
-    public static String encodeBits5(int bit) {
-        checkArgument(bit > 0 && bit < 32); // TODO
-
+    public static String encodeBits5(int bit) {  // TODO x preconditon ?
         char chr = ALPHABET.charAt(bit & 0b11111);
         return String.valueOf(chr);
     }
@@ -56,7 +54,7 @@ public final class Base32 {
      * bits of the given integer
      */
     public static String encodeBits10(int bit) {
-        return encodeBits5(bit & 0b1111100000) + encodeBits5(bit & 0b11111);
+        return encodeBits5(bit >>> 5) + encodeBits5(bit);
     }
 
     /**

@@ -1,21 +1,15 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -73,7 +67,7 @@ public final class Main extends Application {
         TileDecks tileDecks =
                 new TileDecks(tilesByKind.get(START),
                         tilesByKind.get(NORMAL),
-                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of()));
+                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of())); // TODO
 
         Map<PlayerColor, String> playerColorMap =
                 IntStream.range(0, playersNames.size()).boxed()
