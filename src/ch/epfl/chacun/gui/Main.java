@@ -93,12 +93,12 @@ public final class Main extends Application {
         ObjectProperty<List<String>> actionsP =
                 new SimpleObjectProperty<>(List.of());
 
-        gameStateP.addListener((_, _, nV) -> {
-            Set<Occupant> newVisibles = new HashSet<>(nV.board().occupants());
-            if (nV.nextAction() == OCCUPY_TILE)
-                newVisibles.addAll(nV.lastTilePotentialOccupants());
-            visibleoccupantsP.set(newVisibles);
-        });
+        visibleoccupantsP.bind(gameStateP.map(gs -> {
+            Set<Occupant> newVisibles = new HashSet<>(gs.board().occupants());
+            if (gs.nextAction() == OCCUPY_TILE)
+                newVisibles.addAll(gs.lastTilePotentialOccupants());
+            return newVisibles;
+        }));
 
         ObjectProperty<Rotation> rotationHandler = new SimpleObjectProperty<>(Rotation.NONE);
 
@@ -134,29 +134,19 @@ public final class Main extends Application {
                                 actionsP,
                                 decodeAndApply(gameStateP.getValue(), t)));
 
-        ObservableValue<TileDecks> tileDecksO =
-                gameStateP.map(GameState::tileDecks);
         ObjectProperty<String> textP =
                 new SimpleObjectProperty<>("");
 
-        Node decksNode =
-                getDecks(gameStateP.map(GameState::tileToPlace),
-                        tileDecksO.map(d -> d.deckSize(NORMAL)),
-                        tileDecksO.map(d -> d.deckSize(MENHIR)),
-                        textP,
-                        gameStateP,
-                        actionsP);
+        Node decksNode = getDecks(gameStateP, textP, actionsP);
 
         ObservableValue<GameState.Action> nextActionO =
                 gameStateP.map(GameState::nextAction);
 
-        nextActionO.addListener((_, _, nV) -> {
-            switch (nV) {
-                case OCCUPY_TILE -> textP.setValue(textMaker.clickToOccupy());
-                case RETAKE_PAWN -> textP.setValue(textMaker.clickToUnoccupy());
-                default -> textP.setValue("");
-            }
-        });
+        textP.bind(nextActionO.map(a -> switch(a) {
+            case OCCUPY_TILE -> textMaker.clickToOccupy();
+            case RETAKE_PAWN -> textMaker.clickToUnoccupy();
+            default -> ""; // TODO next action can't be null - check !
+        }));
 
         vBox.getChildren().addAll(actionsNode, decksNode);
 
@@ -167,12 +157,14 @@ public final class Main extends Application {
         primaryStage.show();
     }
 
-    private static Node getDecks(ObservableValue<Tile> tileO,
-                                 ObservableValue<Integer> normalCount0,
-                                 ObservableValue<Integer> menhirCount0,
+    private static Node getDecks(ObjectProperty<GameState> gameStateP,
                                  ObjectProperty<String> textP,
-                                 ObjectProperty<GameState> gameStateP,
                                  ObjectProperty<List<String>> actionsP) {
+        ObservableValue<Tile> tileO = gameStateP.map(GameState::tileToPlace);
+        ObservableValue<TileDecks> tileDecksO = gameStateP.map(GameState::tileDecks);
+        ObservableValue<Integer> normalCount0 = tileDecksO.map(d -> d.deckSize(NORMAL));
+        ObservableValue<Integer> menhirCount0 = tileDecksO.map(d -> d.deckSize(MENHIR));
+
         Consumer<Occupant> occupantHandler = _ -> {
             switch (gameStateP.getValue().nextAction()) {
                 case OCCUPY_TILE ->
@@ -183,6 +175,7 @@ public final class Main extends Application {
                         update(gameStateP,
                                 actionsP,
                                 withOccupantRemoved(gameStateP.getValue(), null));
+                // TODO default/ null case ?
             }
         };
 
@@ -222,7 +215,7 @@ public final class Main extends Application {
 
         Consumer<Occupant> occupantHandler = occupant -> {
             GameState state = gameStateP.getValue();
-            PlacedTile tile = state.board().tileWithId(occupant.zoneId() / 10);
+            PlacedTile tile = state.board().tileWithId(Zone.tileId(occupant.zoneId()));
 
             switch (state.nextAction()) {
                 case OCCUPY_TILE -> {
@@ -252,7 +245,7 @@ public final class Main extends Application {
                         occupantHandler);
     }
 
-    private static void update(ObjectProperty<GameState> gameStateP,
+    private static void update(ObjectProperty<GameState> gameStateP, // TODO
                                ObjectProperty<List<String>> actionsP,
                                StateAction newState) {
         if (newState != null) {

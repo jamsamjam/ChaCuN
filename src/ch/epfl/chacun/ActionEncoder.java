@@ -26,13 +26,8 @@ public final class ActionEncoder {
      * @param tile the given tile
      * @return the corresponding StateAction
      */
-    public static StateAction withPlacedTile(GameState gameState,
-                                             PlacedTile tile){
-        List<Pos> positions = gameState.board().insertionPositions().stream()
-                .sorted(Comparator.comparingInt(Pos::x)
-                        .thenComparingInt(Pos::y))
-                .toList();
-
+    public static StateAction withPlacedTile(GameState gameState, PlacedTile tile){
+        List<Pos> positions = getSortedPositions(gameState);
         int bit = positions.indexOf(tile.pos());
         bit = (bit << 2) | tile.rotation().ordinal();
 
@@ -49,8 +44,7 @@ public final class ActionEncoder {
      * @param occupant the given occupant
      * @return the corresponding StateAction
      */
-    public static StateAction withNewOccupant(GameState gameState,
-                                              Occupant occupant){
+    public static StateAction withNewOccupant(GameState gameState, Occupant occupant){
         int bit = NONE; // no occupant is placed
         if (occupant != null) {
             bit = occupant.kind().ordinal();
@@ -68,14 +62,10 @@ public final class ActionEncoder {
      * @param occupant the given occupant
      * @return the corresponding StateAction
      */
-    public static StateAction withOccupantRemoved(GameState gameState,
-                                                  Occupant occupant){
+    public static StateAction withOccupantRemoved(GameState gameState, Occupant occupant){
         int bit = NONE; // no pawn must be taken back
         if (occupant != null) {
-            List<Occupant> occupants = gameState.board().occupants().stream()
-                    .filter(o -> o.kind() == PAWN)
-                    .sorted(Comparator.comparingInt(Occupant::zoneId))
-                    .toList();
+            List<Occupant> occupants = getSortedOccupants(gameState);
             bit = occupants.indexOf(occupant);
         }
         return new StateAction(gameState.withOccupantRemoved(occupant), encodeBits5(bit));
@@ -90,8 +80,7 @@ public final class ActionEncoder {
      * @return the corresponding StateAction, or null if the given string doesn't represent a valid
      * action
      */
-    public static StateAction decodeAndApply(GameState gameState,
-                                             String string) {
+    public static StateAction decodeAndApply(GameState gameState, String string) {
         try {
             return decodeAndApplyInternal(gameState, string);
         } catch (DecodingException e) {
@@ -99,82 +88,97 @@ public final class ActionEncoder {
         }
     }
 
-    private static StateAction decodeAndApplyInternal(GameState gameState,
-                                                      String string) throws DecodingException {
+    private static StateAction decodeAndApplyInternal(GameState gameState, String string)
+            throws DecodingException {
         if (!isValid(string)) throw new DecodingException();
-
-        int bit = Base32.decode(string);
 
         switch (gameState.nextAction()) {
             case PLACE_TILE -> {
-                // ppppp ppprr
-                int index = bit >>> 2;
-                int rotation = bit & 0b11;
-
-                List<Pos> positions = gameState.board().insertionPositions().stream()
-                        .sorted(Comparator.comparingInt(Pos::x)
-                                .thenComparingInt(Pos::y))
-                        .toList();
-
-                if (index > positions.size() || rotation > Rotation.ALL.size())
-                    throw new DecodingException();
-
-                PlacedTile tile = new PlacedTile(gameState.tileToPlace(),
-                        gameState.currentPlayer(),
-                        Rotation.ALL.get(rotation),
-                        positions.get(index));
-
-                if (!gameState.board().canAddTile(tile))
-                    throw new DecodingException();
-
-                return new StateAction(gameState.withPlacedTile(tile), string);
+                return decodePlaceTileAction(gameState, string);
             }
-
             case RETAKE_PAWN -> {
-                // ooooo
-                Occupant occupant = null;
-
-                if (bit != NONE) {
-                    List<Occupant> occupants = gameState.board().occupants().stream()
-                            .filter(o -> o.kind() == PAWN)
-                            .sorted(Comparator.comparingInt(Occupant::zoneId))
-                            .toList();
-
-                    if (bit >= occupants.size())
-                        throw new DecodingException();
-
-                    occupant = occupants.get(bit);
-                    int tileId = Zone.tileId(occupant.zoneId());
-
-                    if (gameState.board().tileWithId(tileId).placer() != gameState.currentPlayer())
-                        throw new DecodingException();
-                }
-
-                return new StateAction(gameState.withOccupantRemoved(occupant), string);
+                return decodeRetakePawnAction(gameState, string);
             }
-
             case OCCUPY_TILE -> {
-                // kzzzz
-                Occupant occupant = null;
-
-                if (bit != NONE) {
-                    int kind = bit >>> 4;
-                    int id = bit & 0b01111;
-
-                    for (Occupant o : gameState.lastTilePotentialOccupants()) {
-                        if (o.kind().ordinal() == kind && Zone.localId(o.zoneId()) == id)
-                            occupant = o;
-                    }
-
-                    if (occupant == null)
-                        throw new DecodingException();
-                }
-
-                return new StateAction(gameState.withNewOccupant(occupant), string);
+                return decodeOccupyTileAction(gameState, string);
             }
-
-            case null, default -> throw new DecodingException();
+            default -> throw new DecodingException(); // TODO can be null ?
         }
+    }
+
+    private static StateAction decodePlaceTileAction(GameState gameState, String string)
+            throws DecodingException {
+        // ppppp ppprr
+        int bit = Base32.decode(string);
+        int index = bit >>> 2;
+        int rotation = bit & 0b11;
+
+        List<Pos> positions = getSortedPositions(gameState);
+        if (index > positions.size() || rotation > Rotation.ALL.size())
+            throw new DecodingException();
+
+        PlacedTile tile = new PlacedTile(gameState.tileToPlace(),
+                gameState.currentPlayer(),
+                Rotation.ALL.get(rotation),
+                positions.get(index));
+
+        if (!gameState.board().canAddTile(tile)) throw new DecodingException();
+
+        return new StateAction(gameState.withPlacedTile(tile), string);
+    }
+
+    private static StateAction decodeOccupyTileAction(GameState gameState, String string)
+            throws DecodingException {
+        // kzzzz
+        int bit = Base32.decode(string);
+        Occupant occupant = null;
+
+        if (bit != NONE) {
+            int kind = bit >>> 4;
+            int id = bit & 0b01111;
+
+            occupant = gameState.lastTilePotentialOccupants().stream()
+                    .filter(o -> o.kind().ordinal() == kind && Zone.localId(o.zoneId()) == id)
+                    .findFirst()
+                    .orElseThrow(DecodingException::new);
+        }
+
+        return new StateAction(gameState.withNewOccupant(occupant), string);
+    }
+
+    private static StateAction decodeRetakePawnAction(GameState gameState, String string)
+            throws DecodingException {
+        // ooooo
+        int bit = Base32.decode(string);
+        Occupant occupant = null;
+
+        if (bit != NONE) {
+            List<Occupant> occupants = getSortedOccupants(gameState);
+
+            if (bit >= occupants.size()) throw new DecodingException();
+
+            occupant = occupants.get(bit);
+            int tileId = Zone.tileId(occupant.zoneId());
+
+            if (gameState.board().tileWithId(tileId).placer() != gameState.currentPlayer())
+                throw new DecodingException();
+        }
+
+        return new StateAction(gameState.withOccupantRemoved(occupant), string);
+    }
+
+    private static List<Pos> getSortedPositions(GameState gameState) {
+        return gameState.board().insertionPositions().stream()
+                .sorted(Comparator.comparingInt(Pos::x)
+                        .thenComparingInt(Pos::y))
+                .toList();
+    }
+
+    private static List<Occupant> getSortedOccupants(GameState gameState) {
+        return gameState.board().occupants().stream()
+                .filter(o -> o.kind() == PAWN)
+                .sorted(Comparator.comparingInt(Occupant::zoneId))
+                .toList();
     }
 
     private static class DecodingException extends Exception {}

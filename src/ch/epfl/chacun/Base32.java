@@ -25,11 +25,7 @@ public final class Base32 {
         if (string == null || string.isEmpty() || string.length() > 2)
             return false;
 
-        for (int i = 0; i < string.length(); i++) {
-            char chr = string.charAt(i);
-            if (ALPHABET.indexOf(chr) == -1) return false;
-        }
-        return true;
+        return string.chars().allMatch(chr -> ALPHABET.indexOf(chr) != -1);
     }
 
     /**
@@ -64,13 +60,10 @@ public final class Base32 {
      * @return the corresponding integer from a string of length 1 or 2 representing a base32 number
      */
     public static int decode(String string) {
-        char chr0 = string.charAt(0);
-        int bit = ALPHABET.indexOf(chr0);
+        int bit = 0;
+        for (int i = 0; i < string.length(); i++)
+            bit = (bit << 5) | ALPHABET.indexOf(string.charAt(i));
 
-        if (string.length() == 2) {
-            char chr1 = string.charAt(1);
-            bit = (bit << 5) | ALPHABET.indexOf(chr1);
-        }
         return bit;
     }
 }
