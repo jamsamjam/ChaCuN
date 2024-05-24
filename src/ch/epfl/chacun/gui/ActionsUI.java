@@ -42,7 +42,7 @@ public final class ActionsUI {
 
             StringJoiner sj = new StringJoiner(", ");
             for (int i = Math.max(0, size - 4); i < size; i++)
-                sj.add(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
+                sj.add(STR."\{i + 1}:\{actionsO.getValue().get(i)}");
 
             return sj.toString();
         }));
