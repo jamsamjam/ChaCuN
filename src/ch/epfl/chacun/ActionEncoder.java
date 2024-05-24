@@ -122,7 +122,8 @@ public final class ActionEncoder {
                 Rotation.ALL.get(rotation),
                 positions.get(index));
 
-        if (!gameState.board().canAddTile(tile)) throw new DecodingException();
+        if (!gameState.board().canAddTile(tile))
+            throw new DecodingException();
 
         return new StateAction(gameState.withPlacedTile(tile), string);
     }
@@ -155,7 +156,8 @@ public final class ActionEncoder {
         if (bit != NONE) {
             List<Occupant> occupants = getSortedOccupants(gameState);
 
-            if (bit >= occupants.size()) throw new DecodingException();
+            if (bit >= occupants.size())
+                throw new DecodingException();
 
             occupant = occupants.get(bit);
             int tileId = Zone.tileId(occupant.zoneId());

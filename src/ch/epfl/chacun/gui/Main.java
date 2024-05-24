@@ -134,13 +134,10 @@ public final class Main extends Application {
                                 actionsP,
                                 decodeAndApply(gameStateP.getValue(), t)));
 
-        ObjectProperty<String> textP =
-                new SimpleObjectProperty<>("");
+        ObjectProperty<String> textP = new SimpleObjectProperty<>("");
+        ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
 
         Node decksNode = getDecks(gameStateP, textP, actionsP);
-
-        ObservableValue<GameState.Action> nextActionO =
-                gameStateP.map(GameState::nextAction);
 
         textP.bind(nextActionO.map(a -> switch(a) {
             case OCCUPY_TILE -> textMaker.clickToOccupy();

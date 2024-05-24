@@ -15,8 +15,8 @@ public final class Base32 {
      */
     public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-    private static final Integer BITS_5 = 31;
-    private static final Integer BITS_10 = 1023;
+    private static final Integer MAX_5_BIT = 31;
+    private static final Integer MAX_10_BIT = 1023;
 
     /**
      * Returns true iff the given string is only composed of characters from the base32 alphabet.
@@ -28,7 +28,7 @@ public final class Base32 {
         if (string == null || string.isEmpty() || string.length() > 2)
             return false;
 
-        return string.chars().allMatch(chr -> ALPHABET.indexOf(chr) != -1);
+        return string.chars().allMatch(c -> ALPHABET.indexOf(c) != -1);
     }
 
     /**
@@ -40,7 +40,7 @@ public final class Base32 {
      * bits of the given integer
      */
     public static String encodeBits5(int bit) {
-        checkArgument(bit <= BITS_5);
+        checkArgument(bit <= MAX_5_BIT);
         return String.valueOf(ALPHABET.charAt(bit));
     }
 
@@ -53,8 +53,8 @@ public final class Base32 {
      * bits of the given integer
      */
     public static String encodeBits10(int bit) {
-        checkArgument(bit <= BITS_10);
-        return encodeBits5(bit >>> 5) + encodeBits5(bit & BITS_5);
+        checkArgument(bit <= MAX_10_BIT);
+        return encodeBits5(bit >>> 5) + encodeBits5(bit & MAX_5_BIT);
     }
 
     /**

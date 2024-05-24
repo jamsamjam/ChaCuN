@@ -8,13 +8,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Base32.ALPHABET;
-import static ch.epfl.chacun.Base32.isValid;
 
 /**
  * Creates the graphical interface that allows remote play.
@@ -41,8 +39,8 @@ public final class ActionsUI {
         Text text = new Text();
         text.textProperty().bind(actionsO.map(_ -> {
             int size = actionsO.getValue().size();
-            StringJoiner sj = new StringJoiner(", ");
 
+            StringJoiner sj = new StringJoiner(", ");
             for (int i = Math.max(0, size - 4); i < size; i++)
                 sj.add(STR."\{i + 1} : \{actionsO.getValue().get(i)}");
 
