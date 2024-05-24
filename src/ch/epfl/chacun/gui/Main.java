@@ -35,6 +35,8 @@ import static java.lang.Long.parseUnsignedLong;
  * @author Sam Lee (375535)
  */
 public final class Main extends Application {
+    private Scene mainScene;
+
     /**
      * Launches the program.
      *
@@ -163,15 +165,11 @@ public final class Main extends Application {
 
         Node decksNode = getDecks(gameStateP, textP, actionsP);
 
-        textP.bind(nextActionO.map(a -> switch(a) {
+        textP.bind(nextActionO.map(a -> switch (a) {
             case OCCUPY_TILE -> textMaker.clickToOccupy();
             case RETAKE_PAWN -> textMaker.clickToUnoccupy();
             case END_GAME -> {
-                Node scoreBoard = ScoreBoardUI.create(playersNames, gameStateP.getValue().messageBoard());
-                StackPane scorePane = new StackPane(scoreBoard);
-                primaryStage.setScene(new Scene(scorePane, 1440, 1080));
-                primaryStage.show();
-
+                showScoreBoardUI(playersNames, gameStateP.getValue().messageBoard(), primaryStage);
                 yield "";
             }
             default -> "";
@@ -181,7 +179,8 @@ public final class Main extends Application {
 
         gameStateP.setValue(gameStateP.getValue().withStartingTilePlaced());
 
-        primaryStage.setScene(new Scene(mainPane, 1440, 1080));
+        mainScene = new Scene(mainPane, 1440, 1080);
+        primaryStage.setScene(mainScene);
         primaryStage.setTitle("ChaCuN");
         primaryStage.show();
     }
@@ -284,5 +283,16 @@ public final class Main extends Application {
             newActions.add(newState.string());
             actionsP.setValue(newActions);
         }
+    }
+
+    private void showScoreBoardUI(List<String> playersNames, MessageBoard messageBoard, Stage primaryStage) {
+        Node scoreBoard = ScoreBoardUI.create(playersNames, messageBoard, () -> switchToMainUI(primaryStage));
+        StackPane scorePane = new StackPane(scoreBoard);
+        Scene sceneScene = new Scene(scorePane, 1440, 1080);
+        primaryStage.setScene(sceneScene);
+    }
+
+    private void switchToMainUI(Stage primaryStage) {
+        primaryStage.setScene(mainScene);
     }
 }

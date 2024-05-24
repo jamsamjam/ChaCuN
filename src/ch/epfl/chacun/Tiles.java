@@ -85,673 +85,673 @@ public final class Tiles implements Serializable {
             assert tiles.size() == 4;
             tiles.add(new Tile(4, Tile.Kind.NORMAL, sN, sE, sS, sW));
         }
-        {   // Tile 5
-            var l1 = new Zone.Lake(5_8, 1, null);
-            var a0_0 = new Animal(5_0_0, Animal.Kind.AUROCHS);
-            var z0 = new Zone.Meadow(5_0, List.of(a0_0), null);
-            var z1 = new Zone.River(5_1, 0, l1);
-            var z2 = new Zone.Meadow(5_2, List.of(), null);
-            var z3 = new Zone.River(5_3, 0, l1);
-            var z4 = new Zone.Meadow(5_4, List.of(), null);
-            var z5 = new Zone.River(5_5, 0, l1);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z3, z4);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 5;
-            tiles.add(new Tile(5, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 6
-            var l1 = new Zone.Lake(6_8, 1, null);
-            var z0 = new Zone.Meadow(6_0, List.of(), null);
-            var z1 = new Zone.River(6_1, 0, l1);
-            var z2 = new Zone.Meadow(6_2, List.of(), null);
-            var z3 = new Zone.River(6_3, 0, l1);
-            var a4_0 = new Animal(6_4_0, Animal.Kind.DEER);
-            var z4 = new Zone.Meadow(6_4, List.of(a4_0), null);
-            var z5 = new Zone.River(6_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.Meadow(z4);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 6;
-            tiles.add(new Tile(6, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 7
-            var l1 = new Zone.Lake(7_8, 1, null);
-            var a0_0 = new Animal(7_0_0, Animal.Kind.TIGER);
-            var z0 = new Zone.Meadow(7_0, List.of(a0_0), null);
-            var z1 = new Zone.River(7_1, 0, l1);
-            var z2 = new Zone.Meadow(7_2, List.of(), null);
-            var z3 = new Zone.River(7_3, 0, l1);
-            var z4 = new Zone.Meadow(7_4, List.of(), null);
-            var z5 = new Zone.River(7_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.River(z4, z5, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 7;
-            tiles.add(new Tile(7, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 8
-            var l1 = new Zone.Lake(8_8, 1, null);
-            var a0_0 = new Animal(8_0_0, Animal.Kind.MAMMOTH);
-            var z0 = new Zone.Meadow(8_0, List.of(a0_0), null);
-            var z1 = new Zone.River(8_1, 0, l1);
-            var a2_0 = new Animal(8_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(8_2, List.of(a2_0), null);
-            var z3 = new Zone.River(8_3, 0, l1);
-            var z4 = new Zone.Meadow(8_4, List.of(), null);
-            var z5 = new Zone.River(8_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.Meadow(z4);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 8;
-            tiles.add(new Tile(8, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 9
-            var l1 = new Zone.Lake(9_8, 2, null);
-            var z0 = new Zone.Meadow(9_0, List.of(), null);
-            var z1 = new Zone.River(9_1, 0, l1);
-            var z2 = new Zone.Meadow(9_2, List.of(), null);
-            var z3 = new Zone.River(9_3, 0, l1);
-            var z4 = new Zone.Meadow(9_4, List.of(), null);
-            var z5 = new Zone.River(9_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.River(z4, z5, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 9;
-            tiles.add(new Tile(9, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 10
-            var l1 = new Zone.Lake(10_8, 1, null);
-            var z0 = new Zone.Meadow(10_0, List.of(), null);
-            var z1 = new Zone.River(10_1, 0, l1);
-            var z2 = new Zone.Meadow(10_2, List.of(), null);
-            var z3 = new Zone.River(10_3, 0, l1);
-            var a4_0 = new Animal(10_4_0, Animal.Kind.DEER);
-            var z4 = new Zone.Meadow(10_4, List.of(a4_0), null);
-            var z5 = new Zone.River(10_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.Meadow(z4);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 10;
-            tiles.add(new Tile(10, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 11
-            var l1 = new Zone.Lake(11_8, 1, null);
-            var z0 = new Zone.Meadow(11_0, List.of(), null);
-            var z1 = new Zone.River(11_1, 0, l1);
-            var z2 = new Zone.Meadow(11_2, List.of(), null);
-            var z3 = new Zone.River(11_3, 0, l1);
-            var z4 = new Zone.Meadow(11_4, List.of(), null);
-            var z5 = new Zone.Forest(11_5, Zone.Forest.Kind.PLAIN);
-            var z6 = new Zone.Meadow(11_6, List.of(), null);
-            var z7 = new Zone.River(11_7, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.Forest(z5);
-            var sW = new TileSide.River(z6, z7, z0);
-            assert tiles.size() == 11;
-            tiles.add(new Tile(11, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 12
-            var l1 = new Zone.Lake(12_8, 1, null);
-            var z0 = new Zone.Meadow(12_0, List.of(), null);
-            var z1 = new Zone.River(12_1, 0, l1);
-            var z2 = new Zone.Meadow(12_2, List.of(), null);
-            var z3 = new Zone.River(12_3, 0, l1);
-            var a4_0 = new Animal(12_4_0, Animal.Kind.DEER);
-            var z4 = new Zone.Meadow(12_4, List.of(a4_0), null);
-            var z5 = new Zone.River(12_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Meadow(z2);
-            var sS = new TileSide.River(z2, z3, z4);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 12;
-            tiles.add(new Tile(12, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 13
-            var l1 = new Zone.Lake(13_8, 2, null);
-            var a0_0 = new Animal(13_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(13_0, List.of(a0_0), null);
-            var z1 = new Zone.River(13_1, 0, l1);
-            var z2 = new Zone.Meadow(13_2, List.of(), null);
-            var z3 = new Zone.River(13_3, 0, l1);
-            var z4 = new Zone.Meadow(13_4, List.of(), null);
-            var z5 = new Zone.River(13_5, 0, l1);
-            var a6_0 = new Animal(13_6_0, Animal.Kind.DEER);
-            var z6 = new Zone.Meadow(13_6, List.of(a6_0), null);
-            var z7 = new Zone.River(13_7, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z3, z4);
-            var sS = new TileSide.River(z4, z5, z6);
-            var sW = new TileSide.River(z6, z7, z0);
-            assert tiles.size() == 13;
-            tiles.add(new Tile(13, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 14
-            var z0 = new Zone.Meadow(14_0, List.of(), null);
-            var z1 = new Zone.River(14_1, 0, null);
-            var a2_0 = new Animal(14_2_0, Animal.Kind.TIGER);
-            var z2 = new Zone.Meadow(14_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(14_3, Zone.Forest.Kind.PLAIN);
-            var z4 = new Zone.Forest(14_4, Zone.Forest.Kind.PLAIN);
-            var z5 = new Zone.Forest(14_5, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Forest(z3);
-            var sS = new TileSide.Forest(z4);
-            var sW = new TileSide.Forest(z5);
-            assert tiles.size() == 14;
-            tiles.add(new Tile(14, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 15
-            var a0_0 = new Animal(15_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(15_0, List.of(a0_0), null);
-            var z1 = new Zone.River(15_1, 0, null);
-            var z2 = new Zone.Meadow(15_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 15;
-            tiles.add(new Tile(15, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 16
-            var z0 = new Zone.Meadow(16_0, List.of(), null);
-            var z1 = new Zone.River(16_1, 0, null);
-            var a2_0 = new Animal(16_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(16_2, List.of(a2_0), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 16;
-            tiles.add(new Tile(16, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 17
-            var z0 = new Zone.Meadow(17_0, List.of(), null);
-            var z1 = new Zone.River(17_1, 0, null);
-            var a2_0 = new Animal(17_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(17_2, List.of(a2_0), null);
-            var z3 = new Zone.River(17_3, 0, null);
-            var a4_0 = new Animal(17_4_0, Animal.Kind.TIGER);
-            var z4 = new Zone.Meadow(17_4, List.of(a4_0), null);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z1, z0);
-            var sS = new TileSide.River(z0, z3, z4);
-            var sW = new TileSide.River(z4, z3, z0);
-            assert tiles.size() == 17;
-            tiles.add(new Tile(17, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 18
-            var a0_0 = new Animal(18_0_0, Animal.Kind.TIGER);
-            var z0 = new Zone.Meadow(18_0, List.of(a0_0), null);
-            var z1 = new Zone.River(18_1, 0, null);
-            var z2 = new Zone.Meadow(18_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 18;
-            tiles.add(new Tile(18, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 19
-            var a0_0 = new Animal(19_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(19_0, List.of(a0_0), null);
-            var z1 = new Zone.River(19_1, 1, null);
-            var z2 = new Zone.Meadow(19_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 19;
-            tiles.add(new Tile(19, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 20
-            var a0_0 = new Animal(20_0_0, Animal.Kind.AUROCHS);
-            var z0 = new Zone.Meadow(20_0, List.of(a0_0), null);
-            var z1 = new Zone.River(20_1, 2, null);
-            var z2 = new Zone.Meadow(20_2, List.of(), null);
-            var z3 = new Zone.Meadow(20_3, List.of(), null);
-            var z4 = new Zone.Forest(20_4, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z1, z3);
-            var sS = new TileSide.Forest(z4);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 20;
-            tiles.add(new Tile(20, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 21
-            var z0 = new Zone.Meadow(21_0, List.of(), null);
-            var z1 = new Zone.River(21_1, 0, null);
-            var a2_0 = new Animal(21_2_0, Animal.Kind.AUROCHS);
-            var z2 = new Zone.Meadow(21_2, List.of(a2_0), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 21;
-            tiles.add(new Tile(21, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 22
-            var z0 = new Zone.Meadow(22_0, List.of(), null);
-            var z1 = new Zone.River(22_1, 0, null);
-            var a2_0 = new Animal(22_2_0, Animal.Kind.AUROCHS);
-            var z2 = new Zone.Meadow(22_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(22_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Meadow(z2);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 22;
-            tiles.add(new Tile(22, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 23
-            var a0_0 = new Animal(23_0_0, Animal.Kind.AUROCHS);
-            var z0 = new Zone.Meadow(23_0, List.of(a0_0), null);
-            var z1 = new Zone.River(23_1, 0, null);
-            var z2 = new Zone.Meadow(23_2, List.of(), null);
-            var z3 = new Zone.Forest(23_3, Zone.Forest.Kind.WITH_MENHIR);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z1, z0);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.Forest(z3);
-            assert tiles.size() == 23;
-            tiles.add(new Tile(23, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 24
-            var l1 = new Zone.Lake(24_8, 1, null);
-            var z0 = new Zone.Meadow(24_0, List.of(), null);
-            var z1 = new Zone.River(24_1, 0, l1);
-            var a2_0 = new Animal(24_2_0, Animal.Kind.AUROCHS);
-            var z2 = new Zone.Meadow(24_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(24_3, Zone.Forest.Kind.PLAIN);
-            var z4 = new Zone.Meadow(24_4, List.of(), null);
-            var z5 = new Zone.River(24_5, 0, l1);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Meadow(z2);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.River(z4, z5, z0);
-            assert tiles.size() == 24;
-            tiles.add(new Tile(24, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 25
-            var z0 = new Zone.Meadow(25_0, List.of(), null);
-            var z1 = new Zone.River(25_1, 0, null);
-            var a2_0 = new Animal(25_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(25_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(25_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z1, z0);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 25;
-            tiles.add(new Tile(25, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 26
-            var z0 = new Zone.Meadow(26_0, List.of(), null);
-            var z1 = new Zone.River(26_1, 0, null);
-            var z2 = new Zone.Meadow(26_2, List.of(), null);
-            var z3 = new Zone.Forest(26_3, Zone.Forest.Kind.PLAIN);
-            var z4 = new Zone.Forest(26_4, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.River(z2, z1, z0);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.Forest(z4);
-            assert tiles.size() == 26;
-            tiles.add(new Tile(26, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 27
-            var z0 = new Zone.Meadow(27_0, List.of(), null);
-            var z1 = new Zone.River(27_1, 0, null);
-            var a2_0 = new Animal(27_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(27_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(27_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Forest(z3);
-            assert tiles.size() == 27;
-            tiles.add(new Tile(27, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 28
-            var z0 = new Zone.Meadow(28_0, List.of(), null);
-            var z1 = new Zone.River(28_1, 1, null);
-            var z2 = new Zone.Meadow(28_2, List.of(), null);
-            var z3 = new Zone.Forest(28_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Meadow(z2);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 28;
-            tiles.add(new Tile(28, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 29
-            var z0 = new Zone.Forest(29_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Meadow(29_1, List.of(), null);
-            var z2 = new Zone.River(29_2, 0, null);
-            var z3 = new Zone.Meadow(29_3, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.River(z1, z2, z3);
-            var sS = new TileSide.River(z3, z2, z1);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 29;
-            tiles.add(new Tile(29, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 30
-            var a0_0 = new Animal(30_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(30_0, List.of(a0_0), null);
-            var z1 = new Zone.Forest(30_1, Zone.Forest.Kind.WITH_MENHIR);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Meadow(z0);
-            var sS = new TileSide.Forest(z1);
-            var sW = new TileSide.Forest(z1);
-            assert tiles.size() == 30;
-            tiles.add(new Tile(30, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 31
-            var z0 = new Zone.Forest(31_0, Zone.Forest.Kind.WITH_MENHIR);
-            var a1_0 = new Animal(31_1_0, Animal.Kind.TIGER);
-            var z1 = new Zone.Meadow(31_1, List.of(a1_0), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Meadow(z1);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 31;
-            tiles.add(new Tile(31, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 32
-            var z0 = new Zone.Forest(32_0, Zone.Forest.Kind.WITH_MENHIR);
-            var a1_0 = new Animal(32_1_0, Animal.Kind.TIGER);
-            var z1 = new Zone.Meadow(32_1, List.of(a1_0), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Meadow(z1);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 32;
-            tiles.add(new Tile(32, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 33
-            var z0 = new Zone.Forest(33_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Meadow(33_1, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Meadow(z1);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 33;
-            tiles.add(new Tile(33, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 34
-            var z0 = new Zone.Meadow(34_0, List.of(), null);
-            var z1 = new Zone.Meadow(34_1, List.of(), null);
-            var a2_0 = new Animal(34_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(34_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(34_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Meadow(z1);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.Forest(z3);
-            assert tiles.size() == 34;
-            tiles.add(new Tile(34, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 35
-            var a0_0 = new Animal(35_0_0, Animal.Kind.MAMMOTH);
-            var z0 = new Zone.Meadow(35_0, List.of(a0_0), null);
-            var z1 = new Zone.Forest(35_1, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 35;
-            tiles.add(new Tile(35, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 36
-            var a0_0 = new Animal(36_0_0, Animal.Kind.AUROCHS);
-            var z0 = new Zone.Meadow(36_0, List.of(a0_0), null);
-            var z1 = new Zone.Forest(36_1, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Meadow(z0);
-            var sS = new TileSide.Forest(z1);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 36;
-            tiles.add(new Tile(36, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 37
-            var z0 = new Zone.Forest(37_0, Zone.Forest.Kind.PLAIN);
-            var a1_0 = new Animal(37_1_0, Animal.Kind.DEER);
-            var z1 = new Zone.Meadow(37_1, List.of(a1_0), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Meadow(z1);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Meadow(z1);
-            assert tiles.size() == 37;
-            tiles.add(new Tile(37, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 38
-            var a0_0 = new Animal(38_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(38_0, List.of(a0_0), null);
-            var z1 = new Zone.Forest(38_1, Zone.Forest.Kind.WITH_MENHIR);
-            var z2 = new Zone.Meadow(38_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.Forest(z1);
-            assert tiles.size() == 38;
-            tiles.add(new Tile(38, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 39
-            var z0 = new Zone.Meadow(39_0, List.of(), null);
-            var z1 = new Zone.Forest(39_1, Zone.Forest.Kind.WITH_MENHIR);
-            var z2 = new Zone.Meadow(39_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.Forest(z1);
-            assert tiles.size() == 39;
-            tiles.add(new Tile(39, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 40
-            var z0 = new Zone.Meadow(40_0, List.of(), null);
-            var z1 = new Zone.Forest(40_1, Zone.Forest.Kind.WITH_MENHIR);
-            var z2 = new Zone.Meadow(40_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.Forest(z1);
-            assert tiles.size() == 40;
-            tiles.add(new Tile(40, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 41
-            var a0_0 = new Animal(41_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(41_0, List.of(a0_0), null);
-            var z1 = new Zone.Forest(41_1, Zone.Forest.Kind.PLAIN);
-            var z2 = new Zone.Forest(41_2, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z0);
-            var sW = new TileSide.Forest(z2);
-            assert tiles.size() == 41;
-            tiles.add(new Tile(41, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 42
-            var z0 = new Zone.Forest(42_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Meadow(42_1, List.of(), null);
-            var z2 = new Zone.Meadow(42_2, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Forest(z0);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Meadow(z2);
-            assert tiles.size() == 42;
-            tiles.add(new Tile(42, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 43
-            var z0 = new Zone.Forest(43_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Forest(43_1, Zone.Forest.Kind.PLAIN);
-            var z2 = new Zone.Meadow(43_2, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Forest(z0);
-            var sS = new TileSide.Forest(z1);
-            var sW = new TileSide.Meadow(z2);
-            assert tiles.size() == 43;
-            tiles.add(new Tile(43, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 44
-            var z0 = new Zone.Forest(44_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Forest(44_1, Zone.Forest.Kind.PLAIN);
-            var a2_0 = new Animal(44_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(44_2, List.of(a2_0), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Forest(z1);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 44;
-            tiles.add(new Tile(44, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 45
-            var z0 = new Zone.Meadow(45_0, List.of(), null);
-            var z1 = new Zone.River(45_1, 1, null);
-            var z2 = new Zone.Meadow(45_2, List.of(), null);
-            var z3 = new Zone.Forest(45_3, Zone.Forest.Kind.PLAIN);
-            var a4_0 = new Animal(45_4_0, Animal.Kind.DEER);
-            var z4 = new Zone.Meadow(45_4, List.of(a4_0), null);
-            var z5 = new Zone.Meadow(45_5, List.of(), null);
-            var z6 = new Zone.Forest(45_6, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Forest(z3);
-            var sS = new TileSide.River(z4, z1, z5);
-            var sW = new TileSide.Forest(z6);
-            assert tiles.size() == 45;
-            tiles.add(new Tile(45, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 46
-            var z0 = new Zone.Meadow(46_0, List.of(), null);
-            var z1 = new Zone.River(46_1, 0, null);
-            var z2 = new Zone.Meadow(46_2, List.of(), null);
-            var z3 = new Zone.Forest(46_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 46;
-            tiles.add(new Tile(46, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 47
-            var z0 = new Zone.Meadow(47_0, List.of(), null);
-            var z1 = new Zone.River(47_1, 1, null);
-            var a2_0 = new Animal(47_2_0, Animal.Kind.DEER);
-            var z2 = new Zone.Meadow(47_2, List.of(a2_0), null);
-            var z3 = new Zone.Forest(47_3, Zone.Forest.Kind.PLAIN);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Forest(z3);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 47;
-            tiles.add(new Tile(47, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 48
-            var z0 = new Zone.Meadow(48_0, List.of(), null);
-            var z1 = new Zone.River(48_1, 0, null);
-            var a2_0 = new Animal(48_2_0, Animal.Kind.TIGER);
-            var z2 = new Zone.Meadow(48_2, List.of(a2_0), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 48;
-            tiles.add(new Tile(48, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 49
-            var a0_0 = new Animal(49_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(49_0, List.of(a0_0), null);
-            var z1 = new Zone.River(49_1, 0, null);
-            var a2_0 = new Animal(49_2_0, Animal.Kind.TIGER);
-            var z2 = new Zone.Meadow(49_2, List.of(a2_0), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 49;
-            tiles.add(new Tile(49, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 50
-            var a0_0 = new Animal(50_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(50_0, List.of(a0_0), null);
-            var z1 = new Zone.River(50_1, 0, null);
-            var z2 = new Zone.Meadow(50_2, List.of(), null);
-            var sN = new TileSide.River(z0, z1, z2);
-            var sE = new TileSide.Meadow(z2);
-            var sS = new TileSide.River(z2, z1, z0);
-            var sW = new TileSide.Meadow(z0);
-            assert tiles.size() == 50;
-            tiles.add(new Tile(50, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 51
-            var a0_0 = new Animal(51_0_0, Animal.Kind.AUROCHS);
-            var z0 = new Zone.Meadow(51_0, List.of(a0_0), null);
-            var z1 = new Zone.River(51_1, 0, null);
-            var z2 = new Zone.Meadow(51_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 51;
-            tiles.add(new Tile(51, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 52
-            var a0_0 = new Animal(52_0_0, Animal.Kind.DEER);
-            var z0 = new Zone.Meadow(52_0, List.of(a0_0), null);
-            var z1 = new Zone.River(52_1, 0, null);
-            var z2 = new Zone.Meadow(52_2, List.of(), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 52;
-            tiles.add(new Tile(52, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 53
-            var z0 = new Zone.Meadow(53_0, List.of(), null);
-            var z1 = new Zone.River(53_1, 0, null);
-            var a2_0 = new Animal(53_2_0, Animal.Kind.MAMMOTH);
-            var z2 = new Zone.Meadow(53_2, List.of(a2_0), null);
-            var sN = new TileSide.Meadow(z0);
-            var sE = new TileSide.River(z0, z1, z2);
-            var sS = new TileSide.Meadow(z2);
-            var sW = new TileSide.River(z2, z1, z0);
-            assert tiles.size() == 53;
-            tiles.add(new Tile(53, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 54
-            var z0 = new Zone.Forest(54_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Meadow(54_1, List.of(), null);
-            var z2 = new Zone.River(54_2, 0, null);
-            var a3_0 = new Animal(54_3_0, Animal.Kind.DEER);
-            var z3 = new Zone.Meadow(54_3, List.of(a3_0), null);
-            var z4 = new Zone.Meadow(54_4, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.River(z1, z2, z3);
-            var sS = new TileSide.River(z3, z2, z4);
-            var sW = new TileSide.Forest(z0);
-            assert tiles.size() == 54;
-            tiles.add(new Tile(54, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
-        {   // Tile 55
-            var z0 = new Zone.Forest(55_0, Zone.Forest.Kind.WITH_MENHIR);
-            var z1 = new Zone.Forest(55_1, Zone.Forest.Kind.PLAIN);
-            var z2 = new Zone.Meadow(55_2, List.of(), null);
-            var z3 = new Zone.River(55_3, 0, null);
-            var z4 = new Zone.Meadow(55_4, List.of(), null);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Forest(z0);
-            var sS = new TileSide.Forest(z1);
-            var sW = new TileSide.River(z2, z3, z4);
-            assert tiles.size() == 55;
-            tiles.add(new Tile(55, Tile.Kind.NORMAL, sN, sE, sS, sW));
-        }
+//        {   // Tile 5
+//            var l1 = new Zone.Lake(5_8, 1, null);
+//            var a0_0 = new Animal(5_0_0, Animal.Kind.AUROCHS);
+//            var z0 = new Zone.Meadow(5_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(5_1, 0, l1);
+//            var z2 = new Zone.Meadow(5_2, List.of(), null);
+//            var z3 = new Zone.River(5_3, 0, l1);
+//            var z4 = new Zone.Meadow(5_4, List.of(), null);
+//            var z5 = new Zone.River(5_5, 0, l1);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z3, z4);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 5;
+//            tiles.add(new Tile(5, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 6
+//            var l1 = new Zone.Lake(6_8, 1, null);
+//            var z0 = new Zone.Meadow(6_0, List.of(), null);
+//            var z1 = new Zone.River(6_1, 0, l1);
+//            var z2 = new Zone.Meadow(6_2, List.of(), null);
+//            var z3 = new Zone.River(6_3, 0, l1);
+//            var a4_0 = new Animal(6_4_0, Animal.Kind.DEER);
+//            var z4 = new Zone.Meadow(6_4, List.of(a4_0), null);
+//            var z5 = new Zone.River(6_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.Meadow(z4);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 6;
+//            tiles.add(new Tile(6, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 7
+//            var l1 = new Zone.Lake(7_8, 1, null);
+//            var a0_0 = new Animal(7_0_0, Animal.Kind.TIGER);
+//            var z0 = new Zone.Meadow(7_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(7_1, 0, l1);
+//            var z2 = new Zone.Meadow(7_2, List.of(), null);
+//            var z3 = new Zone.River(7_3, 0, l1);
+//            var z4 = new Zone.Meadow(7_4, List.of(), null);
+//            var z5 = new Zone.River(7_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.River(z4, z5, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 7;
+//            tiles.add(new Tile(7, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 8
+//            var l1 = new Zone.Lake(8_8, 1, null);
+//            var a0_0 = new Animal(8_0_0, Animal.Kind.MAMMOTH);
+//            var z0 = new Zone.Meadow(8_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(8_1, 0, l1);
+//            var a2_0 = new Animal(8_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(8_2, List.of(a2_0), null);
+//            var z3 = new Zone.River(8_3, 0, l1);
+//            var z4 = new Zone.Meadow(8_4, List.of(), null);
+//            var z5 = new Zone.River(8_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.Meadow(z4);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 8;
+//            tiles.add(new Tile(8, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 9
+//            var l1 = new Zone.Lake(9_8, 2, null);
+//            var z0 = new Zone.Meadow(9_0, List.of(), null);
+//            var z1 = new Zone.River(9_1, 0, l1);
+//            var z2 = new Zone.Meadow(9_2, List.of(), null);
+//            var z3 = new Zone.River(9_3, 0, l1);
+//            var z4 = new Zone.Meadow(9_4, List.of(), null);
+//            var z5 = new Zone.River(9_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.River(z4, z5, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 9;
+//            tiles.add(new Tile(9, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 10
+//            var l1 = new Zone.Lake(10_8, 1, null);
+//            var z0 = new Zone.Meadow(10_0, List.of(), null);
+//            var z1 = new Zone.River(10_1, 0, l1);
+//            var z2 = new Zone.Meadow(10_2, List.of(), null);
+//            var z3 = new Zone.River(10_3, 0, l1);
+//            var a4_0 = new Animal(10_4_0, Animal.Kind.DEER);
+//            var z4 = new Zone.Meadow(10_4, List.of(a4_0), null);
+//            var z5 = new Zone.River(10_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.Meadow(z4);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 10;
+//            tiles.add(new Tile(10, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 11
+//            var l1 = new Zone.Lake(11_8, 1, null);
+//            var z0 = new Zone.Meadow(11_0, List.of(), null);
+//            var z1 = new Zone.River(11_1, 0, l1);
+//            var z2 = new Zone.Meadow(11_2, List.of(), null);
+//            var z3 = new Zone.River(11_3, 0, l1);
+//            var z4 = new Zone.Meadow(11_4, List.of(), null);
+//            var z5 = new Zone.Forest(11_5, Zone.Forest.Kind.PLAIN);
+//            var z6 = new Zone.Meadow(11_6, List.of(), null);
+//            var z7 = new Zone.River(11_7, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.Forest(z5);
+//            var sW = new TileSide.River(z6, z7, z0);
+//            assert tiles.size() == 11;
+//            tiles.add(new Tile(11, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 12
+//            var l1 = new Zone.Lake(12_8, 1, null);
+//            var z0 = new Zone.Meadow(12_0, List.of(), null);
+//            var z1 = new Zone.River(12_1, 0, l1);
+//            var z2 = new Zone.Meadow(12_2, List.of(), null);
+//            var z3 = new Zone.River(12_3, 0, l1);
+//            var a4_0 = new Animal(12_4_0, Animal.Kind.DEER);
+//            var z4 = new Zone.Meadow(12_4, List.of(a4_0), null);
+//            var z5 = new Zone.River(12_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Meadow(z2);
+//            var sS = new TileSide.River(z2, z3, z4);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 12;
+//            tiles.add(new Tile(12, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 13
+//            var l1 = new Zone.Lake(13_8, 2, null);
+//            var a0_0 = new Animal(13_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(13_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(13_1, 0, l1);
+//            var z2 = new Zone.Meadow(13_2, List.of(), null);
+//            var z3 = new Zone.River(13_3, 0, l1);
+//            var z4 = new Zone.Meadow(13_4, List.of(), null);
+//            var z5 = new Zone.River(13_5, 0, l1);
+//            var a6_0 = new Animal(13_6_0, Animal.Kind.DEER);
+//            var z6 = new Zone.Meadow(13_6, List.of(a6_0), null);
+//            var z7 = new Zone.River(13_7, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z3, z4);
+//            var sS = new TileSide.River(z4, z5, z6);
+//            var sW = new TileSide.River(z6, z7, z0);
+//            assert tiles.size() == 13;
+//            tiles.add(new Tile(13, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 14
+//            var z0 = new Zone.Meadow(14_0, List.of(), null);
+//            var z1 = new Zone.River(14_1, 0, null);
+//            var a2_0 = new Animal(14_2_0, Animal.Kind.TIGER);
+//            var z2 = new Zone.Meadow(14_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(14_3, Zone.Forest.Kind.PLAIN);
+//            var z4 = new Zone.Forest(14_4, Zone.Forest.Kind.PLAIN);
+//            var z5 = new Zone.Forest(14_5, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Forest(z3);
+//            var sS = new TileSide.Forest(z4);
+//            var sW = new TileSide.Forest(z5);
+//            assert tiles.size() == 14;
+//            tiles.add(new Tile(14, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 15
+//            var a0_0 = new Animal(15_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(15_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(15_1, 0, null);
+//            var z2 = new Zone.Meadow(15_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 15;
+//            tiles.add(new Tile(15, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 16
+//            var z0 = new Zone.Meadow(16_0, List.of(), null);
+//            var z1 = new Zone.River(16_1, 0, null);
+//            var a2_0 = new Animal(16_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(16_2, List.of(a2_0), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 16;
+//            tiles.add(new Tile(16, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 17
+//            var z0 = new Zone.Meadow(17_0, List.of(), null);
+//            var z1 = new Zone.River(17_1, 0, null);
+//            var a2_0 = new Animal(17_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(17_2, List.of(a2_0), null);
+//            var z3 = new Zone.River(17_3, 0, null);
+//            var a4_0 = new Animal(17_4_0, Animal.Kind.TIGER);
+//            var z4 = new Zone.Meadow(17_4, List.of(a4_0), null);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z1, z0);
+//            var sS = new TileSide.River(z0, z3, z4);
+//            var sW = new TileSide.River(z4, z3, z0);
+//            assert tiles.size() == 17;
+//            tiles.add(new Tile(17, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 18
+//            var a0_0 = new Animal(18_0_0, Animal.Kind.TIGER);
+//            var z0 = new Zone.Meadow(18_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(18_1, 0, null);
+//            var z2 = new Zone.Meadow(18_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 18;
+//            tiles.add(new Tile(18, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 19
+//            var a0_0 = new Animal(19_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(19_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(19_1, 1, null);
+//            var z2 = new Zone.Meadow(19_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 19;
+//            tiles.add(new Tile(19, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 20
+//            var a0_0 = new Animal(20_0_0, Animal.Kind.AUROCHS);
+//            var z0 = new Zone.Meadow(20_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(20_1, 2, null);
+//            var z2 = new Zone.Meadow(20_2, List.of(), null);
+//            var z3 = new Zone.Meadow(20_3, List.of(), null);
+//            var z4 = new Zone.Forest(20_4, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z1, z3);
+//            var sS = new TileSide.Forest(z4);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 20;
+//            tiles.add(new Tile(20, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 21
+//            var z0 = new Zone.Meadow(21_0, List.of(), null);
+//            var z1 = new Zone.River(21_1, 0, null);
+//            var a2_0 = new Animal(21_2_0, Animal.Kind.AUROCHS);
+//            var z2 = new Zone.Meadow(21_2, List.of(a2_0), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 21;
+//            tiles.add(new Tile(21, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 22
+//            var z0 = new Zone.Meadow(22_0, List.of(), null);
+//            var z1 = new Zone.River(22_1, 0, null);
+//            var a2_0 = new Animal(22_2_0, Animal.Kind.AUROCHS);
+//            var z2 = new Zone.Meadow(22_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(22_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Meadow(z2);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 22;
+//            tiles.add(new Tile(22, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 23
+//            var a0_0 = new Animal(23_0_0, Animal.Kind.AUROCHS);
+//            var z0 = new Zone.Meadow(23_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(23_1, 0, null);
+//            var z2 = new Zone.Meadow(23_2, List.of(), null);
+//            var z3 = new Zone.Forest(23_3, Zone.Forest.Kind.WITH_MENHIR);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z1, z0);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.Forest(z3);
+//            assert tiles.size() == 23;
+//            tiles.add(new Tile(23, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 24
+//            var l1 = new Zone.Lake(24_8, 1, null);
+//            var z0 = new Zone.Meadow(24_0, List.of(), null);
+//            var z1 = new Zone.River(24_1, 0, l1);
+//            var a2_0 = new Animal(24_2_0, Animal.Kind.AUROCHS);
+//            var z2 = new Zone.Meadow(24_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(24_3, Zone.Forest.Kind.PLAIN);
+//            var z4 = new Zone.Meadow(24_4, List.of(), null);
+//            var z5 = new Zone.River(24_5, 0, l1);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Meadow(z2);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.River(z4, z5, z0);
+//            assert tiles.size() == 24;
+//            tiles.add(new Tile(24, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 25
+//            var z0 = new Zone.Meadow(25_0, List.of(), null);
+//            var z1 = new Zone.River(25_1, 0, null);
+//            var a2_0 = new Animal(25_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(25_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(25_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z1, z0);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 25;
+//            tiles.add(new Tile(25, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 26
+//            var z0 = new Zone.Meadow(26_0, List.of(), null);
+//            var z1 = new Zone.River(26_1, 0, null);
+//            var z2 = new Zone.Meadow(26_2, List.of(), null);
+//            var z3 = new Zone.Forest(26_3, Zone.Forest.Kind.PLAIN);
+//            var z4 = new Zone.Forest(26_4, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.River(z2, z1, z0);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.Forest(z4);
+//            assert tiles.size() == 26;
+//            tiles.add(new Tile(26, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 27
+//            var z0 = new Zone.Meadow(27_0, List.of(), null);
+//            var z1 = new Zone.River(27_1, 0, null);
+//            var a2_0 = new Animal(27_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(27_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(27_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Forest(z3);
+//            assert tiles.size() == 27;
+//            tiles.add(new Tile(27, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 28
+//            var z0 = new Zone.Meadow(28_0, List.of(), null);
+//            var z1 = new Zone.River(28_1, 1, null);
+//            var z2 = new Zone.Meadow(28_2, List.of(), null);
+//            var z3 = new Zone.Forest(28_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Meadow(z2);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 28;
+//            tiles.add(new Tile(28, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 29
+//            var z0 = new Zone.Forest(29_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Meadow(29_1, List.of(), null);
+//            var z2 = new Zone.River(29_2, 0, null);
+//            var z3 = new Zone.Meadow(29_3, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.River(z1, z2, z3);
+//            var sS = new TileSide.River(z3, z2, z1);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 29;
+//            tiles.add(new Tile(29, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 30
+//            var a0_0 = new Animal(30_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(30_0, List.of(a0_0), null);
+//            var z1 = new Zone.Forest(30_1, Zone.Forest.Kind.WITH_MENHIR);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Meadow(z0);
+//            var sS = new TileSide.Forest(z1);
+//            var sW = new TileSide.Forest(z1);
+//            assert tiles.size() == 30;
+//            tiles.add(new Tile(30, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 31
+//            var z0 = new Zone.Forest(31_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var a1_0 = new Animal(31_1_0, Animal.Kind.TIGER);
+//            var z1 = new Zone.Meadow(31_1, List.of(a1_0), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Meadow(z1);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 31;
+//            tiles.add(new Tile(31, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 32
+//            var z0 = new Zone.Forest(32_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var a1_0 = new Animal(32_1_0, Animal.Kind.TIGER);
+//            var z1 = new Zone.Meadow(32_1, List.of(a1_0), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Meadow(z1);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 32;
+//            tiles.add(new Tile(32, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 33
+//            var z0 = new Zone.Forest(33_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Meadow(33_1, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Meadow(z1);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 33;
+//            tiles.add(new Tile(33, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 34
+//            var z0 = new Zone.Meadow(34_0, List.of(), null);
+//            var z1 = new Zone.Meadow(34_1, List.of(), null);
+//            var a2_0 = new Animal(34_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(34_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(34_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Meadow(z1);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.Forest(z3);
+//            assert tiles.size() == 34;
+//            tiles.add(new Tile(34, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 35
+//            var a0_0 = new Animal(35_0_0, Animal.Kind.MAMMOTH);
+//            var z0 = new Zone.Meadow(35_0, List.of(a0_0), null);
+//            var z1 = new Zone.Forest(35_1, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 35;
+//            tiles.add(new Tile(35, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 36
+//            var a0_0 = new Animal(36_0_0, Animal.Kind.AUROCHS);
+//            var z0 = new Zone.Meadow(36_0, List.of(a0_0), null);
+//            var z1 = new Zone.Forest(36_1, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Meadow(z0);
+//            var sS = new TileSide.Forest(z1);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 36;
+//            tiles.add(new Tile(36, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 37
+//            var z0 = new Zone.Forest(37_0, Zone.Forest.Kind.PLAIN);
+//            var a1_0 = new Animal(37_1_0, Animal.Kind.DEER);
+//            var z1 = new Zone.Meadow(37_1, List.of(a1_0), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Meadow(z1);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Meadow(z1);
+//            assert tiles.size() == 37;
+//            tiles.add(new Tile(37, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 38
+//            var a0_0 = new Animal(38_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(38_0, List.of(a0_0), null);
+//            var z1 = new Zone.Forest(38_1, Zone.Forest.Kind.WITH_MENHIR);
+//            var z2 = new Zone.Meadow(38_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.Forest(z1);
+//            assert tiles.size() == 38;
+//            tiles.add(new Tile(38, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 39
+//            var z0 = new Zone.Meadow(39_0, List.of(), null);
+//            var z1 = new Zone.Forest(39_1, Zone.Forest.Kind.WITH_MENHIR);
+//            var z2 = new Zone.Meadow(39_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.Forest(z1);
+//            assert tiles.size() == 39;
+//            tiles.add(new Tile(39, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 40
+//            var z0 = new Zone.Meadow(40_0, List.of(), null);
+//            var z1 = new Zone.Forest(40_1, Zone.Forest.Kind.WITH_MENHIR);
+//            var z2 = new Zone.Meadow(40_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.Forest(z1);
+//            assert tiles.size() == 40;
+//            tiles.add(new Tile(40, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 41
+//            var a0_0 = new Animal(41_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(41_0, List.of(a0_0), null);
+//            var z1 = new Zone.Forest(41_1, Zone.Forest.Kind.PLAIN);
+//            var z2 = new Zone.Forest(41_2, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z0);
+//            var sW = new TileSide.Forest(z2);
+//            assert tiles.size() == 41;
+//            tiles.add(new Tile(41, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 42
+//            var z0 = new Zone.Forest(42_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Meadow(42_1, List.of(), null);
+//            var z2 = new Zone.Meadow(42_2, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Forest(z0);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Meadow(z2);
+//            assert tiles.size() == 42;
+//            tiles.add(new Tile(42, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 43
+//            var z0 = new Zone.Forest(43_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Forest(43_1, Zone.Forest.Kind.PLAIN);
+//            var z2 = new Zone.Meadow(43_2, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Forest(z0);
+//            var sS = new TileSide.Forest(z1);
+//            var sW = new TileSide.Meadow(z2);
+//            assert tiles.size() == 43;
+//            tiles.add(new Tile(43, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 44
+//            var z0 = new Zone.Forest(44_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Forest(44_1, Zone.Forest.Kind.PLAIN);
+//            var a2_0 = new Animal(44_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(44_2, List.of(a2_0), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Forest(z1);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 44;
+//            tiles.add(new Tile(44, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 45
+//            var z0 = new Zone.Meadow(45_0, List.of(), null);
+//            var z1 = new Zone.River(45_1, 1, null);
+//            var z2 = new Zone.Meadow(45_2, List.of(), null);
+//            var z3 = new Zone.Forest(45_3, Zone.Forest.Kind.PLAIN);
+//            var a4_0 = new Animal(45_4_0, Animal.Kind.DEER);
+//            var z4 = new Zone.Meadow(45_4, List.of(a4_0), null);
+//            var z5 = new Zone.Meadow(45_5, List.of(), null);
+//            var z6 = new Zone.Forest(45_6, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Forest(z3);
+//            var sS = new TileSide.River(z4, z1, z5);
+//            var sW = new TileSide.Forest(z6);
+//            assert tiles.size() == 45;
+//            tiles.add(new Tile(45, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 46
+//            var z0 = new Zone.Meadow(46_0, List.of(), null);
+//            var z1 = new Zone.River(46_1, 0, null);
+//            var z2 = new Zone.Meadow(46_2, List.of(), null);
+//            var z3 = new Zone.Forest(46_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 46;
+//            tiles.add(new Tile(46, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 47
+//            var z0 = new Zone.Meadow(47_0, List.of(), null);
+//            var z1 = new Zone.River(47_1, 1, null);
+//            var a2_0 = new Animal(47_2_0, Animal.Kind.DEER);
+//            var z2 = new Zone.Meadow(47_2, List.of(a2_0), null);
+//            var z3 = new Zone.Forest(47_3, Zone.Forest.Kind.PLAIN);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Forest(z3);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 47;
+//            tiles.add(new Tile(47, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 48
+//            var z0 = new Zone.Meadow(48_0, List.of(), null);
+//            var z1 = new Zone.River(48_1, 0, null);
+//            var a2_0 = new Animal(48_2_0, Animal.Kind.TIGER);
+//            var z2 = new Zone.Meadow(48_2, List.of(a2_0), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 48;
+//            tiles.add(new Tile(48, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 49
+//            var a0_0 = new Animal(49_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(49_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(49_1, 0, null);
+//            var a2_0 = new Animal(49_2_0, Animal.Kind.TIGER);
+//            var z2 = new Zone.Meadow(49_2, List.of(a2_0), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 49;
+//            tiles.add(new Tile(49, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 50
+//            var a0_0 = new Animal(50_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(50_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(50_1, 0, null);
+//            var z2 = new Zone.Meadow(50_2, List.of(), null);
+//            var sN = new TileSide.River(z0, z1, z2);
+//            var sE = new TileSide.Meadow(z2);
+//            var sS = new TileSide.River(z2, z1, z0);
+//            var sW = new TileSide.Meadow(z0);
+//            assert tiles.size() == 50;
+//            tiles.add(new Tile(50, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 51
+//            var a0_0 = new Animal(51_0_0, Animal.Kind.AUROCHS);
+//            var z0 = new Zone.Meadow(51_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(51_1, 0, null);
+//            var z2 = new Zone.Meadow(51_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 51;
+//            tiles.add(new Tile(51, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 52
+//            var a0_0 = new Animal(52_0_0, Animal.Kind.DEER);
+//            var z0 = new Zone.Meadow(52_0, List.of(a0_0), null);
+//            var z1 = new Zone.River(52_1, 0, null);
+//            var z2 = new Zone.Meadow(52_2, List.of(), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 52;
+//            tiles.add(new Tile(52, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 53
+//            var z0 = new Zone.Meadow(53_0, List.of(), null);
+//            var z1 = new Zone.River(53_1, 0, null);
+//            var a2_0 = new Animal(53_2_0, Animal.Kind.MAMMOTH);
+//            var z2 = new Zone.Meadow(53_2, List.of(a2_0), null);
+//            var sN = new TileSide.Meadow(z0);
+//            var sE = new TileSide.River(z0, z1, z2);
+//            var sS = new TileSide.Meadow(z2);
+//            var sW = new TileSide.River(z2, z1, z0);
+//            assert tiles.size() == 53;
+//            tiles.add(new Tile(53, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 54
+//            var z0 = new Zone.Forest(54_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Meadow(54_1, List.of(), null);
+//            var z2 = new Zone.River(54_2, 0, null);
+//            var a3_0 = new Animal(54_3_0, Animal.Kind.DEER);
+//            var z3 = new Zone.Meadow(54_3, List.of(a3_0), null);
+//            var z4 = new Zone.Meadow(54_4, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.River(z1, z2, z3);
+//            var sS = new TileSide.River(z3, z2, z4);
+//            var sW = new TileSide.Forest(z0);
+//            assert tiles.size() == 54;
+//            tiles.add(new Tile(54, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
+//        {   // Tile 55
+//            var z0 = new Zone.Forest(55_0, Zone.Forest.Kind.WITH_MENHIR);
+//            var z1 = new Zone.Forest(55_1, Zone.Forest.Kind.PLAIN);
+//            var z2 = new Zone.Meadow(55_2, List.of(), null);
+//            var z3 = new Zone.River(55_3, 0, null);
+//            var z4 = new Zone.Meadow(55_4, List.of(), null);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Forest(z0);
+//            var sS = new TileSide.Forest(z1);
+//            var sW = new TileSide.River(z2, z3, z4);
+//            assert tiles.size() == 55;
+//            tiles.add(new Tile(55, Tile.Kind.NORMAL, sN, sE, sS, sW));
+//        }
         {   // Tile 56
             var l1 = new Zone.Lake(56_8, 1, null);
             var a0_0 = new Animal(56_0_0, Animal.Kind.AUROCHS);
@@ -763,7 +763,7 @@ public final class Tiles implements Serializable {
             var sE = new TileSide.Forest(z1);
             var sS = new TileSide.Forest(z1);
             var sW = new TileSide.River(z2, z3, z0);
-            assert tiles.size() == 56;
+            //assert tiles.size() == 56;
             tiles.add(new Tile(56, Tile.Kind.START, sN, sE, sS, sW));
         }
 //        {   // Tile 57
@@ -1212,16 +1212,16 @@ public final class Tiles implements Serializable {
 //            assert tiles.size() == 91;
 //            tiles.add(new Tile(91, Tile.Kind.MENHIR, sN, sE, sS, sW));
 //        }
-        {   // Tile 92
-            var z0 = new Zone.Forest(92_0, Zone.Forest.Kind.PLAIN);
-            var z1 = new Zone.Meadow(92_1, List.of(), Zone.SpecialPower.PIT_TRAP);
-            var sN = new TileSide.Forest(z0);
-            var sE = new TileSide.Forest(z0);
-            var sS = new TileSide.Meadow(z1);
-            var sW = new TileSide.Meadow(z1);
-            //assert tiles.size() == 92;
-            tiles.add(new Tile(92, Tile.Kind.MENHIR, sN, sE, sS, sW));
-        }
+//        {   // Tile 92
+//            var z0 = new Zone.Forest(92_0, Zone.Forest.Kind.PLAIN);
+//            var z1 = new Zone.Meadow(92_1, List.of(), Zone.SpecialPower.PIT_TRAP);
+//            var sN = new TileSide.Forest(z0);
+//            var sE = new TileSide.Forest(z0);
+//            var sS = new TileSide.Meadow(z1);
+//            var sW = new TileSide.Meadow(z1);
+//            assert tiles.size() == 92;
+//            tiles.add(new Tile(92, Tile.Kind.MENHIR, sN, sE, sS, sW));
+//        }
 //        {   // Tile 93
 //            var l1 = new Zone.Lake(93_8, 1, Zone.SpecialPower.LOGBOAT);
 //            var z0 = new Zone.Meadow(93_0, List.of(), null);
