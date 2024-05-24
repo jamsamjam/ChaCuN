@@ -16,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 import java.util.*;
@@ -75,6 +76,11 @@ public final class BoardUI {
         gridPane.setId("board-grid");
         scrollPane.setContent(gridPane);
 
+        StackPane stackPane = new StackPane();
+        ImageView animalScore = new ImageView("animalScore.png");
+        stackPane.getChildren().addAll(scrollPane, animalScore);
+        StackPane.setAlignment(animalScore, javafx.geometry.Pos.TOP_LEFT);
+
         for (int x = -scope; x <= scope; x++)
             for (int y = -scope; y <= scope; y++) {
                 ObjectProperty<CellData> cellData = new SimpleObjectProperty<>();
@@ -96,6 +102,11 @@ public final class BoardUI {
                     if (oV == null) {
                         group.getChildren().addAll(markers(nV, boardO));
                         group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
+
+                        Node gem = Gem.newFor();
+                        gem.setId(STR."gem_\{nV.id()}");
+                        gem.getStyleClass().add("gem");
+                        group.getChildren().add(gem);
                     }
                 });
 
@@ -166,7 +177,7 @@ public final class BoardUI {
                 }));
             }
 
-        return scrollPane;
+        return stackPane;
     }
 
     private static List<ImageView> markers(PlacedTile tile,

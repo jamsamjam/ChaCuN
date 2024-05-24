@@ -49,7 +49,7 @@ public final class DecksUI {
         nextTileImage.imageProperty().bind(tileO.map(t -> t == null ? null : largeImageForTile(t.id())));
 
         Text text = new Text();
-        text.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.8);
+        text.setWrappingWidth(LARGE_TILE_FIT_SIZE * 0.75);
         text.textProperty().bind(textO.map(Object::toString));
         text.visibleProperty().bind(textO.map(s -> !s.isEmpty()));
 

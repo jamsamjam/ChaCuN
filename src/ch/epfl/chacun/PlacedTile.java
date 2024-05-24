@@ -1,4 +1,5 @@
 package ch.epfl.chacun;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -17,7 +18,8 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param pos the position at which the tile was placed
  * @param occupant the occupant of the tile, or null if it is not occupied
  */
-public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant) {
+public record PlacedTile(Tile tile, PlayerColor placer, Rotation rotation, Pos pos, Occupant occupant)
+        implements Serializable {
     /**
      * Compact constructor of PlacedTile.
      *

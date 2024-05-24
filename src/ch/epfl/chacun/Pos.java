@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
+
 /**
  * Represents a position.
  *
@@ -9,7 +11,7 @@ package ch.epfl.chacun;
  * @param x the x coordinate
  * @param y the y coordinate
  */
-public record Pos(int x, int y) {
+public record Pos(int x, int y) implements Serializable {
     /**
      * The origin position, the central square of the game board, which contains the starting tile.
      */

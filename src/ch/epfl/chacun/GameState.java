@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public record GameState(List<PlayerColor> players,
                         Tile tileToPlace,
                         Board board,
                         Action nextAction,
-                        MessageBoard messageBoard) {
+                        MessageBoard messageBoard) implements Serializable {
     /**
      * Compact constructor of GameState.
      *

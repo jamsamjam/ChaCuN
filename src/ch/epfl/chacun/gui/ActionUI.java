@@ -2,6 +2,7 @@ package ch.epfl.chacun.gui;
 
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
@@ -31,7 +32,9 @@ public final class ActionUI {
      *                     an action, which must be performed if it is valid
      */
     public static Node create(ObservableValue<List<String>> actionsO,
-                              Consumer<String> eventHandler) {
+                              Consumer<String> eventHandler,
+                              Runnable saveHandler,
+                              Runnable loadHandler) {
         HBox hBox = new HBox();
         hBox.getStylesheets().add("actions.css");
         hBox.setId("actions");
@@ -48,7 +51,13 @@ public final class ActionUI {
         }));
 
         TextField textField = getTextField(eventHandler);
-        hBox.getChildren().addAll(text, textField);
+
+        Button saveButton = new Button("\uD83D\uDCBE");
+        saveButton.setOnAction(_ -> saveHandler.run());
+        Button loadButton = new Button("\uD83D\uDCC2");
+        loadButton.setOnAction(_ -> loadHandler.run());
+
+        hBox.getChildren().addAll(text, textField, saveButton, loadButton);
 
         return hBox;
     }

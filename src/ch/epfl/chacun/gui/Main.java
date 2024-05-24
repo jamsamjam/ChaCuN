@@ -7,10 +7,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.random.RandomGenerator;
@@ -132,7 +137,26 @@ public final class Main extends Application {
                 .create(actionsP,
                         t -> update(gameStateP,
                                 actionsP,
-                                decodeAndApply(gameStateP.getValue(), t)));
+                                decodeAndApply(gameStateP.getValue(), t)),
+                        () -> {
+                            FileChooser fileChooser = new FileChooser();
+                            fileChooser.setTitle("Save");
+                            File file = fileChooser.showSaveDialog(primaryStage);
+                            if (file != null) {
+                                GameSaveLoad.saveGame(gameStateP.getValue(), file.getAbsolutePath());
+                            }
+                        },
+                        () -> {
+                            FileChooser fileChooser = new FileChooser();
+                            fileChooser.setTitle("Load");
+                            File file = fileChooser.showOpenDialog(primaryStage);
+                            if (file != null) {
+                                GameState loadedGameState = GameSaveLoad.loadGame(file.getAbsolutePath());
+                                if (loadedGameState != null) {
+                                    gameStateP.setValue(loadedGameState);
+                                }
+                            }
+                        });
 
         ObjectProperty<String> textP = new SimpleObjectProperty<>("");
         ObservableValue<GameState.Action> nextActionO = gameStateP.map(GameState::nextAction);
@@ -142,6 +166,14 @@ public final class Main extends Application {
         textP.bind(nextActionO.map(a -> switch(a) {
             case OCCUPY_TILE -> textMaker.clickToOccupy();
             case RETAKE_PAWN -> textMaker.clickToUnoccupy();
+            case END_GAME -> {
+                Node scoreBoard = ScoreBoardUI.create(playersNames, gameStateP.getValue().messageBoard());
+                StackPane scorePane = new StackPane(scoreBoard);
+                primaryStage.setScene(new Scene(scorePane, 1440, 1080));
+                primaryStage.show();
+
+                yield "";
+            }
             default -> "";
         }));
 
