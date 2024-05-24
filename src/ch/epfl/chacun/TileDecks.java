@@ -1,4 +1,5 @@
 package ch.epfl.chacun;
+import java.io.Serializable;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -14,8 +15,8 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param normalTiles a list containing the remaining normal tiles
  * @param menhirTiles a list containing the remaining menhir tiles
  */
-public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile> menhirTiles) {
-
+public record TileDecks(List<Tile> startTiles, List<Tile> normalTiles, List<Tile> menhirTiles)
+        implements Serializable {
     /**
      * A compact constructor of TileDecks.
      */

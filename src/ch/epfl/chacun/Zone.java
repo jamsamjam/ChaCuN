@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -80,7 +81,7 @@ public sealed interface Zone {
      * @param id the zone identifier
      * @param kind the kind of forest in question
      */
-    record Forest(int id, Kind kind) implements Zone {
+    record Forest(int id, Kind kind) implements Zone, Serializable {
         /**
          * Lists the three types of forests that exist.
          */
@@ -98,7 +99,8 @@ public sealed interface Zone {
      * @param animals the animals contained in the meadow
      * @param specialPower the possible special power of the meadow, which can be null
      */
-    record Meadow(int id, List<Animal> animals, SpecialPower specialPower) implements Zone {
+    record Meadow(int id, List<Animal> animals, SpecialPower specialPower)
+            implements Zone, Serializable {
         /**
          * Compact constructor of Meadow
          */
@@ -111,7 +113,7 @@ public sealed interface Zone {
      * Represents a water type zone.
      * Water zones can be lakes or rivers.
      */
-    sealed interface Water extends Zone {
+    sealed interface Water extends Zone, Serializable {
         /**
          * Returns the number of fish in this water zone
          *
@@ -127,7 +129,8 @@ public sealed interface Zone {
      * @param fishCount the number of fish swimming in the lake
      * @param specialPower the possible special power of the lake, which can be null
      */
-    record Lake(int id, int fishCount, SpecialPower specialPower) implements Water {
+    record Lake(int id, int fishCount, SpecialPower specialPower)
+            implements Water, Serializable {
     }
 
     /**
@@ -137,7 +140,7 @@ public sealed interface Zone {
      * @param fishCount the number of fish swimming in the river
      * @param lake the lake to which the river is connected, or null if there is none
      */
-    record River(int id, int fishCount, Lake lake) implements Water {
+    record River(int id, int fishCount, Lake lake) implements Water, Serializable {
         /**
          * Checks if this river is connected to a lake.
          *

@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -14,7 +15,8 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param occupants the colors of any players occupying the area
  * @param openConnections the number of open connections in the area
  */
-public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections) {
+public record Area<Z extends Zone>(Set<Z> zones, List<PlayerColor> occupants, int openConnections)
+        implements Serializable {
     /**
      * A compact constructor of Area.
      *

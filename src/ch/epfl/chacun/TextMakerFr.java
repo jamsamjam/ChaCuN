@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static ch.epfl.chacun.Animal.Kind.*;
@@ -10,7 +11,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class TextMakerFr implements TextMaker {
+public final class TextMakerFr implements TextMaker, Serializable {
     private final Map<PlayerColor, String> nameColorMap;
 
     /**

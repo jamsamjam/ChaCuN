@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
  *
  * @author Sam Lee (375535)
  */
-public final class ActionEncoder {
+public final class ActionEncoder implements Serializable {
     private ActionEncoder() {}
 
     private static final int NONE = 0b11111;

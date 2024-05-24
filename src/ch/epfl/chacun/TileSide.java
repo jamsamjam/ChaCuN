@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public sealed interface TileSide {
      *
      * @param forest the forest that touches the edge
      */
-    record Forest(Zone.Forest forest) implements TileSide {
+    record Forest(Zone.Forest forest) implements TileSide, Serializable {
 
         @Override
         public List<Zone> zones() {
@@ -47,7 +48,7 @@ public sealed interface TileSide {
      *
      * @param meadow the meadow which touches the edge
      */
-    record Meadow(Zone.Meadow meadow) implements TileSide {
+    record Meadow(Zone.Meadow meadow) implements TileSide, Serializable {
 
         @Override
         public List<Zone> zones() {
@@ -67,7 +68,8 @@ public sealed interface TileSide {
      * @param river the river that touches the edge
      * @param meadow2 the second meadow which surrounds the river and touches the edge
      */
-    record River(Zone.Meadow meadow1, Zone.River river, Zone.Meadow meadow2) implements TileSide {
+    record River(Zone.Meadow meadow1, Zone.River river, Zone.Meadow meadow2)
+            implements TileSide, Serializable {
 
         @Override
         public List<Zone> zones() {

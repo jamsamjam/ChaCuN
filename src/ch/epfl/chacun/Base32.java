@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
+
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
@@ -7,7 +9,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  *
  * @author Sam Lee (375535)
  */
-public final class Base32 {
+public final class Base32 implements Serializable {
     private Base32() {}
 
     /**

@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
+
 /**
  * Represents an animal.
  *
@@ -9,7 +11,7 @@ package ch.epfl.chacun;
  * @param id the identifier of animal
  * @param kind the kind of animal
  */
-public record Animal(int id, Kind kind) {
+public record Animal(int id, Kind kind) implements Serializable {
 
     /**
      * Returns identifier of the tile on which the animal is located.

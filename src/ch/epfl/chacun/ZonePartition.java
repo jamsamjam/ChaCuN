@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -13,7 +14,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param areas the set of areas forming the partition
  * @param <Z> the type parameter representing the zone type
  */
-public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas){
+public record ZonePartition<Z extends Zone>(Set<Area<Z>> areas) implements Serializable {
     /**
      * Compact constructor of ZonePartition.
      */

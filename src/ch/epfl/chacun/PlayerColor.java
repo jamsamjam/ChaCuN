@@ -1,5 +1,6 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -8,7 +9,7 @@ import java.util.List;
  * @author Sam Lee (375535)
  * @author Gehna Yadav (379155)
  */
-public enum PlayerColor {
+public enum PlayerColor implements Serializable {
     RED,
     BLUE,
     GREEN,

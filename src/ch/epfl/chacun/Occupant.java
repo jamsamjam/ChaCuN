@@ -1,4 +1,5 @@
 package ch.epfl.chacun;
+import java.io.Serializable;
 import java.util.Objects;
 
 import static ch.epfl.chacun.Preconditions.checkArgument;
@@ -12,7 +13,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @param kind the type of occupant
  * @param zoneId the identifier of the zone in which the occupant is located
  */
-public record Occupant(Kind kind, int zoneId) {
+public record Occupant(Kind kind, int zoneId) implements Serializable {
     /**
      * Constructor of Occupant.
      *

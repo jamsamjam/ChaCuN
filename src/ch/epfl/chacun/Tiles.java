@@ -1,10 +1,11 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class Tiles {
+public final class Tiles implements Serializable {
     private Tiles() {}
 
     public static final List<Tile> TILES = createTiles();

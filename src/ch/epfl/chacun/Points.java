@@ -1,5 +1,8 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
+import java.util.Set;
+
 import static ch.epfl.chacun.Preconditions.checkArgument;
 
 /**
@@ -8,7 +11,7 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Sam Lee (375535)
  * @author Gehna Yadav (379155)
  */
-public final class Points {
+public final class Points implements Serializable {
     private Points() {}
 
     /**

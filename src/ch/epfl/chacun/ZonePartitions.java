@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import java.io.Serializable;
+
 import static ch.epfl.chacun.Occupant.Kind.HUT;
 import static ch.epfl.chacun.Occupant.Kind.PAWN;
 
@@ -17,7 +19,7 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
 public record ZonePartitions (ZonePartition<Zone.Forest> forests,
                               ZonePartition<Zone.Meadow> meadows,
                               ZonePartition<Zone.River> rivers,
-                              ZonePartition<Zone.Water> riverSystems) {
+                              ZonePartition<Zone.Water> riverSystems) implements Serializable {
     /**
      * Represents a group of 4 empty partitions.
      */
