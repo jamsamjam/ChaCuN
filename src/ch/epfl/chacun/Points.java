@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * @author Gehna Yadav (379155)
  */
 public final class Points {
-
     private Points() {}
 
     /**

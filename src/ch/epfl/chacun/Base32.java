@@ -15,8 +15,8 @@ public final class Base32 {
      */
     public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-    private static final Integer MAX_5_BIT = 31;
-    private static final Integer MAX_10_BIT = 1023;
+    private static final Integer MAX_5_BIT = 0b11111;
+    private static final Integer MAX_10_BIT = 0b1111111111;
 
     /**
      * Returns true iff the given string is only composed of characters from the base32 alphabet.
@@ -32,12 +32,11 @@ public final class Base32 {
     }
 
     /**
-     * Returns the string of length 1 corresponding to the base32 encoding of the 5 least significant
-     * bits of the given integer.
+     * Returns the string of length 1 corresponding to the base32 encoding of the given integer.
      *
      * @param bit the given integer
-     * @return the string of length 1 corresponding to the base32 encoding of the 5 least significant
-     * bits of the given integer
+     * @return the string of length 1 corresponding to the base32 encoding of the given integer
+     * @throws IllegalArgumentException if the given integer can't be converted to a valid Base32 string
      */
     public static String encodeBits5(int bit) {
         checkArgument(bit <= MAX_5_BIT);
@@ -45,12 +44,11 @@ public final class Base32 {
     }
 
     /**
-     * Returns the string of length 2 corresponding to the base32 encoding of the 10 least significant
-     * bits of the given integer.
+     * Returns the string of length 2 corresponding to the base32 encoding of the given integer.
      *
      * @param bit the given integer
-     * @return the string of length 2 corresponding to the base32 encoding of the 10 least significant
-     * bits of the given integer
+     * @return the string of length 2 corresponding to the base32 encoding of the given integer
+     * @throws IllegalArgumentException if the given integer can't be converted to a valid Base32 string
      */
     public static String encodeBits10(int bit) {
         checkArgument(bit <= MAX_10_BIT);

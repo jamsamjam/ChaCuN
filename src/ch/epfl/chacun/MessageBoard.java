@@ -1,7 +1,6 @@
 package ch.epfl.chacun;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ch.epfl.chacun.Points.*;
 import static ch.epfl.chacun.Preconditions.checkArgument;

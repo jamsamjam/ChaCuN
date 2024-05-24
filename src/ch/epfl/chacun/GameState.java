@@ -1,6 +1,5 @@
 package ch.epfl.chacun;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -268,7 +267,7 @@ public record GameState(List<PlayerColor> players,
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
 
-            if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) { //todo
+            if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) {
                 myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
                 if (myTileDecks.topTile(MENHIR) != null) {
