@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
+import javafx.animation.FadeTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -18,6 +19,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -102,11 +104,10 @@ public final class BoardUI {
                     if (oV == null) {
                         group.getChildren().addAll(markers(nV, boardO));
                         group.getChildren().addAll(occupants(nV, tileO, visibleOccupantsO, occupantHandler));
-
-                        Node gem = Gem.newFor();
-                        gem.setId(STR."gem_\{nV.id()}");
-                        gem.getStyleClass().add("gem");
-                        group.getChildren().add(gem);
+                        // TODO
+//                        Node gem = Gem.newFor();
+//                        gem.getStyleClass().add("gem");
+//                        group.getChildren().add(gem);
                     }
                 });
 
@@ -214,6 +215,14 @@ public final class BoardUI {
             // It should always appear vertical when tile box is rotated
             icon.rotateProperty()
                     .bind(tileO.map(t -> t.rotation().negated().degreesCW()));
+
+//            FadeTransition fadeOutTransition = new FadeTransition(Duration.millis(1000), icon); // Increase duration to 1000 milliseconds
+//            fadeOutTransition.setFromValue(1.0); // Start from full opacity
+//            fadeOutTransition.setToValue(0.0);
+//
+//            icon.visibleProperty().addListener((_, _, nV) -> {
+//                if (!nV) fadeOutTransition.play();
+//            });
 
             return icon;
         }).toList();
