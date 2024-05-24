@@ -1,0 +1,6 @@
+.gem {
+    -fx-translate-x: 20;
+    -fx-translate-y: 20;
+    -fx-stroke: powderblue;
+    -fx-fill: aliceblue;
+}
