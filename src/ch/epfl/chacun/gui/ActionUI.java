@@ -53,8 +53,9 @@ public final class ActionUI {
         TextField textField = getTextField(eventHandler);
 
         Button saveButton = new Button("\uD83D\uDCBE");
-        saveButton.setOnAction(_ -> saveHandler.run());
         Button loadButton = new Button("\uD83D\uDCC2");
+
+        saveButton.setOnAction(_ -> saveHandler.run());
         loadButton.setOnAction(_ -> loadHandler.run());
 
         hBox.getChildren().addAll(text, textField, saveButton, loadButton);
@@ -65,7 +66,7 @@ public final class ActionUI {
     private static TextField getTextField(Consumer<String> eventHandler) {
         TextField textField = new TextField();
         textField.setId("actions-field");
-        textField.setPrefWidth(60);
+        textField.setPrefWidth(50);
 
         textField.setTextFormatter(new TextFormatter<>(change -> {
             if (change.getControlNewText().length() > 2)

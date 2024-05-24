@@ -140,7 +140,7 @@ public final class Main extends Application {
                                 decodeAndApply(gameStateP.getValue(), t)),
                         () -> {
                             FileChooser fileChooser = new FileChooser();
-                            fileChooser.setTitle("Save");
+                            fileChooser.setTitle("Select the path to save the game file");
                             File file = fileChooser.showSaveDialog(primaryStage);
                             if (file != null) {
                                 GameSaveLoad.saveGame(gameStateP.getValue(), file.getAbsolutePath());
@@ -148,7 +148,7 @@ public final class Main extends Application {
                         },
                         () -> {
                             FileChooser fileChooser = new FileChooser();
-                            fileChooser.setTitle("Load");
+                            fileChooser.setTitle("Select the game file to load");
                             File file = fileChooser.showOpenDialog(primaryStage);
                             if (file != null) {
                                 GameState loadedGameState = GameSaveLoad.loadGame(file.getAbsolutePath());
