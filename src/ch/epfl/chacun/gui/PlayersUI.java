@@ -52,11 +52,9 @@ public final class PlayersUI  {
                     textFlow.getStyleClass().remove("current");
             });
 
-            // circle
             Circle circle = new Circle(5);
             circle.setFill(fillColor(player));
 
-            // text
             ObservableValue<String> pointsText =
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
@@ -66,12 +64,12 @@ public final class PlayersUI  {
             text.textProperty().bind(pointsText);
             textFlow.getChildren().addAll(circle, text);
 
-            // occupant
             createOccupants(player, Occupant.Kind.HUT, gameStateO, textFlow);
-            createOccupants(player, Occupant.Kind.PAWN, gameStateO, textFlow);
 
             Text space = new Text("   ");
             textFlow.getChildren().add(space);
+
+            createOccupants(player, Occupant.Kind.PAWN, gameStateO, textFlow);
 
             vBox.getChildren().add(textFlow);
         }

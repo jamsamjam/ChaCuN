@@ -128,7 +128,7 @@ public final class Main extends Application {
         infoPane.setCenter(messageBoardNode);
         infoPane.setBottom(vBox);
 
-        Node actionsNode = ActionsUI
+        Node actionsNode = ActionUI
                 .create(actionsP,
                         t -> update(gameStateP,
                                 actionsP,

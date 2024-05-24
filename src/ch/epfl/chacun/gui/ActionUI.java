@@ -19,8 +19,8 @@ import static ch.epfl.chacun.Base32.ALPHABET;
  *
  * @author Sam Lee (375535)
  */
-public final class ActionsUI {
-    private ActionsUI() {}
+public final class ActionUI {
+    private ActionUI() {}
 
     /**
      * Creates the graphical interface that allows remote play.
