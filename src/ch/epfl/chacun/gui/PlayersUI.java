@@ -60,7 +60,7 @@ public final class PlayersUI  {
             ObservableValue<String> pointsText =
                     myPoints.map(m -> {
                         int point = m.getOrDefault(player, 0);
-                        return STR." \{tm.playerName(player)} : \{tm.points(point)}\n";
+                        return STR." \{tm.playerName(player)}:\{tm.points(point)}\n";
                     });
             Text text = new Text();
             text.textProperty().bind(pointsText);
