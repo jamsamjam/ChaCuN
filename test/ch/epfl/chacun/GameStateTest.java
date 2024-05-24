@@ -501,7 +501,7 @@ class GameStateTest {
                 .flatMap(Collection::stream)
                 .iterator();
 
-        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> { // TODO
+        var nextPlacedTile = (Function<GameState, PlacedTile>) s -> { 
             var t = s.tileToPlace();
             return new PlacedTile(t, playersIt.next(), Rotation.NONE, positions.get(t.id()));
         };

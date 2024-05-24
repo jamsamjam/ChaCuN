@@ -102,7 +102,7 @@ public final class ActionEncoder {
             case OCCUPY_TILE -> {
                 return decodeOccupyTileAction(gameState, string);
             }
-            default -> throw new DecodingException(); // TODO can be null ?
+            default -> throw new DecodingException();
         }
     }
 

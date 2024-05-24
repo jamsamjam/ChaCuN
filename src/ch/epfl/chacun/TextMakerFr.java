@@ -19,7 +19,7 @@ public final class TextMakerFr implements TextMaker {
      * @param nameColorMap a table associating their name with the colors of the players
      */
     public TextMakerFr(Map<PlayerColor, String> nameColorMap) {
-        this.nameColorMap = Map.copyOf(nameColorMap); // TODO
+        this.nameColorMap = Map.copyOf(nameColorMap);
     }
 
     @Override
@@ -109,19 +109,22 @@ public final class TextMakerFr implements TextMaker {
     }
 
     private String subject(Set<PlayerColor> scorers) {
-        List<PlayerColor> sortedScorers = new ArrayList<>(scorers);
-        Collections.sort(sortedScorers); // TODO Collections.sort(scorers) ?
+        List<String> names = scorers.stream()
+                .sorted()
+                .map(this::playerName)
+                .toList();
+        return getString(names);
+    }
 
-        StringBuilder sb = new StringBuilder();
-        int size = sortedScorers.size();
-        int i = 0;
-        for (PlayerColor scorer : sortedScorers) {
-            sb.append(playerName(scorer));
-            if (i < size - 2) sb.append(", ");
-            else if (i == size - 2) sb.append(" et ");
-            i++;
-        }
-        return sb.toString();
+    private String getString(List<String> list) {
+        int size = list.size();
+        if (size == 1) return list.getFirst();
+
+        StringJoiner sj = new StringJoiner(", ");
+        for (int i = 0; i < size - 1; i++)
+            sj.add(list.get(i));
+
+        return STR."\{sj.toString()} et \{list.get(size - 1)}";
     }
 
     private String verb(Set<PlayerColor> scorers) {
@@ -148,24 +151,13 @@ public final class TextMakerFr implements TextMaker {
         return lakeCount == 1 ? "1 lac" : STR."\{lakeCount} lacs";
     }
 
+    private static final Map<Animal.Kind, String> ANIMAL_NAME =
+            Map.of(MAMMOTH, "mammouth", AUROCHS, "auroch", DEER, "cerf");
+
     private String animal(Map<Animal.Kind, Integer> animals) {
-        animals.remove(Animal.Kind.TIGER); // TODO animals : could be modified ?
-        List<String> dict = List.of("mammouth", "auroch", "cerf");
-
-        StringBuilder sb = new StringBuilder();
-        int size = animals.size();
-        int i = 0;
-        for (Map.Entry<Animal.Kind, Integer> entry : animals.entrySet()) {
-            Animal.Kind kind = entry.getKey();
-            int count = entry.getValue();
-
-            sb.append(STR."\{count} \{dict.get(kind.ordinal())}");
-            if (count > 1) sb.append("s");
-
-            if (i == size - 2) sb.append(" et ");
-            else if (i < size - 2) sb.append(", ");
-            i++;
-        }
-        return sb.toString();
+        List<String> strings = animals.entrySet().stream()
+                .map(e -> STR."\{e.getValue()} \{ANIMAL_NAME.get(e.getKey())}")
+                .toList();
+        return getString(strings);
     }
 }

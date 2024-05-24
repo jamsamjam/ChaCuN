@@ -67,7 +67,7 @@ public final class Main extends Application {
         TileDecks tileDecks =
                 new TileDecks(tilesByKind.get(START),
                         tilesByKind.get(NORMAL),
-                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of())); // TODO
+                        tilesByKind.getOrDefault(Tile.Kind.MENHIR, List.of()));
 
         Map<PlayerColor, String> playerColorMap =
                 IntStream.range(0, playersNames.size()).boxed()
@@ -145,7 +145,7 @@ public final class Main extends Application {
         textP.bind(nextActionO.map(a -> switch(a) {
             case OCCUPY_TILE -> textMaker.clickToOccupy();
             case RETAKE_PAWN -> textMaker.clickToUnoccupy();
-            default -> ""; // TODO next action can't be null - check !
+            default -> "";
         }));
 
         vBox.getChildren().addAll(actionsNode, decksNode);
@@ -175,7 +175,7 @@ public final class Main extends Application {
                         update(gameStateP,
                                 actionsP,
                                 withOccupantRemoved(gameStateP.getValue(), null));
-                // TODO default/ null case ?
+                default -> throw new IllegalArgumentException();
             }
         };
 
@@ -245,7 +245,7 @@ public final class Main extends Application {
                         occupantHandler);
     }
 
-    private static void update(ObjectProperty<GameState> gameStateP, // TODO
+    private static void update(ObjectProperty<GameState> gameStateP,
                                ObjectProperty<List<String>> actionsP,
                                StateAction newState) {
         if (newState != null) {

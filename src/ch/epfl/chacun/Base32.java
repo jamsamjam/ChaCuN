@@ -1,5 +1,7 @@
 package ch.epfl.chacun;
 
+import static ch.epfl.chacun.Preconditions.checkArgument;
+
 /**
  * Contains methods for encoding and decoding base32 binary values.
  *
@@ -12,6 +14,9 @@ public final class Base32 {
      * Contains the characters corresponding to base 32 digits, ordered by increasing weight.
      */
     public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+    private static final Integer BITS_5 = 31;
+    private static final Integer BITS_10 = 1023;
 
     /**
      * Returns true iff the given string is only composed of characters from the base32 alphabet.
@@ -34,9 +39,9 @@ public final class Base32 {
      * @return the string of length 1 corresponding to the base32 encoding of the 5 least significant
      * bits of the given integer
      */
-    public static String encodeBits5(int bit) {  // TODO x preconditon ?
-        char chr = ALPHABET.charAt(bit & 0b11111);
-        return String.valueOf(chr);
+    public static String encodeBits5(int bit) {
+        checkArgument(bit <= BITS_5);
+        return String.valueOf(ALPHABET.charAt(bit));
     }
 
     /**
@@ -48,7 +53,8 @@ public final class Base32 {
      * bits of the given integer
      */
     public static String encodeBits10(int bit) {
-        return encodeBits5(bit >>> 5) + encodeBits5(bit);
+        checkArgument(bit <= BITS_10);
+        return encodeBits5(bit >>> 5) + encodeBits5(bit & BITS_5);
     }
 
     /**

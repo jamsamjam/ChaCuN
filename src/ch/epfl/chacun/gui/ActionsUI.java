@@ -8,9 +8,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import static ch.epfl.chacun.Base32.ALPHABET;
 import static ch.epfl.chacun.Base32.isValid;
 
 /**
@@ -61,13 +64,12 @@ public final class ActionsUI {
             if (change.getControlNewText().length() > 2)
                 return null;
 
-            StringBuilder filteredText = new StringBuilder();
-            change.getText().chars().forEach(c -> {
-                String u = new String(Character.toChars(c)).toUpperCase();
-                //String u = (String.valueOf((char) c)).toUpperCase(); // TODO casting x ?? 뭐가 더 나은지
-                if (isValid(u)) filteredText.append(u);
-            });
-            change.setText(filteredText.toString());
+            String input = change.getText().chars()
+                    .map(Character::toUpperCase)
+                    .filter(c -> ALPHABET.indexOf(c) != -1)
+                    .mapToObj(Character::toString)
+                    .collect(Collectors.joining());
+            change.setText(input);
 
             return change;
         }));
