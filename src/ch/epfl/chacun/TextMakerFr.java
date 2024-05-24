@@ -156,7 +156,8 @@ public final class TextMakerFr implements TextMaker {
 
     private String animal(Map<Animal.Kind, Integer> animals) {
         List<String> strings = animals.entrySet().stream()
-                .map(e -> STR."\{e.getValue()} \{ANIMAL_NAME.get(e.getKey())}")
+                .filter(e -> e.getKey() != TIGER)
+                .map(e -> STR."\{e.getValue()} \{ANIMAL_NAME.get(e.getKey())}\{(e.getValue() == 1 ? "" : "s")}")
                 .toList();
         return getString(strings);
     }

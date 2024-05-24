@@ -268,7 +268,7 @@ public record GameState(List<PlayerColor> players,
         for (var forest : myBoard.forestsClosedByLastTile()) {
             myMessageBoard = myMessageBoard.withScoredForest(forest);
 
-            if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) {
+            if (hasMenhir(forest) && myBoard.lastPlacedTile().tile().kind() == NORMAL) { //todo
                 myTileDecks = myTileDecks.withTopTileDrawnUntil(MENHIR, myBoard::couldPlaceTile);
 
                 if (myTileDecks.topTile(MENHIR) != null) {

@@ -65,7 +65,7 @@ public final class ActionsUI {
             String input = change.getText().chars()
                     .map(Character::toUpperCase)
                     .filter(c -> ALPHABET.indexOf(c) != -1)
-                    .mapToObj(Character::toString)
+                    .mapToObj(c -> String.valueOf((char) c))
                     .collect(Collectors.joining());
             change.setText(input);
 
