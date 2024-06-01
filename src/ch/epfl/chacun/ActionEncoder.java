@@ -3,6 +3,7 @@ package ch.epfl.chacun;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 
 import static ch.epfl.chacun.Base32.*;
 import static ch.epfl.chacun.Occupant.Kind.PAWN;
@@ -16,6 +17,14 @@ public final class ActionEncoder implements Serializable {
     private ActionEncoder() {}
 
     private static final int NONE = 0b11111;
+
+    // ppppp ppprr
+    private static final int TILE_MASK = 2; // TODO
+    private static final int ROTATION_MASK = 0b11;
+
+    // kzzzz
+    private static final int KIND_MASK = 4;
+    private static final int ID_MASK = 0b01111;
 
     /**
      * Returns a StateAction composed of the game state with the given tile placed and the base32
@@ -109,10 +118,9 @@ public final class ActionEncoder implements Serializable {
 
     private static StateAction decodePlaceTileAction(GameState gameState, String string)
             throws DecodingException {
-        // ppppp ppprr
         int bit = Base32.decode(string);
-        int index = bit >>> 2;
-        int rotation = bit & 0b11;
+        int index = bit >>> TILE_MASK;
+        int rotation = bit & ROTATION_MASK;
 
         List<Pos> positions = getSortedPositions(gameState);
         if (index > positions.size() || rotation > Rotation.ALL.size())
@@ -131,13 +139,12 @@ public final class ActionEncoder implements Serializable {
 
     private static StateAction decodeOccupyTileAction(GameState gameState, String string)
             throws DecodingException {
-        // kzzzz
         int bit = Base32.decode(string);
         Occupant occupant = null;
 
         if (bit != NONE) {
-            int kind = bit >>> 4;
-            int id = bit & 0b01111;
+            int kind = bit >>> KIND_MASK;
+            int id = bit & ID_MASK;
 
             occupant = gameState.lastTilePotentialOccupants().stream()
                     .filter(o -> o.kind().ordinal() == kind && Zone.localId(o.zoneId()) == id)
@@ -150,7 +157,6 @@ public final class ActionEncoder implements Serializable {
 
     private static StateAction decodeRetakePawnAction(GameState gameState, String string)
             throws DecodingException {
-        // ooooo
         int bit = Base32.decode(string);
         Occupant occupant = null;
 

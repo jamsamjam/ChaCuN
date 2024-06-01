@@ -2,6 +2,8 @@ package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -9,6 +11,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -146,9 +149,8 @@ public final class Main extends Application {
                             FileChooser fileChooser = new FileChooser();
                             fileChooser.setTitle("Select the path to save the game file");
                             File file = fileChooser.showSaveDialog(primaryStage);
-                            if (file != null) {
+                            if (file != null)
                                 GameSaveLoad.saveGame(gameStateP.getValue(), file.getAbsolutePath());
-                            }
                         },
                         () -> {
                             FileChooser fileChooser = new FileChooser();
@@ -156,9 +158,8 @@ public final class Main extends Application {
                             File file = fileChooser.showOpenDialog(primaryStage);
                             if (file != null) {
                                 GameState loadedGameState = GameSaveLoad.loadGame(file.getAbsolutePath());
-                                if (loadedGameState != null) {
+                                if (loadedGameState != null)
                                     gameStateP.setValue(loadedGameState);
-                                }
                             }
                         });
 

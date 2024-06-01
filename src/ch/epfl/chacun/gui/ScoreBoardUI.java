@@ -20,11 +20,16 @@ import java.util.List;
 
 import static ch.epfl.chacun.gui.ColorMap.fillColor;
 
+/**
+ * Creates the part of the graphical interface that displays the final score.
+ *
+ * @author Sam Lee (375535)
+ */
 public class ScoreBoardUI {
+    private ScoreBoardUI() {}
+
     private static final Duration INACTIVITY_TIMEOUT = Duration.seconds(5);
     private static PauseTransition inactivityTimer;
-
-    private ScoreBoardUI() {}
 
     public static Node create(List<String> playersNames, MessageBoard messageBoard, Runnable onTimeout) {
         Text[] names = new Text[playersNames.size()];
@@ -86,10 +91,7 @@ public class ScoreBoardUI {
         timeline.setCycleCount(1);
         timeline.play();
 
-        inactivityTimer.setOnFinished(event -> {
-            onTimeout.run();
-        });
-
+        inactivityTimer.setOnFinished(_ -> onTimeout.run());
         inactivityTimer.play();
 
         return scoreBoard;

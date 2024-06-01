@@ -8,7 +8,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Represents an occupant (pawn or hut) of a zone.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param kind the type of occupant
  * @param zoneId the identifier of the zone in which the occupant is located

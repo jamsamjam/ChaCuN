@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Represents an area.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param zones all the zones constituting the area
  * @param occupants the colors of any players occupying the area

@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Represents the piles of the three types of tile that exist — start, normal, menhir.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param startTiles a list containing the starting tile (or nothing at all)
  * @param normalTiles a list containing the remaining normal tiles

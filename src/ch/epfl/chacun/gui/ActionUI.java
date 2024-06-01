@@ -6,9 +6,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 
 import java.util.List;
+import java.util.Random;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,9 +37,11 @@ public final class ActionUI {
                               Consumer<String> eventHandler,
                               Runnable saveHandler,
                               Runnable loadHandler) {
-        HBox hBox = new HBox();
-        hBox.getStylesheets().add("actions.css");
-        hBox.setId("actions");
+        VBox vBox = new VBox();
+
+        HBox actionBox = new HBox();
+        actionBox.getStylesheets().add("actions.css");
+        actionBox.setId("actions");
 
         Text text = new Text();
         text.textProperty().bind(actionsO.map(_ -> {
@@ -51,6 +55,11 @@ public final class ActionUI {
         }));
 
         TextField textField = getTextField(eventHandler);
+        actionBox.getChildren().addAll(text, textField);
+
+        HBox infoBox = new HBox();
+        infoBox.getStylesheets().add("info.css");
+        infoBox.setId("info");
 
         Button saveButton = new Button("\uD83D\uDCBE");
         Button loadButton = new Button("\uD83D\uDCC2");
@@ -58,9 +67,19 @@ public final class ActionUI {
         saveButton.setOnAction(_ -> saveHandler.run());
         loadButton.setOnAction(_ -> loadHandler.run());
 
-        hBox.getChildren().addAll(text, textField, saveButton, loadButton);
+        Text space = new Text("                  ");
 
-        return hBox;
+        Button randomButton = new Button("Random  \uD83C\uDFB2");
+        randomButton.setOnAction(_ -> {
+            String randomText = generateText();
+            eventHandler.accept(randomText); // TODO
+        });
+
+        infoBox.getChildren().addAll(saveButton, loadButton, space, randomButton);
+
+        vBox.getChildren().addAll(infoBox, actionBox);
+
+        return vBox;
     }
 
     private static TextField getTextField(Consumer<String> eventHandler) {
@@ -88,5 +107,16 @@ public final class ActionUI {
         });
 
         return textField;
+    }
+
+    private static String generateText() {
+        String alphabet = ALPHABET;
+        Random random = new Random();
+
+        StringBuilder sb = new StringBuilder(2);
+        for (int i = 0; i < 2; i++)
+            sb.append(alphabet.charAt(random.nextInt(alphabet.length())));
+
+        return sb.toString();
     }
 }

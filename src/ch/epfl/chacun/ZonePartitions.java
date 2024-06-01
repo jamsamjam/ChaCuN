@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Occupant.Kind.PAWN;
  * Brings together the four zone partitions of the game.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param forests the partition of the forests
  * @param meadows the partition of the meadows

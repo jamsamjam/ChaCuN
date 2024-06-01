@@ -10,7 +10,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Represents a tile that has been placed.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param tile the tile that was placed
  * @param placer the tile changer, or null for the starting tile

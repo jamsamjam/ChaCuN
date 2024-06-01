@@ -7,7 +7,6 @@ import java.util.List;
  * Represents a tile edge (three kinds exist).
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public sealed interface TileSide {
     /**

@@ -15,15 +15,14 @@ import static ch.epfl.chacun.Zone.SpecialPower.*;
  * Represents the complete state of a part of ChaCuN, with all the information related to a current game.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
- * @param players the list of all players in the game, in the order in which they must play
- *                — so with the current player at the top of the list
- * @param tileDecks the three piles of the remaining tiles
- * @param tileToPlace the possible tile to be placed, which was taken from the top of the pile of
- *                    normal tiles or menhir tiles (null if no tile is currently to be placed)
- * @param board the game board
- * @param nextAction the next action to perform,
+ * @param players      the list of all players in the game, in the order in which they must play
+ *                     — so with the current player at the top of the list
+ * @param tileDecks    the three piles of the remaining tiles
+ * @param tileToPlace  the possible tile to be placed, which was taken from the top of the pile of
+ *                     normal tiles or menhir tiles (null if no tile is currently to be placed)
+ * @param board        the game board
+ * @param nextAction   the next action to perform,
  * @param messageBoard the message board containing the messages generated so far in the game
  */
 public record GameState(List<PlayerColor> players,
@@ -36,8 +35,8 @@ public record GameState(List<PlayerColor> players,
      * Compact constructor of GameState.
      *
      * @throws IllegalArgumentException if the number of players is less than 2,
-     * or neither the tile to be placed is null nor the next action is PLACE_TILE
-     * @throws NullPointerException if any of the tile deck, board, next Action, or message board is null
+     *                                  or neither the tile to be placed is null nor the next action is PLACE_TILE
+     * @throws NullPointerException     if any of the tile deck, board, next Action, or message board is null
      */
     public GameState {
         players = List.copyOf(players);
@@ -54,7 +53,7 @@ public record GameState(List<PlayerColor> players,
      * action is START_GAME (hence the tile to be placed is null), and whose board and display board
      * are empty.
      *
-     * @param players the given players
+     * @param players   the given players
      * @param tileDecks the given tileDeck
      * @param textMaker the given textMaker
      * @return the initial game state
@@ -84,7 +83,7 @@ public record GameState(List<PlayerColor> players,
      * of the given type and of the given player.
      *
      * @param player the given player
-     * @param kind the given type
+     * @param kind   the given type
      * @return the number of free occupants of the given type and of the given player
      */
     public int freeOccupantsCount(PlayerColor player, Occupant.Kind kind) {
@@ -157,7 +156,7 @@ public record GameState(List<PlayerColor> players,
      * @param tile the tile that was placed by the current player
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not PLACE_TILE, or if the given tile
-     * is already occupied
+     *                                  is already occupied
      */
     public GameState withPlacedTile(PlacedTile tile) {
         checkArgument(nextAction == Action.PLACE_TILE);
@@ -197,7 +196,8 @@ public record GameState(List<PlayerColor> players,
                                 myMessageBoard);
                 }
 
-                case null, default -> {}
+                case null, default -> {
+                }
             }
         }
         return new GameState(players,
@@ -215,11 +215,11 @@ public record GameState(List<PlayerColor> players,
      * @param occupant the given occupant
      * @return an updated game state
      * @throws IllegalArgumentException if the next action is not RETAKE_PAWN, or if the given
-     * occupant is neither null, nor a pawn.
+     *                                  occupant is neither null, nor a pawn.
      */
     public GameState withOccupantRemoved(Occupant occupant) {
         checkArgument(nextAction == Action.RETAKE_PAWN);
-        checkArgument (occupant == null || occupant.kind() == PAWN);
+        checkArgument(occupant == null || occupant.kind() == PAWN);
 
         return new GameState(players,
                 tileDecks,
@@ -256,7 +256,7 @@ public record GameState(List<PlayerColor> players,
         return lastTilePotentialOccupants().isEmpty() ? withTurnFinished() : this;
     }
 
-    private GameState withTurnFinished() {
+    public GameState withTurnFinished() {
         List<PlayerColor> myPlayers = new ArrayList<>(players);
         Board myBoard = board;
         TileDecks myTileDecks = tileDecks;
@@ -329,7 +329,7 @@ public record GameState(List<PlayerColor> players,
 
                 deer.sort(Comparator.comparing(d ->
                         Math.abs(board.tileWithId(d.tileId()).pos().x() - pitPos.x()) < 2
-                        && Math.abs(board.tileWithId(d.tileId()).pos().y() - pitPos.y()) < 2));
+                                && Math.abs(board.tileWithId(d.tileId()).pos().y() - pitPos.y()) < 2));
 
                 myBoard = cancelDeer(meadow, myBoard, deer);
 

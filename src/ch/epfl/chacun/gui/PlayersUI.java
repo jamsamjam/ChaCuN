@@ -1,6 +1,7 @@
 package ch.epfl.chacun.gui;
 
 import ch.epfl.chacun.*;
+
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;

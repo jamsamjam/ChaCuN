@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Calculates points obtained in different situations.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public final class Points implements Serializable {
     private Points() {}

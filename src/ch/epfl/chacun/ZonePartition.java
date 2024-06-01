@@ -9,7 +9,6 @@ import static ch.epfl.chacun.Preconditions.checkArgument;
  * Represents a zone partition of a given type.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  *
  * @param areas the set of areas forming the partition
  * @param <Z> the type parameter representing the zone type

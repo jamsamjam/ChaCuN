@@ -17,8 +17,8 @@ public final class Base32 implements Serializable {
      */
     public static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-    private static final Integer MAX_5_BIT = 0b11111;
-    private static final Integer MAX_10_BIT = 0b1111111111;
+    private static final int MAX_5_BIT = 0b11111;
+    private static final int MAX_10_BIT = 0b1111111111;
 
     /**
      * Returns true iff the given string is only composed of characters from the base32 alphabet.

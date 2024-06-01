@@ -7,7 +7,6 @@ import java.util.List;
  * Lists the colors associated with the players.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public enum PlayerColor implements Serializable {
     RED,

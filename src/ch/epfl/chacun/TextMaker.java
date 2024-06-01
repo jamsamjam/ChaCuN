@@ -8,7 +8,6 @@ import java.util.Set;
  * interface - mainly the messages, but also the number of points of each player, their name, etc.
  *
  * @author Sam Lee (375535)
- * @author Gehna Yadav (379155)
  */
 public interface TextMaker {
     /**
