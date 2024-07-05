@@ -188,7 +188,7 @@ public final class Main extends Application {
                                 decodeAndApply(gameStateP.getValue(), t)),
                         () -> {
                             FileChooser fileChooser = new FileChooser();
-                            fileChooser.setTitle("Select the path to save the game file");
+                            fileChooser.setTitle("Select the path to save the game");
                             File file = fileChooser.showSaveDialog(primaryStage);
                             if (file != null)
                                 GameSaveLoad.saveGame(gameStateP.getValue(), file.getAbsolutePath());
