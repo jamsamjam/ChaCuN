@@ -56,19 +56,11 @@ public class ScoreBoardUI {
         scoreBoard.getStylesheets().add("/score-board.css");
         scoreBoard.setSpacing(40);
 
+        // get max points
+        int maxP = 0;
         for (int i = 0; i < playersNames.size(); i++) {
-            int j = i;
-            KeyFrame keyFrame = new KeyFrame(Duration.millis(100 * i), _ -> {
-                int targetScore = messageBoard.points().getOrDefault(PlayerColor.ALL.get(j), 0);
-                int currentScore = scoresP[j].get();
-
-                if (currentScore < targetScore) {
-                    int newScore = Math.min(currentScore + 1, targetScore);
-                    scoresP[j].set(newScore);
-                    inactivityTimer.playFromStart();
-                }
-            });
-            timeline.getKeyFrames().add(keyFrame);
+            int targetScore = messageBoard.points().getOrDefault(PlayerColor.ALL.get(i), Integer.valueOf(0));
+            maxP = Math.max(maxP, targetScore);
 
             names[i].getStyleClass().add("name-text");
             scores[i].getStyleClass().add("score-text");
@@ -83,6 +75,22 @@ public class ScoreBoardUI {
             names[i].setLineSpacing(0.3);
 
             scoreBoard.getChildren().add(playerInfo);
+        }
+
+        for (int i = 0; i < maxP; i++) {
+            KeyFrame keyFrame = new KeyFrame(Duration.millis(100 * i), _ -> {
+                for (int j = 0; j < playersNames.size(); j++) {
+                    int targetScore = messageBoard.points().getOrDefault(PlayerColor.ALL.get(j), Integer.valueOf(0));
+                    int currentScore = scoresP[j].get();
+
+                    if (currentScore < targetScore) {
+                        int newScore = Math.min(currentScore + 1, targetScore);
+                        scoresP[j].set(newScore);
+                        inactivityTimer.playFromStart();
+                    }
+                }
+            });
+            timeline.getKeyFrames().add(keyFrame);
         }
 
         for (Text score : scores)
